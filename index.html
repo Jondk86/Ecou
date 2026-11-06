@@ -574,6 +574,19 @@ nav button[aria-selected="true"] svg{background:color-mix(in srgb,var(--ac) 18%,
 </style>
 </head>
 <body>
+<div id="splash" aria-hidden="true"><img src="icons/icon-512.png" alt=""><div class="sw">ECOU</div></div>
+<style>
+#splash{position:fixed;inset:0;z-index:1000;background:#0B0B10;display:none;flex-direction:column;align-items:center;justify-content:center;gap:18px;transition:opacity .45s ease}
+html.splash #splash{display:flex}
+#splash img{width:132px;height:132px;border-radius:30px;animation:spIn .9s cubic-bezier(.2,.8,.2,1) both,spPulse 2.2s ease-in-out .9s infinite}
+#splash .sw{font:700 28px/1 system-ui,sans-serif;letter-spacing:.32em;margin-right:-.32em;color:#F4F4F7;animation:spTx .9s .25s ease both}
+#splash.out{opacity:0;pointer-events:none}
+@keyframes spIn{from{opacity:0;transform:scale(.86)}to{opacity:1;transform:none}}
+@keyframes spTx{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@keyframes spPulse{50%{transform:scale(1.04)}}
+@media (prefers-reduced-motion:reduce){#splash img,#splash .sw{animation:none}}
+</style>
+<script>(function(){var app=false;try{app=matchMedia('(display-mode: standalone)').matches||matchMedia('(display-mode: fullscreen)').matches||document.referrer.indexOf('android-app://')===0||navigator.standalone===true||/[?&]splash=1/.test(location.search);}catch(e){}if(!app)return;var d=document.documentElement;d.classList.add('splash');var t0=(performance&&performance.now)?performance.now():0;function done(){var s=document.getElementById('splash');if(!s){d.classList.remove('splash');return;}s.classList.add('out');setTimeout(function(){d.classList.remove('splash');},500);}setTimeout(done,Math.max(0,3000-t0));})();</script>
 <div id="start">
   <h1>ECOU</h1>
   <p>Turn any sound into a playable instrument. Capture it, resynthesize it, and shape it with camera, motion and real acoustic space.</p>
