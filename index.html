@@ -214,73 +214,192 @@ nav button{overflow:hidden;white-space:nowrap}
 .rb{position:relative;height:74px;background:var(--s2);border-radius:8px;display:flex;flex-direction:column;justify-content:space-between;align-items:center;padding:3px 0;font-size:10px}
 .rb i{position:absolute;left:30%;right:30%;border-radius:2px}
 .rb span{color:var(--mu)}
-/* Garage mode */
-#t-gar .seg button{padding:0 10px}
-.gar-tr{gap:8px;padding:10px}
-.gar-tr .btn{min-height:44px}
-.gar-tr .dawbar{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
-.gar-key{margin-left:auto;max-width:96px}
-.gar-st{font-size:12px;min-height:16px}
-.gar-v{display:flex;flex-direction:column;gap:12px}
-.gar-v[hidden]{display:none}
-.gar-browse{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
-.gar-card{position:relative;min-height:112px;border-radius:16px;border:1px solid var(--ln);background:var(--s1);color:var(--tx);text-align:left;padding:12px;display:flex;flex-direction:column;justify-content:flex-end;gap:4px;overflow:hidden}
-.gar-card b{font-size:16px}
-.gar-card span{font-size:12px;color:var(--mu);line-height:1.3}
-.gar-card svg{position:absolute;top:10px;right:10px;opacity:.9}
-.gar-card:active{transform:scale(.98)}
-.gar-banner{border-radius:12px;background:var(--or);color:var(--bg);font-weight:700;font-size:13px;padding:10px 12px;display:flex;align-items:center;justify-content:space-between;gap:8px}
-.gar-banner button{min-height:34px;border-radius:17px;border:0;background:var(--bg);color:var(--tx);font-weight:700;padding:0 12px}
+/* ===== Garage mode — tokens ===== */
+#t-gar{--gp:#15151C;--gr:#1E1E28;--gl:#2B2B37;--gm:#9A9AAB;--k:#5CE1E6;--g:#FF8A5B;--b:#B69CFF;--d:#FFC94D;--a:#FF6B8B;--l:#D4FF3A;--fam:var(--k);gap:12px;padding-bottom:8px}
+#t-gar.active{display:flex}
+#t-gar button{-webkit-user-select:none;user-select:none}
+#t-gar :focus-visible{outline:2px solid var(--tx);outline-offset:2px}
+#t-gar svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.gx-v{display:flex;flex-direction:column;gap:12px}
+.gx-v[hidden]{display:none}
+/* control bar */
+.gx-bar{position:sticky;top:0;z-index:5;display:flex;align-items:center;gap:6px;padding:6px;border-radius:20px;background:rgba(21,21,28,.92);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:1px solid var(--gl);box-shadow:0 8px 24px rgba(0,0,0,.35)}
+.gx-trans{display:flex;gap:6px}
+.gx-ib{width:44px;height:44px;border-radius:14px;border:1px solid var(--gl);background:var(--gr);color:var(--tx);display:grid;place-items:center;padding:0}
+.gx-ib svg{width:20px;height:20px}
+#t-gar .gx-play svg{fill:currentColor;stroke-width:1.5}
+.gx-play{background:var(--tx);color:var(--bg);border-color:var(--tx)}
+.gx-play.on svg{display:none}.gx-play.on::after{content:"";width:14px;height:14px;border-radius:3px;background:currentColor}
+#t-gar .gx-rec{color:var(--a)}#t-gar .gx-rec svg{fill:currentColor;stroke:none}
+.gx-rec.on,#t-gar .gx-rec.on{background:var(--a);color:var(--tx);border-color:var(--a);animation:gxpulse 1s ease-in-out infinite}
+@keyframes gxpulse{50%{box-shadow:0 0 0 6px rgba(255,107,139,.18)}}
+.gx-pos{flex:1;min-width:0;height:44px;border-radius:14px;border:1px solid var(--gl);background:var(--gr);color:var(--tx);display:flex;flex-direction:column;align-items:flex-start;justify-content:center;padding:0 12px;line-height:1.1}
+.gx-pos b{font-size:18px;font-variant-numeric:tabular-nums;letter-spacing:.02em}
+.gx-pos span{font-size:11px;color:var(--gm);white-space:nowrap}.gx-pos em{font-style:normal;color:var(--tx);font-variant-numeric:tabular-nums}
+.gx-pos.cnt b{color:var(--a)}
+.gx-keyp select{height:44px;border-radius:14px;border:1px solid var(--gl);background:var(--gr);color:var(--tx);font:inherit;font-size:14px;font-weight:600;padding:0 8px;width:112px}
+/* tabs */
+.gx-tabs{display:grid;grid-template-columns:repeat(3,1fr);padding:4px;border-radius:14px;background:var(--gp);border:1px solid var(--gl)}
+.gx-tabs button{min-height:38px;border:0;border-radius:10px;background:transparent;color:var(--gm);font-size:14px;font-weight:600}
+.gx-tabs button[aria-selected="true"]{background:var(--gr);color:var(--tx);box-shadow:inset 0 0 0 1px var(--gl)}
+.gx-st{margin:-4px 2px 0;font-size:12px;color:var(--gm)}
+.gx-st:empty{display:none}
+.gx-st.rec{color:var(--a)}
+/* browser */
+.gx-grp{display:flex;flex-direction:column;gap:8px}
+.gx-grp h3{margin:6px 2px 0;font-size:13px;font-weight:600;color:var(--gm)}
+.gx-tiles{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.gx-tile{--c:var(--k);position:relative;min-height:92px;border-radius:18px;border:1px solid var(--gl);background:var(--gp);color:var(--tx);text-align:left;padding:12px;display:flex;flex-direction:column;justify-content:space-between;gap:10px;overflow:hidden}
+.gx-tile::before{content:"";position:absolute;inset:0 0 auto 0;height:3px;background:var(--c)}
+.gx-tile .gx-ic{width:36px;height:36px;border-radius:11px;display:grid;place-items:center;background:color-mix(in srgb,var(--c) 16%,transparent);color:var(--c)}
+.gx-tile b{display:block;font-size:15px}
+.gx-tile small{display:block;font-size:12px;color:var(--gm);line-height:1.3;margin-top:2px}
+.gx-tile:active{transform:scale(.98);background:var(--gr)}
+.gx-tile.wide{grid-column:1/-1;flex-direction:row;align-items:center;min-height:68px}
+.gx-tile.wide>div{flex:1}
+/* instrument head */
+.gx-ihead{display:flex;align-items:center;gap:8px}
+.gx-back{width:40px;height:40px;border-radius:12px;border:1px solid var(--gl);background:var(--gp);color:var(--tx);display:grid;place-items:center;padding:0;flex-shrink:0}
+.gx-iname{flex:1;min-width:0;display:flex;align-items:center;gap:8px}
+.gx-iname i{width:10px;height:10px;border-radius:5px;background:var(--fam);flex-shrink:0}
+.gx-iname b{font-size:17px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.gx-pill{height:36px;border-radius:18px;border:1px solid var(--gl);background:var(--gp);color:var(--tx);font:inherit;font-size:13px;font-weight:600;padding:0 12px;max-width:44%}
+.gx-pill[hidden]{display:none}
+.gx-iopts{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.gx-iopts[hidden]{display:none}
+.gx-snd{flex:1;max-width:none;min-width:140px}
+.gx-ap{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--gm)}
+.gx-ap[hidden]{display:none}
+.gx-ap>div{display:flex;padding:3px;border-radius:18px;background:var(--gp);border:1px solid var(--gl)}
+.gx-ap button{min-width:32px;height:30px;border-radius:15px;border:0;background:transparent;color:var(--gm);font-size:13px;font-weight:700;padding:0 8px}
+.gx-ap button[aria-pressed="true"]{background:var(--fam);color:var(--bg)}
+.gx-banner{display:flex;align-items:center;justify-content:space-between;gap:8px;border-radius:14px;background:color-mix(in srgb,var(--a) 14%,var(--gp));border:1px solid var(--a);padding:8px 8px 8px 12px;font-size:13px;font-weight:600}
+.gx-banner[hidden]{display:none}
+.gx-banner button{height:34px;border-radius:17px;border:0;background:var(--a);color:var(--tx);font-weight:700;padding:0 14px}
+.gx-hint{margin:0 2px;font-size:12px;color:var(--gm);line-height:1.4}
+.gx-surface{display:flex;flex-direction:column;gap:12px}
 /* chord strips */
-.gar-strips{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:4px;touch-action:none;user-select:none;-webkit-user-select:none}
-.gar-strip{display:flex;flex-direction:column;gap:3px}
-.gar-ch{height:40px;border-radius:9px;border:1px solid #3A3A48;background:var(--s2);color:var(--tx);font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;padding:0;white-space:nowrap;overflow:hidden}
-.gar-ch.on{background:var(--ac);color:var(--bg);border-color:var(--ac)}
-.gar-seg{height:44px;border-radius:7px;background:var(--s1);border:1px solid var(--ln);position:relative}
-.gar-seg.str::after{content:"";position:absolute;left:0;right:0;top:50%;height:2px;background:#5a5a6a;transform:translateY(-50%)}
-.gar-seg.bs{background:#191922}
-.gar-seg.hit{background:var(--cy);border-color:var(--cy)}
-.gar-strip.ap .gar-seg{opacity:.35}
-.gar-chedit{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
-.gar-chedit select{max-width:none;width:100%;font-size:13px}
-/* pads */
-.gar-pads{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;touch-action:none}
-.gar-pad{aspect-ratio:1;border-radius:14px;border:0;background:var(--s2);color:var(--tx);font-size:12px;font-weight:700;display:flex;align-items:flex-end;justify-content:flex-start;padding:8px;user-select:none;-webkit-user-select:none}
-.gar-pad.hit{background:var(--ac);color:var(--bg)}
-/* XY */
-.gar-xy{position:relative;width:100%;aspect-ratio:1.6;border-radius:14px;background:var(--s1);border:1px solid var(--ln);touch-action:none;overflow:hidden}
-.gar-xy canvas{width:100%;height:100%;display:block}
-.gar-ax{position:absolute;font-size:10px;color:var(--mu);pointer-events:none;letter-spacing:.04em;text-transform:uppercase}
+.gx-strips{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:5px;touch-action:none;height:var(--sh,420px)}
+.gx-strip{display:flex;flex-direction:column;gap:4px;min-width:0}
+.gx-ch{flex:0 0 46px;border-radius:10px;border:1px solid var(--gl);background:var(--gr);color:var(--tx);font-size:13px;font-weight:700;display:grid;place-items:center;padding:0;white-space:nowrap;overflow:hidden;transition:background .08s}
+.gx-ch.on{background:var(--fam);border-color:var(--fam);color:var(--bg)}
+.gx-strip.ap .gx-ch{background:var(--fam);border-color:var(--fam);color:var(--bg)}
+.gx-segs{flex:1;display:flex;flex-direction:column;gap:4px;min-height:0;border-radius:10px}
+.gx-seg{flex:1;border-radius:8px;background:linear-gradient(#24242F,#1C1C25);border:1px solid var(--gl);position:relative;transition:background .06s}
+.gx-seg.lo{background:#14141B}
+.gx-seg:not(.lo)+.gx-seg.lo{margin-top:6px}
+.gx-seg.hit{background:var(--fam);border-color:var(--fam)}
+.gx-strip.ap .gx-seg{opacity:.45}
+/* fretboard for guitar and bass */
+.gx-surface.fret .gx-segs{background:#1C1612;border:1px solid #2E241C;gap:0;padding:2px 0;overflow:hidden}
+.gx-surface.fret .gx-seg{background:transparent;border:0;border-radius:0}
+.gx-surface.fret .gx-seg::after{content:"";position:absolute;left:-3px;right:-3px;top:50%;height:var(--sw,2px);transform:translateY(-50%);background:linear-gradient(#E9E4DA,#A49C8E);border-radius:2px;box-shadow:0 1px 1px rgba(0,0,0,.6)}
+.gx-surface.fret .gx-seg.hit{background:color-mix(in srgb,var(--fam) 35%,transparent)}
+.gx-surface.fret .gx-seg.hit::after{background:var(--fam)}
+.gx-chedit summary{font-size:13px;color:var(--gm);cursor:pointer;padding:4px 2px}
+.gx-chgrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;margin-top:8px}
+.gx-chgrid select{height:38px;border-radius:10px;border:1px solid var(--gl);background:var(--gp);color:var(--tx);font:inherit;font-size:13px;padding:0 6px;width:100%}
+/* drum kit */
+.gx-pads{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));grid-auto-rows:1fr;gap:8px;touch-action:none;height:var(--sh,420px)}
+.gx-pad{border-radius:18px;border:1px solid var(--gl);background:var(--gr);color:var(--tx);font-size:13px;font-weight:600;display:flex;align-items:flex-end;padding:10px;position:relative;overflow:hidden}
+.gx-pad::before{content:"";position:absolute;inset:auto 10px 30px;height:3px;border-radius:2px;background:var(--fam);opacity:.35}
+.gx-pad.big{grid-column:span 2}
+.gx-pad.hit{background:var(--fam);color:var(--bg);border-color:var(--fam)}
+/* drummer + smart drums */
+.gx-styles{display:flex;gap:8px;overflow-x:auto;padding:2px 2px 4px;margin:0 -2px;scrollbar-width:none}
+.gx-styles::-webkit-scrollbar{display:none}
+.gx-sty{flex:0 0 auto;min-width:96px;height:56px;border-radius:14px;border:1px solid var(--gl);background:var(--gp);color:var(--tx);text-align:left;padding:8px 12px;display:flex;flex-direction:column;justify-content:center}
+.gx-sty b{font-size:14px}.gx-sty small{font-size:11px;color:var(--gm)}
+.gx-sty[aria-pressed="true"]{border-color:var(--fam);background:color-mix(in srgb,var(--fam) 14%,var(--gp))}
+.gx-xy{position:relative;width:100%;aspect-ratio:1.7;border-radius:18px;background:var(--gp);border:1px solid var(--gl);touch-action:none;overflow:hidden}
+.gx-xy canvas{width:100%;height:100%;display:block}
+.gx-ax{position:absolute;font-size:11px;color:var(--gm);pointer-events:none}
+.gx-row{display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:40px}
+.gx-row>span{font-size:14px}
+.gx-seg2{display:flex;padding:3px;border-radius:12px;background:var(--gp);border:1px solid var(--gl)}
+.gx-seg2 button{min-width:40px;height:32px;border:0;border-radius:9px;background:transparent;color:var(--gm);font-size:13px;font-weight:600;padding:0 10px}
+.gx-seg2 button[aria-pressed="true"]{background:var(--gr);color:var(--tx);box-shadow:inset 0 0 0 1px var(--gl)}
+.gx-seg2 button.has{color:var(--tx)}
+.gx-sw{position:relative;width:46px;height:28px;border-radius:14px;border:0;background:var(--gl);padding:0;flex-shrink:0}
+.gx-sw::after{content:"";position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:11px;background:var(--tx);transition:left .15s}
+.gx-sw[aria-pressed="true"]{background:var(--fam)}.gx-sw[aria-pressed="true"]::after{left:21px;background:var(--bg)}
+#t-gar .gx-rng{flex:1;max-width:58%;accent-color:var(--fam)}
+.gx-chips{display:flex;flex-wrap:wrap;gap:6px}
+.gx-chip{height:34px;border-radius:17px;border:1px solid var(--gl);background:var(--gp);color:var(--gm);font-size:13px;font-weight:600;padding:0 12px}
+.gx-chip.on{color:var(--tx);border-color:color-mix(in srgb,var(--fam) 60%,var(--gl))}
+.gx-chip[aria-pressed="true"]{background:var(--fam);color:var(--bg);border-color:var(--fam)}
+.gx-acts{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.gx-btn{min-height:46px;border-radius:14px;border:1px solid var(--gl);background:var(--gr);color:var(--tx);font:inherit;font-size:14px;font-weight:600;padding:0 14px;display:flex;align-items:center;justify-content:center;gap:8px}
+.gx-btn.pri{background:var(--tx);color:var(--bg);border-color:var(--tx)}
+.gx-btn:disabled{opacity:.4}
+.gx-sec{display:flex;flex-direction:column;gap:6px;padding:12px;border-radius:18px;background:var(--gp);border:1px solid var(--gl)}
+/* audio recorder */
+.gx-mic{display:flex;flex-direction:column;align-items:center;gap:14px;padding:26px 16px;border-radius:18px;background:var(--gp);border:1px solid var(--gl);text-align:center}
+.gx-mic button{width:96px;height:96px;border-radius:48px;border:6px solid color-mix(in srgb,var(--a) 30%,transparent);background:var(--a);display:grid;place-items:center;padding:0}
+.gx-mic button.on{animation:gxpulse 1s infinite}
+.gx-mic p{margin:0;font-size:14px;color:var(--gm);max-width:30ch}
 /* live loops */
-.gar-grid{display:grid;gap:4px;overflow-x:auto;padding-bottom:4px}
-.gar-rh{display:flex;align-items:center;gap:6px;min-width:0;border:0;background:transparent;color:var(--tx);font-size:12px;font-weight:600;padding:0 2px;text-align:left;min-height:40px}
-.gar-rh i{flex-shrink:0;width:8px;height:8px;border-radius:4px;background:var(--ln)}
-.gar-rh.on i{background:var(--ac)}
-.gar-rh span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.gar-cell{position:relative;min-width:30px;height:40px;border-radius:8px;border:1px dashed #33333f;background:transparent;padding:0;overflow:hidden;color:var(--bg);font-size:10px;font-weight:700}
-.gar-cell.has{border:0;background:var(--c,#5CE1E6);opacity:.5}
-.gar-cell.play{opacity:1}
-.gar-cell.q{animation:qblink .5s steps(2,start) infinite;opacity:.9}
-.gar-cell.sel{outline:2px solid var(--tx);outline-offset:1px}
-.gar-cell.rc{box-shadow:inset 0 0 0 3px var(--or)}
-.gar-cell b{position:absolute;left:0;bottom:0;height:4px;background:rgba(0,0,0,.45)}
-.gar-sc{min-width:30px;height:30px;border-radius:8px;border:1px solid var(--ln);background:var(--s1);color:var(--mu);font-size:11px;font-weight:700;padding:0}
-.gar-sc.on{color:var(--ac);border-color:var(--ac)}
+.gx-grid{display:grid;gap:4px;overflow-x:auto;padding:2px;margin:0 -2px;grid-template-columns:58px repeat(8,minmax(30px,1fr))}
+.gx-colh{height:32px;border-radius:10px;border:0;background:transparent;color:var(--gm);font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;gap:4px;padding:0}
+#t-gar .gx-colh svg{width:9px;height:9px;fill:currentColor;stroke:none}
+.gx-colh.on{color:var(--l)}
+.gx-colh:disabled{opacity:.3}
+.gx-rh{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;min-width:0;border:0;border-radius:10px;background:transparent;color:var(--tx);font-size:10.5px;font-weight:600;padding:0;height:56px}
+.gx-rh i{flex-shrink:0;width:28px;height:28px;border-radius:9px;display:grid;place-items:center;background:color-mix(in srgb,var(--c) 16%,transparent);color:var(--c)}
+.gx-rh i svg{width:16px;height:16px}
+.gx-rh span{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.gx-rh.on i{box-shadow:0 0 0 2px var(--c)}
+.gx-cell{--c:var(--k);position:relative;height:56px;border-radius:11px;border:1px solid #24242F;background:#111117;padding:0;overflow:hidden;touch-action:manipulation}
+.gx-cell .pl{position:absolute;inset:0;display:grid;place-items:center;color:#3A3A48;font-size:16px;font-weight:400}
+.gx-cell.has{background:color-mix(in srgb,var(--c) 14%,#14141B);border-color:color-mix(in srgb,var(--c) 35%,#24242F)}
+.gx-cell.has svg{position:absolute;inset:6px 5px;width:calc(100% - 10px);height:calc(100% - 12px)}
+.gx-cell.play{background:var(--c);border-color:var(--c)}
+.gx-cell.play svg *{fill:rgba(11,11,16,.55)!important}
+.gx-cell.q{animation:gxq .5s steps(2,start) infinite}
+@keyframes gxq{50%{border-color:var(--tx)}}
+.gx-cell.rc{box-shadow:inset 0 0 0 2px var(--a)}
+.gx-cell b{position:absolute;left:0;bottom:0;height:3px;background:var(--bg);opacity:.6}
+.gx-lfoot,.gx-tfoot{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.gx-cap i{width:10px;height:10px;border-radius:5px;background:var(--a)}
+.gx-cap[aria-pressed="true"]{border-color:var(--a);background:color-mix(in srgb,var(--a) 16%,var(--gr))}
 /* tracks */
-.gar-tl{display:flex;flex-direction:column;gap:6px;position:relative}
-.gar-row{display:grid;grid-template-columns:92px minmax(0,1fr);gap:6px;align-items:stretch}
-.gar-th{display:flex;flex-direction:column;gap:4px;border-radius:10px;background:var(--s1);border:1px solid var(--ln);padding:6px;min-width:0}
-.gar-th.sel{border-color:var(--ac)}
-.gar-th b{font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.gar-th .ms2{display:flex;gap:4px}
-.gar-th .ms2 button{flex:1;min-height:26px;border-radius:7px;border:1px solid #3A3A48;background:var(--s2);color:var(--mu);font-size:11px;font-weight:700;padding:0}
-.gar-th .ms2 button[aria-pressed="true"]{background:var(--ac);color:var(--bg);border-color:var(--ac)}
-.gar-lane{position:relative;border-radius:10px;background:#111118;border:1px solid var(--ln);overflow:hidden;min-height:62px}
-.gar-lane i{position:absolute;top:6px;bottom:6px;border-radius:6px;background:var(--c,#5CE1E6);opacity:.85}
-.gar-ph{position:absolute;top:0;bottom:0;width:2px;background:var(--tx);pointer-events:none;z-index:2}
-.gar-bars{display:grid;grid-template-columns:92px minmax(0,1fr);gap:6px;font-size:10px;color:var(--mu)}
-.gar-bars div{position:relative;height:14px}
-.gar-bars div span{position:absolute;transform:translateX(-50%)}
+.gx-tl{display:flex;flex-direction:column;gap:6px;position:relative}
+.gx-ruler{display:grid;grid-template-columns:104px minmax(0,1fr);gap:6px;height:16px;font-size:11px;color:var(--gm)}
+.gx-ruler div{position:relative;cursor:pointer}
+.gx-ruler div span{position:absolute;top:0;transform:translateX(2px);font-variant-numeric:tabular-nums}
+.gx-trow{display:grid;grid-template-columns:104px minmax(0,1fr);gap:6px;height:60px}
+.gx-th{--c:var(--k);display:flex;flex-direction:column;justify-content:space-between;gap:4px;border-radius:12px;background:var(--gp);border:1px solid var(--gl);padding:7px 7px 6px 10px;min-width:0;position:relative;overflow:hidden;text-align:left;color:var(--tx)}
+.gx-th::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--c)}
+.gx-th.sel{border-color:color-mix(in srgb,var(--c) 70%,var(--gl))}
+.gx-tn{border:0;background:transparent;color:inherit;font:inherit;text-align:left;padding:0;min-width:0;display:block;width:100%}
+.gx-th b{display:block;font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.gx-ms{display:flex;gap:4px}
+.gx-ms button{flex:1;height:22px;border-radius:6px;border:1px solid var(--gl);background:var(--gr);color:var(--gm);font-size:10px;font-weight:700;padding:0}
+.gx-ms button[aria-pressed="true"]{background:var(--tx);color:var(--bg);border-color:var(--tx)}
+.gx-lane{position:relative;border-radius:12px;background:#101016;border:1px solid #20202A;overflow:hidden}
+.gx-lane canvas{position:absolute;inset:0;width:100%;height:100%}
+.gx-ph{position:absolute;top:0;bottom:0;width:2px;background:var(--tx);pointer-events:none;z-index:2;border-radius:1px}
+.gx-empty{padding:28px 18px;border-radius:18px;border:1px dashed var(--gl);text-align:center;display:flex;flex-direction:column;gap:12px;align-items:center}
+.gx-empty b{font-size:16px}.gx-empty p{margin:0;color:var(--gm);font-size:13px;max-width:32ch;line-height:1.45}
+/* sheet */
+.gx-sheet{position:fixed;inset:0;z-index:60;display:flex;flex-direction:column;justify-content:flex-end}
+.gx-sheet[hidden]{display:none}
+.gx-scrim{position:absolute;inset:0;background:rgba(0,0,0,.55)}
+.gx-panel{position:relative;background:#16161D;border-top:1px solid var(--gl);border-radius:22px 22px 0 0;padding:8px 16px calc(18px + env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:12px;max-width:640px;width:100%;margin:0 auto;animation:gxup .18s ease-out}
+@keyframes gxup{from{transform:translateY(24px);opacity:.4}}
+.gx-grab{width:40px;height:4px;border-radius:2px;background:var(--gl);margin:0 auto 4px}
+.gx-panel h3{margin:0;font-size:16px}
+#garSheetB{display:flex;flex-direction:column;gap:8px}
+.gx-act{display:flex;align-items:center;gap:12px;min-height:50px;border-radius:14px;border:1px solid var(--gl);background:var(--gr);color:var(--tx);font:inherit;font-size:15px;font-weight:600;padding:0 14px;text-align:left}
+.gx-act svg{width:20px;height:20px;color:var(--gm)}
+.gx-act.danger{color:var(--a)}.gx-act.danger svg{color:var(--a)}
+.gx-tempo{display:flex;align-items:center;justify-content:center;gap:14px}
+.gx-tempo b{font-size:40px;font-variant-numeric:tabular-nums;min-width:90px;text-align:center}
+.gx-tempo button{width:52px;height:52px;border-radius:16px;border:1px solid var(--gl);background:var(--gr);color:var(--tx);font-size:24px;padding:0}
+@media (prefers-reduced-motion:reduce){.gx-rec.on,.gx-cell.q,.gx-mic button.on{animation:none}.gx-panel{animation:none}}
+@media (max-width:360px){.gx-grid{grid-template-columns:52px repeat(8,minmax(28px,1fr))}.gx-keyp select{width:96px}.gx-trow,.gx-ruler{grid-template-columns:92px minmax(0,1fr)}}
+.gx-tfoot[hidden]{display:none}
+.gx-act .dot{width:12px;height:12px;border-radius:6px;background:var(--a);margin:0 4px;flex-shrink:0}
 </style>
 </head>
 <body>
@@ -305,54 +424,60 @@ nav button{overflow:hidden;white-space:nowrap}
 <main>
   <!-- GARAGE -->
   <section class="tab" id="t-gar">
-    <div class="row"><h2>Garage</h2><div class="seg" role="group" aria-label="Garage view" id="garViews"><button data-gv="sounds" aria-pressed="true">Sounds</button><button data-gv="play">Play</button><button data-gv="loops">Loops</button><button data-gv="tracks">Tracks</button></div></div>
-    <div class="card gar-tr">
-      <div class="dawbar">
-        <button class="mv" id="garHome" aria-label="Go to start">⏮</button>
-        <button class="btn primary" id="garPlay" style="flex:1">▶ Play</button>
-        <button class="btn rec" id="garRec" style="flex:1">● Record</button>
+    <div class="gx-bar" id="garBar">
+      <div class="gx-trans">
+        <button class="gx-ib" id="garHome" aria-label="Go to the start"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 5v14M19 5l-10 7 10 7z"/></svg></button>
+        <button class="gx-ib gx-play" id="garPlay" aria-label="Play"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4.5v15l12.5-7.5z"/></svg></button>
+        <button class="gx-ib gx-rec" id="garRec" aria-label="Record"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="6.5"/></svg></button>
       </div>
-      <div class="dawbar">
-        <button class="mv ms tgl" id="garMetro" aria-pressed="false" aria-label="Metronome">♩</button>
-        <button class="mv ms tgl" id="garCount" aria-pressed="true" aria-label="One-bar count-in before recording" style="font-size:11px">1·2</button>
-        <div class="tempo" role="group" aria-label="Tempo"><button class="mv" id="garBpmDn" aria-label="Tempo down">−</button><span class="tbpm"><b id="garBpm">120</b><small>BPM</small></span><button class="mv" id="garBpmUp" aria-label="Tempo up">+</button></div>
-        <select id="garKey" class="dsel gar-key" aria-label="Song key"></select>
-      </div>
-      <div class="gar-st mu" id="garSt" aria-live="polite"></div>
+      <button class="gx-pos" id="garPosBtn" aria-label="Tempo, metronome and count-in"><b id="garPos">1.1</b><span><em id="garBpm">120</em> bpm<i id="garClick" hidden> · click</i></span></button>
+      <label class="gx-keyp"><span class="vh">Song key</span><select id="garKey" aria-label="Song key"></select></label>
+    </div>
+    <div class="gx-tabs" role="tablist" aria-label="Garage" id="garViews">
+      <button role="tab" data-gv="inst" aria-selected="true">Instruments</button>
+      <button role="tab" data-gv="loops" aria-selected="false">Live Loops</button>
+      <button role="tab" data-gv="tracks" aria-selected="false">Tracks</button>
+    </div>
+    <p class="gx-st" id="garSt" aria-live="polite"></p>
+
+    <!-- instrument browser -->
+    <div id="gv-sounds" class="gx-v">
+      <div id="garBrowse"></div>
     </div>
 
-    <div id="gv-sounds" class="gar-v">
-      <p class="note">Pick an instrument. Everything you play lands on the same tracks, patterns and timeline as the rest of Ecou, so you can switch to Pro tools at any time.</p>
-      <div class="gar-browse" id="garBrowse"></div>
-    </div>
-
-    <div id="gv-play" class="gar-v" hidden>
-      <div class="gar-banner" id="garBanner" hidden></div>
-      <div class="card" style="gap:10px">
-        <div class="row"><span class="kicker" id="garInstName">Smart Keys</span><select id="garTrack" class="dsel" aria-label="Track to play"></select></div>
-        <div class="row" id="garSndRow"><select id="garSnd" class="dsel" aria-label="Sound" style="flex:1;max-width:none"></select></div>
-        <div class="row" id="garApRow"><span class="mu" style="font-size:13px">Autoplay</span><div class="seg" role="group" aria-label="Autoplay pattern" id="garAp"></div></div>
+    <!-- instrument surface -->
+    <div id="gv-play" class="gx-v" hidden>
+      <div class="gx-ihead">
+        <button class="gx-back" id="garBack" aria-label="All instruments"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button>
+        <div class="gx-iname"><i id="garInstDot"></i><b id="garInstName">Smart Keys</b></div>
+        <select id="garTrack" class="gx-pill" aria-label="Track"></select>
       </div>
-      <div id="garInst"></div>
-      <p class="note" id="garHint"></p>
-    </div>
-
-    <div id="gv-loops" class="gar-v" hidden>
-      <div class="row"><span class="mu" style="font-size:13px">Tap a cell to launch it on the next bar. ▶ starts a whole column.</span></div>
-      <div id="garGrid" class="gar-grid" role="grid" aria-label="Live Loops"></div>
-      <div class="btns"><button class="btn" id="garStopAll">■ Stop all</button><button class="btn tgl" id="garEdit" aria-pressed="false">Edit cells</button><button class="btn tgl" id="garPerf" aria-pressed="false">● Capture to Tracks</button></div>
-      <div class="card" id="garCellBar" hidden>
-        <div class="row"><span class="kicker" id="garCellName">Cell</span></div>
-        <div class="btns"><button class="btn rec" id="garCellRec">● Record into cell</button><button class="btn" id="garCellDrum">Fill with Drummer</button><button class="btn" id="garCellCopy">Copy to next empty</button><button class="btn" id="garCellClr">Clear</button></div>
+      <div class="gx-iopts" id="garOpts">
+        <select id="garSnd" class="gx-pill gx-snd" aria-label="Sound"></select>
+        <div class="gx-ap" id="garApRow"><span>Autoplay</span><div id="garAp" role="group" aria-label="Autoplay pattern"></div></div>
       </div>
-      <p class="note">Each row is a track and each column is one of Ecou's patterns A–H, so a loop you record here is also editable in Song. With “Capture to Tracks” on, your performance is written to the end of the timeline when you stop.</p>
+      <div class="gx-banner" id="garBanner" hidden></div>
+      <div id="garInst" class="gx-surface"></div>
+      <p class="gx-hint" id="garHint"></p>
     </div>
 
-    <div id="gv-tracks" class="gar-v" hidden>
-      <div id="garTl" class="gar-tl"></div>
-      <div class="btns"><button class="btn" id="garAddTr">+ Add instrument</button><button class="btn" id="garToStudio">Edit in Studio</button></div>
-      <p class="note">Tap a track to play its instrument. Recording in Play adds a new region at the playhead; Studio has the full editor (cut, loop, automation, takes).</p>
+    <!-- live loops -->
+    <div id="gv-loops" class="gx-v" hidden>
+      <div id="garGrid" class="gx-grid" role="grid" aria-label="Live Loops"></div>
+      <div class="gx-lfoot">
+        <button class="gx-btn" id="garStopAll">Stop all</button>
+        <button class="gx-btn gx-cap" id="garPerf" aria-pressed="false"><i></i>Capture to Tracks</button>
+      </div>
+      <p class="gx-hint" id="garLoopHint">Tap a loop to start it on the next bar. Tap an empty cell to record into it, or hold a loop for more options.</p>
     </div>
+
+    <!-- tracks -->
+    <div id="gv-tracks" class="gx-v" hidden>
+      <div id="garTl" class="gx-tl"></div>
+      <div class="gx-tfoot"><button class="gx-btn" id="garAddTr">Add instrument</button><button class="gx-btn" id="garToStudio">Open in Studio</button></div>
+    </div>
+
+    <div class="gx-sheet" id="garSheet" hidden><div class="gx-scrim" data-close="1"></div><div class="gx-panel" role="dialog" aria-modal="true" aria-labelledby="garSheetT"><div class="gx-grab"></div><h3 id="garSheetT"></h3><div id="garSheetB"></div></div></div>
   </section>
 
   <!-- CAPTEAZĂ -->
@@ -4693,7 +4818,7 @@ function dawLoad(d,gb){
    A guided, band-in-a-phone layer over Ecou's engine: instrument browser, Smart Keys / Guitar / Bass with chord strips
    and autoplay, Drum Kit, Smart Drums, a virtual Drummer, Live Loops (tracks × patterns A–H) and a simple Tracks view.
    Everything writes to the same tracks, patterns and timeline clips as the Pro tabs. */
-var GAR={view:'sounds',inst:null,ti:1,key:0,minor:false,chords:null,ap:{keys:0,gtr:0,bass:0},apOn:-1,
+var GAR={view:'sounds',surf:false,inst:null,ti:1,key:0,minor:false,chords:null,ap:{keys:0,gtr:0,bass:0},apOn:-1,
   drum:{style:'pop',cx:0.4,ly:0.65,fills:0.4,swing:0,cym:true,perc:false,seed:1,bars:4,pat:-1},
   smart:{pieces:{kick:{x:0.3,y:0.7},snare:{x:0.2,y:0.65},hat:{x:0.45,y:0.5}},sel:'kick',bars:2,pat:-1},
   ll:{act:{},q:{},rec:null,perf:null,edit:false,sel:null},
@@ -4702,16 +4827,16 @@ var GCOL=['#D4FF3A','#5CE1E6','#FF8A5B','#B69CFF','#FFD25C','#7CF2A6','#FF7AB6',
 var GNOTE=['C','C♯','D','E♭','E','F','F♯','G','A♭','A','B♭','B'];
 var GCHQ={maj:{n:'',iv:[0,4,7]},min:{n:'m',iv:[0,3,7]},'7':{n:'7',iv:[0,4,7,10]},maj7:{n:'maj7',iv:[0,4,7,11]},m7:{n:'m7',iv:[0,3,7,10]},sus2:{n:'sus2',iv:[0,2,7]},sus4:{n:'sus4',iv:[0,5,7]},dim:{n:'°',iv:[0,3,6]},add9:{n:'add9',iv:[0,4,7,14]}};
 var GINST={
-  keys:{name:'Keyboard',sub:'Play any sound on the piano keys',track:'keys'},
-  skeys:{name:'Smart Keys',sub:'Chord strips with autoplay',track:'keys'},
-  gtr:{name:'Smart Guitar',sub:'Strum chords or pick strings',track:'gtr'},
-  bass:{name:'Smart Bass',sub:'Root, fifth and octave lines',track:'bass'},
-  kit:{name:'Drum Kit',sub:'Finger-drum on big pads',track:'drums'},
-  sdrums:{name:'Smart Drums',sub:'Place drums on a simple–complex grid',track:'drums'},
-  drummer:{name:'Drummer',sub:'A virtual drummer that follows you',track:'drums'},
-  audio:{name:'Audio Recorder',sub:'Record voice or any instrument',track:'audio'},
-  sampler:{name:'Sampler',sub:'Turn any sound into an instrument',go:'t-cap'},
-  loops:{name:'Live Loops',sub:'Trigger loops in a grid, DJ-style',view:'loops'}
+  keys:{name:'Keyboard',sub:'Piano keys with any sound',track:'keys'},
+  skeys:{name:'Smart Keys',sub:'Chords and accompaniment',track:'keys'},
+  gtr:{name:'Smart Guitar',sub:'Strum or pick chords',track:'gtr'},
+  bass:{name:'Smart Bass',sub:'Bass lines that fit your chords',track:'bass'},
+  kit:{name:'Drum Kit',sub:'Finger-drum on pads',track:'drums'},
+  sdrums:{name:'Smart Drums',sub:'Build a beat by placing drums',track:'drums'},
+  drummer:{name:'Drummer',sub:'A drummer that plays for you',track:'drums'},
+  audio:{name:'Audio Recorder',sub:'Voice or any real instrument',track:'audio'},
+  sampler:{name:'Sampler',sub:'Turn a sound into an instrument',go:'t-cap'},
+  loops:{name:'Live Loops',sub:'Launch loops in a grid',view:'loops'}
 };
 var GICON={keys:'<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M8 5v9M12 5v9M16 5v9"/>',skeys:'<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M7 9h10M7 13h6"/>',
   gtr:'<path d="M14 4l6 6M17 7l-6 6"/><circle cx="8" cy="16" r="4.5"/>',bass:'<path d="M15 3l6 6M18 6l-8 8"/><circle cx="7.5" cy="16.5" r="4"/><path d="M5 18l3-3"/>',
@@ -4786,7 +4911,7 @@ function garApStop(){GAR.apOn=-1;clearInterval(garApT);garApT=null;garPaintStrip
 function garApTick(){
   if(!ctx||GAR.apOn<0)return;var ck=garClock(),now=ctx.currentTime,sd=stepDur();
   if(ck.id!==GAR.apId){GAR.apId=ck.id;GAR.apNext=null;}
-  var P0=GAP[garApKind()][GAR.ap[garApKind()]];if(!P0){garApStop();return;}
+  var P0=GAP[garApKind()][GAR.ap[garApKind()]-1];if(!P0){garApStop();return;}
   for(var guard=0;guard<64;guard++){
     var g=GAR.apNext!=null?GAR.apNext:Math.ceil(ck.pos(now+0.03)-1e-6),t=ck.time(g);
     if(t>now+0.12)break;GAR.apNext=g+1;if(t<now-0.005)continue;
@@ -4796,53 +4921,6 @@ function garApTick(){
       R.n.forEach(function(m,j){var tt=t+(R.strum||0)*j,du=Math.max(0.05,ev[1]*sd*0.95);playNote(GAR.ti,m,vel*(R.strum?1-j*0.03:1),tt,du);garRecNote(GAR.ti,m,vel,t,ev[1]);});
       garFlashSeg(GAR.apOn);});
   }
-}
-
-/* ---------- instrument UI ---------- */
-function garStrips(){
-  var inst=GAR.inst,el=$('#garInst'),C=garChords(),nseg=garSegs(inst,C[0]).length;
-  var h='<div class="gar-strips" id="garStrips">';
-  C.forEach(function(c,ci){h+='<div class="gar-strip" data-ci="'+ci+'"><button class="gar-ch" data-ch="'+ci+'">'+garChName(c)+'</button>';
-    for(var k=0;k<nseg;k++)h+='<div class="gar-seg'+(inst==='gtr'||inst==='bass'?' str':'')+(inst==='skeys'&&k>=3?' bs':'')+'" data-ci="'+ci+'" data-sg="'+k+'"></div>';h+='</div>';});
-  h+='</div><details class="strip"><summary>Edit chords</summary><div class="gar-chedit" id="garChEd"></div><div class="btns" style="margin-top:8px"><button class="btn" id="garChReset">Reset to key</button></div></details>';
-  el.innerHTML=h;garPaintStrips();garChEdit();
-  var sp=$('#garStrips'),held=new Map();
-  function segAt(x,y){var e=document.elementFromPoint(x,y);return e&&e.closest?e.closest('#garStrips .gar-seg, #garStrips .gar-ch'):null;}
-  function hit(e,id,first){var s=segAt(e.clientX,e.clientY),prev=held.get(id);if(!s){if(prev&&prev.key){noteGroupOff(prev.key);held.set(id,{el:null});}return;}if(prev&&prev.el===s)return;
-    if(prev&&prev.key)noteGroupOff(prev.key);
-    var ci=+s.getAttribute('data-ci'),vel=0.82;
-    if(s.classList.contains('gar-ch')){ci=+s.getAttribute('data-ch');if(!first){held.set(id,{el:s});return;}
-      if(GAR.ap[garApKind()]>0){if(GAR.apOn===ci)garApStop();else garApStart(ci);held.set(id,{el:s});return;}
-      var c=garChords()[ci],k='gch'+id,ns=inst==='gtr'?garGtrVoice(c):inst==='bass'?[garBassNotes(c)[0]]:garKeysVoice(c,0).concat([garBassRoot(c,36)]);
-      if(inst==='gtr'){garStrum(ns,0.85);held.set(id,{el:s});return;}
-      noteGroupOn(k,ns,vel);held.set(id,{el:s,key:k});s.classList.add('on');setTimeout(function(){s.classList.remove('on');},150);return;}
-    var sg=+s.getAttribute('data-sg'),notes=garSegs(inst,garChords()[ci])[sg],key='gsg'+id;
-    noteGroupOn(key,notes,vel);held.set(id,{el:s,key:key});s.classList.add('hit');setTimeout(function(){s.classList.remove('hit');},180);
-  }
-  sp.addEventListener('pointerdown',function(e){e.preventDefault();ensureAudio();try{sp.setPointerCapture(e.pointerId);}catch(x){}hit(e,e.pointerId,true);});
-  sp.addEventListener('pointermove',function(e){if(held.has(e.pointerId))hit(e,e.pointerId,false);});
-  function up(e){var h0=held.get(e.pointerId);if(h0&&h0.key)noteGroupOff(h0.key);held.delete(e.pointerId);}
-  sp.addEventListener('pointerup',up);sp.addEventListener('pointercancel',up);
-}
-function noteGroupOn(k,ns,vel){ns.forEach(function(m,j){noteOn(k+'_'+j,m,vel);});}
-function noteGroupOff(k){Array.from(voices.keys()).forEach(function(x){if(String(x).indexOf(k+'_')===0)noteOff(x);});}
-function garStrum(ns,vel){if(!ensureAudio())return;var t=ctx.currentTime+0.01,sd=stepDur();ns.forEach(function(m,j){playNote(GAR.ti,m,vel*(1-j*0.03),t+j*0.014,1.6);garRecNoteNow(GAR.ti,m,vel);});}
-/* live (unscheduled) note: record at the current transport position, 1 bar long for a strum */
-function garRecNoteNow(ti,m,v){if(!seq.on||!seq.rec)return;var ck=garClock(),pos=ck.pos(ctx.currentTime-recLatency()),tg=seq.mode==='arrange'?jamTarget(ti,pos):seq.mode==='loops'?llRecAt(ti,pos):null;if(!tg)return;var pt=patterns[tg.p],s=seq.quant?Math.round(tg.s)%pt.len:Math.round(tg.s*100)/100;noteArr(pt,ti).push({s:s,l:8,m:m,v:Math.round(v*100)/100});markDirty();}
-function garPaintStrips(){$$('#garStrips .gar-strip').forEach(function(s){var ci=+s.getAttribute('data-ci');s.classList.toggle('ap',GAR.apOn===ci);var b=s.querySelector('.gar-ch');if(b)b.classList.toggle('on',GAR.apOn===ci);});}
-function garFlashSeg(ci){var s=document.querySelector('#garStrips .gar-strip[data-ci="'+ci+'"] .gar-ch');if(!s)return;s.style.opacity='.7';setTimeout(function(){s.style.opacity='';},90);}
-function garChEdit(){var w=$('#garChEd');if(!w)return;var C=garChords(),h='';
-  C.forEach(function(c,i){h+='<select class="dsel" data-ce="'+i+'" aria-label="Chord '+(i+1)+'">';for(var r=0;r<12;r++)Object.keys(GCHQ).forEach(function(q){h+='<option value="'+r+'|'+q+'"'+(c[0]===r&&c[1]===q?' selected':'')+'>'+garChName([r,q])+'</option>';});h+='</select>';});
-  w.innerHTML=h;$$('[data-ce]').forEach(function(s){s.addEventListener('change',function(){var C2=garChords().map(function(x){return x.slice();}),v=s.value.split('|');C2[+s.getAttribute('data-ce')]=[+v[0],v[1]];GAR.chords=C2;markDirty();garStrips();});});
-  var rb=$('#garChReset');if(rb)rb.onclick=function(){GAR.chords=null;markDirty();garStrips();};
-}
-/* drum kit */
-var GPADN={kick:[/^kick/i,0],snare:[/snare/i,1],clap:[/clap/i,2],rim:[/rim/i,3],hat:[/closed|^hat|hi.?hat/i,4],ohat:[/open/i,5],shaker:[/shak/i,6],cowbell:[/cow/i,7],tomlo:[/tom ?lo|low/i,8],tommid:[/tom ?mid|mid/i,9],tomhi:[/tom ?hi|high/i,10],crash:[/crash/i,11],ride:[/ride/i,13]};
-function garPad(k){var d=GPADN[k];if(!d)return -1;for(var i=0;i<pads.length;i++)if(pads[i]&&pads[i].buf&&d[0].test(pads[i].name||''))return i;return pads[d[1]]&&pads[d[1]].buf?d[1]:-1;}
-function garKit(){var L=[['kick','Kick'],['snare','Snare'],['clap','Clap'],['hat','Hi-hat'],['tomlo','Tom low'],['tomhi','Tom high'],['ohat','Open hat'],['crash','Crash']];
-  var h='<div class="gar-pads" id="garPads">';L.forEach(function(x){var i=garPad(x[0]);if(i<0)return;h+='<button class="gar-pad" data-gp="'+i+'">'+(pads[i].name||x[1])+'</button>';});h+='</div>';
-  $('#garInst').innerHTML=h;
-  $$('#garPads .gar-pad').forEach(function(b){b.addEventListener('pointerdown',function(e){e.preventDefault();if(!ensureAudio())return;var i=+b.getAttribute('data-gp'),r=b.getBoundingClientRect(),vel=clamp(0.55+0.45*(1-(e.clientY-r.top)/r.height),0.3,1);trigPad(i,vel);recPad(i,vel);b.classList.add('hit');setTimeout(function(){b.classList.remove('hit');},110);});});
 }
 
 /* ---------- drum generators (Smart Drums + Drummer) ---------- */
@@ -4907,63 +4985,6 @@ function garLenFor(pi,bars){var pt=patterns[pi],len=bars*16;if(pt&&pt.notes.some
 function garApplyDrummer(){var pi=garTargetPat(GAR.drum),len=garLenFor(pi,GAR.drum.bars);garWriteDrums(pi,garGenDrummer(len),len);var sw=(GSTY[GAR.drum.style].swing||0)+GAR.drum.swing;setParam('swing',clamp(sw,0,P.swing.max));}
 function garApplySmart(){var pi=garTargetPat(GAR.smart),len=garLenFor(pi,GAR.smart.bars);garWriteDrums(pi,garGenSmart(len),len);}
 var garDrT=null;function garDrumsChanged(fn){clearTimeout(garDrT);garDrT=setTimeout(fn,60);}
-
-function garPatChips(o,id){var h='<div class="row"><span class="mu" style="font-size:13px">Writes into pattern</span><div class="chips" id="'+id+'">';for(var i=0;i<8;i++)h+='<button data-tp="'+i+'" aria-pressed="'+(garTargetPat(o)===i)+'"'+(patHas(patterns[i])?' class="has"':'')+'>'+PATN[i]+'</button>';return h+'</div></div>';}
-function garBindPatChips(o,id,fn){$$('#'+id+' [data-tp]').forEach(function(b){b.addEventListener('click',function(){o.pat=+b.getAttribute('data-tp');setPattern(o.pat);$$('#'+id+' [data-tp]').forEach(function(x){x.setAttribute('aria-pressed',x===b);});});});}
-function garPreviewBtns(id,fn){return '<div class="btns" id="'+id+'"><button class="btn primary" data-pv="1">▶ Preview loop</button><button class="btn" data-pv="2">Add to Tracks at playhead</button></div>';}
-function garBindPreview(id,o,fn){var w=$('#'+id);if(!w)return;
-  w.querySelector('[data-pv="1"]').addEventListener('click',function(){if(seq.on){transportStop();garUpd();return;}fn();setPattern(garTargetPat(o));transportStart('pattern');garUpd();});
-  w.querySelector('[data-pv="2"]').addEventListener('click',function(){fn();var pi=garTargetPat(o),pt=patterns[pi],s0=Math.floor(Math.max(0,daw.play)/16)*16;
-    daw.clips=daw.clips.filter(function(c){return !(c.ti===0&&c.type==='pat'&&c.s<s0+pt.len&&c.s+c.l>s0);});newClip({type:'pat',ti:0,s:s0,l:pt.len,p:pi,o:0});dawNeed=true;markDirty();toast('Drums ('+PATN[pi]+', '+pt.len/16+' bars) placed at bar '+(s0/16+1)+'.',1800);});}
-
-function garXY(id,getPts,onMove,labels){
-  var h='<div class="gar-xy" id="'+id+'"><canvas></canvas><span class="gar-ax" style="left:8px;bottom:6px">'+labels[0]+'</span><span class="gar-ax" style="right:8px;bottom:6px">'+labels[1]+'</span><span class="gar-ax" style="left:8px;top:6px">'+labels[2]+'</span></div>';
-  return {html:h,bind:function(){var box=$('#'+id),cv=box.querySelector('canvas'),drag=null;
-    function draw(){var r=box.getBoundingClientRect(),dpr=window.devicePixelRatio||1;cv.width=r.width*dpr;cv.height=r.height*dpr;var g=cv.getContext('2d');g.scale(dpr,dpr);
-      g.strokeStyle='#22222D';for(var i=1;i<4;i++){g.beginPath();g.moveTo(r.width*i/4,0);g.lineTo(r.width*i/4,r.height);g.stroke();g.beginPath();g.moveTo(0,r.height*i/4);g.lineTo(r.width,r.height*i/4);g.stroke();}
-      getPts().forEach(function(p){var x=p.x*r.width,y=(1-p.y)*r.height;g.fillStyle=p.sel?'#D4FF3A':p.c||'#5CE1E6';g.beginPath();g.arc(x,y,p.sel?15:13,0,7);g.fill();g.fillStyle='#0B0B10';g.font='700 9px Space Grotesk, sans-serif';g.textAlign='center';g.fillText(p.l||'',x,y+3);});}
-    function at(e){var r=box.getBoundingClientRect();return {x:clamp((e.clientX-r.left)/r.width,0,1),y:clamp(1-(e.clientY-r.top)/r.height,0,1)};}
-    box.addEventListener('pointerdown',function(e){e.preventDefault();ensureAudio();drag=e.pointerId;try{box.setPointerCapture(e.pointerId);}catch(x){}onMove(at(e),true);draw();});
-    box.addEventListener('pointermove',function(e){if(drag!==e.pointerId)return;onMove(at(e),false);draw();});
-    box.addEventListener('pointerup',function(){drag=null;});box.addEventListener('pointercancel',function(){drag=null;});
-    draw();box._draw=draw;}};
-}
-var GSMP=[['kick','Kick','KCK'],['snare','Snare','SNR'],['clap','Clap','CLP'],['hat','Hi-hat','HH'],['ohat','Open','OH'],['shaker','Shaker','SHK'],['toms','Toms','TOM'],['crash','Crash','CRS'],['cowbell','Bell','BEL'],['ride','Ride','RDE']];
-function garSmartDrums(){var S=GAR.smart;
-  var h='<div class="card" style="gap:10px"><p class="note" style="margin:0">Tap a drum to add or select it, then drag on the grid: left–right is simple → complex, bottom–top is quiet → loud. Tap it again to remove it.</p><div class="chips" id="garSmp">';
-  GSMP.forEach(function(p){if(p[0]!=='toms'&&garPad(p[0])<0)return;h+='<button data-sp="'+p[0]+'" aria-pressed="'+(S.sel===p[0])+'"'+(S.pieces[p[0]]?' class="has"':'')+'>'+p[1]+'</button>';});h+='</div>';
-  var xy=garXY('garSxy',function(){return Object.keys(S.pieces).map(function(k){var n=(GSMP.filter(function(x){return x[0]===k;})[0]||[k,k,k])[2];return {x:S.pieces[k].x,y:S.pieces[k].y,l:n,sel:k===S.sel};});},
-    function(pt){if(!S.sel)return;S.pieces[S.sel]={x:pt.x,y:pt.y};garSmpChips();garDrumsChanged(garApplySmart);},['Simple','Complex','Loud']);
-  h+=xy.html+'<div class="row"><span class="mu" style="font-size:13px">Length</span><div class="seg" id="garSbars"><button data-sb="1">1 bar</button><button data-sb="2">2 bars</button><button data-sb="4">4 bars</button></div></div>'+garPatChips(S,'garSpat')+'<div class="btns"><button class="btn" id="garSdice">🎲 Random kit</button><button class="btn" id="garSclr">Clear grid</button></div>'+garPreviewBtns('garSpv')+'</div>';
-  $('#garInst').innerHTML=h;xy.bind();
-  function garSmpChips(){$$('#garSmp [data-sp]').forEach(function(b){var k=b.getAttribute('data-sp');b.setAttribute('aria-pressed',S.sel===k);b.classList.toggle('has',!!S.pieces[k]);});}
-  $$('#garSmp [data-sp]').forEach(function(b){b.addEventListener('click',function(){var k=b.getAttribute('data-sp');if(S.sel===k&&S.pieces[k]){delete S.pieces[k];S.sel=null;}else{S.sel=k;if(!S.pieces[k])S.pieces[k]={x:0.35,y:0.6};var pd=garPad(k==='toms'?'tommid':k);if(pd>=0)trigPad(pd,0.8);}garSmpChips();$('#garSxy')._draw();garDrumsChanged(garApplySmart);});});
-  $$('#garSbars [data-sb]').forEach(function(b){b.setAttribute('aria-pressed',+b.getAttribute('data-sb')===S.bars);b.addEventListener('click',function(){S.bars=+b.getAttribute('data-sb');$$('#garSbars [data-sb]').forEach(function(x){x.setAttribute('aria-pressed',x===b);});garApplySmart();});});
-  $('#garSdice').addEventListener('click',function(){S.pieces={};var ks=['kick','snare','hat'],ex=['clap','ohat','shaker','toms','cowbell','ride'];ex.forEach(function(k){if(Math.random()<0.35)ks.push(k);});ks.forEach(function(k){S.pieces[k]={x:Math.random()*0.85,y:0.35+Math.random()*0.65};});S.sel=null;garSmpChips();$('#garSxy')._draw();garApplySmart();});
-  $('#garSclr').addEventListener('click',function(){S.pieces={};S.sel=null;garSmpChips();$('#garSxy')._draw();garApplySmart();});
-  garBindPatChips(S,'garSpat');garBindPreview('garSpv',S,garApplySmart);
-}
-function garDrummer(){var D=GAR.drum;
-  var h='<div class="card" style="gap:10px"><div class="chips" id="garDst">';Object.keys(GSTY).forEach(function(k){h+='<button data-ds="'+k+'" aria-pressed="'+(D.style===k)+'">'+GSTY[k].n+'</button>';});h+='</div>';
-  var xy=garXY('garDxy',function(){return [{x:D.cx,y:D.ly,l:'',sel:true}];},function(pt){D.cx=pt.x;D.ly=pt.y;garDrumsChanged(garApplyDrummer);},['Simple','Complex','Loud']);
-  h+=xy.html+'<div class="btns"><button class="btn tgl" id="garDcym" aria-pressed="'+D.cym+'">Cymbals &amp; hats</button><button class="btn tgl" id="garDperc" aria-pressed="'+D.perc+'">Percussion</button></div>'+
-    '<label class="ctl"><span class="row"><span>Fills</span><output id="garDfO"></output></span><input type="range" id="garDf" min="0" max="1" step="0.01" value="'+D.fills+'" aria-label="Fills"></label>'+
-    '<label class="ctl"><span class="row"><span>Extra swing</span><output id="garDsO"></output></span><input type="range" id="garDs" min="0" max="0.5" step="0.01" value="'+D.swing+'" aria-label="Swing"></label>'+
-    '<div class="row"><span class="mu" style="font-size:13px">Length</span><div class="seg" id="garDbars"><button data-db="1">1 bar</button><button data-db="2">2 bars</button><button data-db="4">4 bars</button></div></div>'+garPatChips(D,'garDpat')+
-    '<div class="btns"><button class="btn" id="garDvar">🎲 New variation</button><button class="btn" id="garDgo">Write pattern</button></div>'+garPreviewBtns('garDpv')+'</div>';
-  $('#garInst').innerHTML=h;xy.bind();
-  function outs(){$('#garDfO').textContent=D.fills<0.05?'off':Math.round(D.fills*100)+'%';$('#garDsO').textContent=Math.round(D.swing*100)+'%';}outs();
-  $$('#garDst [data-ds]').forEach(function(b){b.addEventListener('click',function(){D.style=b.getAttribute('data-ds');$$('#garDst [data-ds]').forEach(function(x){x.setAttribute('aria-pressed',x===b);});if(D.style==='onedrop'||D.style==='steppers'){var ri=garPad('rim');if(ri<0)toast('Tip: the Reggae kit (Pads) has the rim click this style expects.',2400);}garApplyDrummer();});});
-  $('#garDcym').addEventListener('click',function(){D.cym=!D.cym;this.setAttribute('aria-pressed',D.cym);garApplyDrummer();});
-  $('#garDperc').addEventListener('click',function(){D.perc=!D.perc;this.setAttribute('aria-pressed',D.perc);garApplyDrummer();});
-  $('#garDf').addEventListener('input',function(){D.fills=+this.value;outs();garDrumsChanged(garApplyDrummer);});
-  $('#garDs').addEventListener('input',function(){D.swing=+this.value;outs();garDrumsChanged(garApplyDrummer);});
-  $$('#garDbars [data-db]').forEach(function(b){b.setAttribute('aria-pressed',+b.getAttribute('data-db')===D.bars);b.addEventListener('click',function(){D.bars=+b.getAttribute('data-db');$$('#garDbars [data-db]').forEach(function(x){x.setAttribute('aria-pressed',x===b);});garApplyDrummer();});});
-  $('#garDvar').addEventListener('click',function(){D.seed=1+Math.floor(Math.random()*9999);garApplyDrummer();});
-  $('#garDgo').addEventListener('click',function(){garApplyDrummer();toast('Drummer wrote pattern '+PATN[garTargetPat(D)]+'.',1400);});
-  garBindPatChips(D,'garDpat');garBindPreview('garDpv',D,garApplyDrummer);
-}
-
 /* ---------- tracks for instruments ---------- */
 function garFindTrack(kind){
   if(kind==='drums')return 0;
@@ -4974,40 +4995,6 @@ function garFindTrack(kind){
   if(f<0&&kind==='keys'){f=selTrack&&tracks[selTrack]&&tracks[selTrack].kind==='keys'&&!/bass|guitar/i.test(tracks[selTrack].name)?selTrack:1;}
   if(f<0)f=selTrack;return f;
 }
-var GSND={keys:['piano','rhodes','organ','strings','pluck','lead','melodica','skank'],gtr:['egtr','agtr','pluck','skank'],bass:['fbass','dub','sub','b808','sawbass']};
-function garSoundChips(){var k=GAR.inst==='gtr'?'gtr':GAR.inst==='bass'?'bass':(GAR.inst==='keys'||GAR.inst==='skeys')?'keys':null,w=$('#garSnd');
-  $('#garSndRow').hidden=!k;if(!k)return;var cur=tracks[GAR.ti]&&tracks[GAR.ti].sound&&tracks[GAR.ti].sound.slots&&tracks[GAR.ti].sound.slots.A.stock;if(GAR.ti===selTrack&&slots.A)cur=slots.A.stock;
-  var ids=GSND[k].filter(function(id){return STOCK[id];});Object.keys(STOCK).forEach(function(id){if(ids.indexOf(id)<0)ids.push(id);});
-  w.innerHTML=(cur?'':'<option value="">Current sound ('+escapeH(slots.A&&GAR.ti===selTrack?slots.A.name:'custom')+')</option>')+ids.map(function(id,i){return (i===GSND[k].length?'<option disabled>──────</option>':'')+'<option value="'+id+'"'+(cur===id?' selected':'')+'>'+STOCK[id].name+'</option>';}).join('');
-}
-function garTrackSel(){var s=$('#garTrack'),kind=(GINST[GAR.inst]||{}).track,h='';
-  tracks.forEach(function(t,i){var ok=kind==='drums'?i===0:kind==='audio'?t.kind==='audio':t.kind==='keys';if(ok)h+='<option value="'+i+'"'+(i===GAR.ti?' selected':'')+'>'+escapeH(t.name)+'</option>';});s.innerHTML=h;s.hidden=kind==='drums';}
-
-function garOpen(inst){
-  var I=GINST[inst];if(!I)return;if(I.go){showTab(I.go);return;}if(I.view){garView(I.view);return;}
-  if(!ensureAudio())return;if(GAR.apOn>=0)garApStop();
-  GAR.inst=inst;var ti=garFindTrack(I.track);if(ti<0)return;GAR.ti=ti;if(tracks[ti].kind==='keys'&&ti!==selTrack)selectTrack(ti);
-  if(inst==='bass'&&tracks[ti].sound&&tracks[ti].sound.slots&&!tracks[ti].sound.slots.A.stock&&STOCK.fbass){loadStock('fbass');}
-  garView('play');
-}
-function garRenderPlay(){
-  var inst=GAR.inst||'skeys';GAR.inst=inst;var I=GINST[inst];$('#garInstName').textContent=I.name;garTrackSel();garSoundChips();$('#garInstName').closest('.card').hidden=I.track==='drums';
-  var apk=garApKind(),smart=inst==='skeys'||inst==='gtr'||inst==='bass';$('#garApRow').hidden=!smart;
-  if(smart){var a=$('#garAp');a.innerHTML='<button data-ap="0">Off</button>'+GAP[apk].map(function(p,i){return '<button data-ap="'+(i+1)+'" title="'+p.n+'">'+(i+1)+'</button>';}).join('');
-    $$('#garAp [data-ap]').forEach(function(b){b.setAttribute('aria-pressed',+b.getAttribute('data-ap')===GAR.ap[apk]);b.addEventListener('click',function(){GAR.ap[apk]=+b.getAttribute('data-ap');$$('#garAp [data-ap]').forEach(function(x){x.setAttribute('aria-pressed',x===b);});if(GAR.ap[apk]===0)garApStop();garHint();});});}
-  $('#kbwrap').hidden=inst!=='keys';if(inst==='keys')setKbCollapsed(false);
-  if(smart)garStrips();else if(inst==='kit')garKit();else if(inst==='sdrums')garSmartDrums();else if(inst==='drummer')garDrummer();
-  else if(inst==='audio')$('#garInst').innerHTML='<div class="card"><p class="note" style="margin:0">Tap <b>● Record</b>: Ecou counts in one bar and records the microphone onto <b>'+escapeH(tracks[GAR.ti].name)+'</b> at the playhead, while the rest of the song plays. Use wired headphones so the mic does not pick up the speaker.</p><label class="chk"><span>Hear yourself while recording (headphones)</span><input type="checkbox" id="garMon"'+(daw.mon?' checked':'')+'></label></div>';
-  else if(inst==='keys')$('#garInst').innerHTML='<div class="card"><p class="note" style="margin:0">The keyboard is docked at the bottom of the screen. Pick a sound above, then tap <b>● Record</b> to record onto <b>'+escapeH(tracks[GAR.ti].name)+'</b>.</p></div>';
-  var mon=$('#garMon');if(mon)mon.addEventListener('change',function(){daw.mon=mon.checked;var dm=$('#dawMon');if(dm)dm.checked=daw.mon;});
-  garHint();garBanner();
-}
-function garHint(){var inst=GAR.inst,t='';
-  if(inst==='skeys'||inst==='gtr'||inst==='bass'){var k=garApKind(),a=GAR.ap[k];t=a?'Autoplay “'+GAP[k][a-1].n+'”: tap a chord name to start it in time, tap another to change, tap the same one to stop.':(inst==='gtr'?'Tap a chord name to strum it, or tap and swipe across the strings.':inst==='bass'?'Each strip has root (bottom), third, fifth and octave (top).':'Top three rows: chord in three inversions. Bottom two: bass notes. Tap a chord name to play chord and bass together.');}
-  else if(inst==='kit')t='Hit higher on a pad for a louder hit.';else if(inst==='sdrums'||inst==='drummer')t='Changes write straight into the pattern. Use it in Live Loops or put it on the timeline.';
-  $('#garHint').textContent=t;}
-function garBanner(){var b=$('#garBanner'),R=GAR.ll.rec;if(R&&seq.rec&&seq.mode==='loops'){b.hidden=false;b.innerHTML='<span>● Recording into loop '+escapeH(tracks[R.ti].name)+' · '+PATN[R.p]+'</span><button id="garBanStop">Stop</button>';$('#garBanStop').onclick=function(){llRecStop();};}else b.hidden=true;}
-
 /* ---------- Live Loops ---------- */
 function llRows(){var r=[];tracks.forEach(function(t,i){if(t.kind!=='audio')r.push(i);});return r;}
 function llHas(ti,p){var pt=patterns[p];if(!pt)return false;if(ti===0)return pt.drums.some(function(a){return a.slice(0,pt.len).some(Boolean);});return (pt.notes[ti]||[]).length>0;}
@@ -5037,106 +5024,312 @@ function llCommitPerf(gEnd){var L=GAR.ll,log=L.perfLog;L.perfLog=null;if(!log||!
   function close(ti,g){var o=open[ti];if(!o)return;if(g>o.g){newClip({type:'pat',ti:ti,s:base+o.g,l:g-o.g,p:o.p,o:0});made++;}delete open[ti];}
   log.forEach(function(e){close(e.ti,e.g);if(e.p>=0)open[e.ti]={p:e.p,g:e.g};});Object.keys(open).forEach(function(k){close(+k,end);});
   if(made){dawNeed=true;markDirty();toast('Performance captured: '+made+' region'+(made>1?'s':'')+' from bar '+(base/16+1)+' in Tracks.',2600);}}
-function llRender(){
-  var w=$('#garGrid');if(!w||$('#gv-loops').hidden)return;var rows=llRows(),L=GAR.ll;
-  w.style.gridTemplateColumns='76px repeat(8,minmax(30px,1fr))';var h='<span></span>';
-  for(var p=0;p<8;p++){var any=rows.some(function(ti){return llHas(ti,p);});h+='<button class="gar-sc'+(rows.some(function(ti){return L.act[ti]&&L.act[ti].p===p;})?' on':'')+'" data-scn="'+p+'" aria-label="Launch column '+PATN[p]+'"'+(any?'':' disabled')+'>▶ '+PATN[p]+'</button>';}
-  rows.forEach(function(ti){var t=tracks[ti],on=!!L.act[ti];h+='<button class="gar-rh'+(on?' on':'')+'" data-rst="'+ti+'" aria-label="Stop '+escapeH(t.name)+'"><i></i><span>'+escapeH(t.name)+'</span></button>';
-    for(var p=0;p<8;p++){var has=llHas(ti,p),pl=on&&L.act[ti].p===p,q=L.q[ti]===p||(pl&&L.q[ti]===-1),sel=L.sel&&L.sel.ti===ti&&L.sel.p===p,rc=L.rec&&L.rec.ti===ti&&L.rec.p===p;
-      h+='<button class="gar-cell'+(has?' has':'')+(pl?' play':'')+(q?' q':'')+(sel?' sel':'')+(rc?' rc':'')+'" style="--c:'+garCol(ti)+'" data-cell="'+ti+':'+p+'" aria-label="'+escapeH(t.name)+' '+PATN[p]+(has?'':' (empty)')+'">'+(pl?'<b data-pr="'+ti+'"></b>':'')+'</button>';}});
-  w.innerHTML=h;
-  $('#garEdit').setAttribute('aria-pressed',L.edit);$('#garPerf').setAttribute('aria-pressed',!!L.perf);
-  var cb=$('#garCellBar');cb.hidden=!(L.edit&&L.sel);if(L.sel){$('#garCellName').textContent=tracks[L.sel.ti].name+' · '+PATN[L.sel.p]+(llHas(L.sel.ti,L.sel.p)?'':' (empty)');$('#garCellDrum').hidden=L.sel.ti!==0;
-    $('#garCellRec').textContent=L.rec&&seq.rec?'■ Stop recording':'● Record into cell';$('#garCellRec').classList.toggle('live',!!(L.rec&&seq.rec));}
-}
-function llProgress(){if(!llRunning()||$('#gv-loops').hidden)return;var L=GAR.ll,pos=(ctx.currentTime-(ctx.outputLatency||0)-seq.audStart)/stepDur();
-  $$('#garGrid [data-pr]').forEach(function(b){var a=L.act[+b.getAttribute('data-pr')];if(!a)return;var len=patterns[a.p].len,f=pos<a.g0?0:((pos-a.g0)%len)/len;b.style.width=(f*100)+'%';});}
-
-/* ---------- Tracks view ---------- */
-function garTl(){
-  var w=$('#garTl');if(!w||$('#gv-tracks').hidden)return;var end=Math.max(64,Math.ceil((arrEnd()+16)/16)*16),h='<div class="gar-bars"><i></i><div>';
-  var step=end/16>16?8:end/16>8?4:end/16>4?2:1;for(var b=0;b<end/16;b+=step)h+='<span style="left:'+(b*16/end*100)+'%">'+(b+1)+'</span>';h+='</div></div>';
-  tracks.forEach(function(t,i){var sel=i===GAR.ti;h+='<div class="gar-row"><div class="gar-th'+(sel?' sel':'')+'" data-gt="'+i+'"><b>'+escapeH(t.name)+'</b><div class="ms2"><button data-gm="'+i+'" aria-pressed="'+!!t.mute+'" aria-label="Mute">M</button><button data-gso="'+i+'" aria-pressed="'+!!t.solo+'" aria-label="Solo">S</button></div></div><div class="gar-lane" data-gl="'+i+'" style="--c:'+garCol(i)+'">';
-    daw.clips.forEach(function(c){if(c.ti!==i)return;var s=c.s,l=c.type==='pat'?c.l:clipLen(c);h+='<i style="left:'+(s/end*100)+'%;width:'+Math.max(0.6,l/end*100)+'%;'+(c.mute?'opacity:.3':'')+'"></i>';});h+='</div></div>';});
-  w.innerHTML=h+'<div class="gar-ph" id="garPh"></div>';w._end=end;
-  $$('#garTl [data-gt]').forEach(function(d){d.addEventListener('click',function(e){if(e.target.closest('button'))return;var i=+d.getAttribute('data-gt'),t=tracks[i];GAR.ti=i;
-    garOpen(i===0?'drummer':t.kind==='audio'?'audio':/guitar/i.test(t.name)?'gtr':/bass/i.test(t.name)?'bass':'skeys');});});
-  $$('#garTl [data-gm]').forEach(function(b){b.addEventListener('click',function(){var t=tracks[+b.getAttribute('data-gm')];t.mute=!t.mute;applyMix();renderMixer();markDirty();garTl();});});
-  $$('#garTl [data-gso]').forEach(function(b){b.addEventListener('click',function(){var t=tracks[+b.getAttribute('data-gso')];t.solo=!t.solo;applyMix();renderMixer();markDirty();garTl();});});
-  $$('#garTl [data-gl]').forEach(function(l){l.addEventListener('click',function(e){var r=l.getBoundingClientRect(),g=Math.round(clamp((e.clientX-r.left)/r.width,0,1)*end/16)*16;if(seq.on)transportStop();setPlayhead(g);garPh();});});
-  garPh();
-}
-function garPh(){var ph=$('#garPh'),w=$('#garTl');if(!ph||!w||!w._end)return;var lane=w.querySelector('.gar-lane');if(!lane){ph.hidden=true;return;}
-  var pos=seq.on&&seq.mode==='arrange'?arrPosNow():daw.play,wr=w.getBoundingClientRect(),lr=lane.getBoundingClientRect();ph.hidden=false;ph.style.left=(lr.left-wr.left+clamp(pos/w._end,0,1)*lr.width)+'px';}
-
-/* ---------- views, transport, status ---------- */
-function garView(v){GAR.view=v;['sounds','play','loops','tracks'].forEach(function(k){$('#gv-'+k).hidden=k!==v;});
-  $$('#garViews [data-gv]').forEach(function(b){b.setAttribute('aria-pressed',b.getAttribute('data-gv')===v);});
-  $('#kbwrap').hidden=!(v==='play'&&GAR.inst==='keys');
-  if(v==='play')garRenderPlay();if(v==='loops'){llRender();}if(v==='tracks')garTl();if(v==='sounds')garBrowse();garUpd();$('main').scrollTop=0;}
-function garBrowse(){var w=$('#garBrowse'),i=0;w.innerHTML=Object.keys(GINST).map(function(k){var I=GINST[k];return '<button class="gar-card" data-gi="'+k+'">'+garIcon(k,GCOL[(i++)%GCOL.length])+'<b>'+I.name+'</b><span>'+I.sub+'</span></button>';}).join('');
-  $$('#garBrowse [data-gi]').forEach(function(b){b.addEventListener('click',function(){garOpen(b.getAttribute('data-gi'));});});}
-function garPlay(){
-  if(GAR.view==='loops'){if(llRunning()){transportStop();}else{var L=GAR.ll,rows=llRows(),any=false;L.act={};L.q={};rows.forEach(function(ti){var p=-1;if(L.sel&&L.sel.ti===ti&&llHas(ti,L.sel.p))p=L.sel.p;else if(llHas(ti,curPat))p=curPat;else for(var k=0;k<8;k++)if(llHas(ti,k)){p=k;break;}if(p>=0){L.q[ti]=p;any=true;}});if(!any){toast('Tap a filled cell to launch a loop.',1800);return;}llStart();}garUpd();return;}
-  if(seq.on){transportStop();}else transportStart('arrange');garUpd();
-}
-function garRecord(){
-  if(GAR.view==='loops'){var S=GAR.ll.sel;if(GAR.ll.rec&&seq.rec){llRecStop();return;}if(!S){GAR.ll.edit=true;llRender();toast('Tap the cell you want to record into.',2000);return;}llRecord(S.ti,S.p);return;}
-  if(seq.on&&seq.mode==='loops'&&GAR.ll.rec){llRecStop();return;}
-  if(GAR.inst==='audio'){var ti=GAR.ti;tracks.forEach(function(t,i){if(t.kind==='audio')t.arm=i===ti;});daw.lane=ti;dawRecord();setTimeout(garUpd,300);return;}
-  if(seq.on&&seq.mode==='arrange'&&seq.rec){seq.rec=false;recFlush();transportStop();garUpd();return;}
-  if(!ensureAudio())return;if(seq.on)transportStop();if(GAR.ti>0&&tracks[GAR.ti].kind==='keys'&&GAR.ti!==selTrack)selectTrack(GAR.ti);
-  seq.rec=true;seq.src='arrange';jamSess++;jamTarget.warned=false;arr.pre=daw.count?16:0;transportStart('arrange');garUpd();
-  toast(daw.count?'Count-in… then play.':'Recording — play now.',1600);
-}
-function garUpd(){
-  var p=$('#garPlay');if(!p)return;var lo=GAR.view==='loops',on=lo?llRunning():(seq.on&&seq.mode==='arrange')||(seq.on&&seq.mode==='pattern');
-  p.textContent=on?'■ Stop':'▶ Play';var recOn=(seq.rec&&seq.on)||!!arr.rec;$('#garRec').classList.toggle('live',recOn);$('#garRec').textContent=recOn?'■ Stop rec':(lo?'● Rec cell':'● Record');
-  $('#garMetro').setAttribute('aria-pressed',!!seq.metro);$('#garCount').setAttribute('aria-pressed',!!daw.count);$('#garBpm').textContent=Math.round(P.bpm.v);
-  var st='';if(seq.on){st=seq.mode==='loops'?'Live Loops playing'+(GAR.ll.perfLog?' · capturing to Tracks':''):seq.mode==='arrange'?(seq.rec||arr.rec?'Recording':'Playing')+' the song':'Previewing pattern '+PATN[curPat];}
-  else st=(GAR.inst?(GINST[GAR.inst].name+' → '+(tracks[GAR.ti]?tracks[GAR.ti].name:'')):'Choose an instrument')+' · '+GNOTE[GAR.key]+(GAR.minor?' minor':' major');
-  $('#garSt').textContent=st;garBanner();
-  if(GAR.view==='loops'){llRender();}
-  $$('#garSpv [data-pv="1"], #garDpv [data-pv="1"]').forEach(function(b){b.textContent=seq.on&&seq.mode==='pattern'?'■ Stop preview':'▶ Preview loop';});
-}
-function garTick(){if(!$('#t-gar').classList.contains('active'))return;if(GAR.view==='loops')llProgress();if(GAR.view==='tracks')garPh();
-  var tx=(seq.on?'1':'0')+seq.mode+(seq.rec?1:0)+(arr.rec?1:0)+Math.round(P.bpm.v);if(tx!==GAR.ui.last){GAR.ui.last=tx;garUpd();}
-  var ll=JSON.stringify(GAR.ll.act)+JSON.stringify(GAR.ll.q);if(GAR.view==='loops'&&ll!==GAR.ui.ll){GAR.ui.ll=ll;llRender();}}
-function garShown(){if(!GAR.ui.init){GAR.ui.init=true;garView(GAR.view);}else garView(GAR.view);}
 function garSave(){return {key:GAR.key,minor:GAR.minor,chords:GAR.chords,ap:GAR.ap,drum:GAR.drum,smart:{pieces:GAR.smart.pieces,bars:GAR.smart.bars,pat:GAR.smart.pat}};}
 function garLoad(d){d=d||{};GAR.key=d.key|0;GAR.minor=!!d.minor;GAR.chords=Array.isArray(d.chords)&&d.chords.length===8?d.chords:null;if(d.ap)Object.assign(GAR.ap,d.ap);if(d.drum)Object.assign(GAR.drum,d.drum);if(d.smart){GAR.smart.pieces=d.smart.pieces||GAR.smart.pieces;GAR.smart.bars=d.smart.bars||2;GAR.smart.pat=d.smart.pat==null?-1:d.smart.pat;}
   GAR.ll.act={};GAR.ll.q={};GAR.ll.rec=null;GAR.ll.sel=null;var ks=$('#garKey');if(ks)ks.value=GAR.key+(GAR.minor?'m':'');if($('#t-gar').classList.contains('active'))garView(GAR.view);}
+function llStopped(){llCommitPerf(seq.step);GAR.ll.act={};GAR.ll.q={};if(GAR.ll.rec){seq.rec=false;GAR.ll.rec=null;}seq.mode='pattern';}
+/* ---------- design tokens shared with the CSS ---------- */
+var FAM={k:'#5CE1E6',g:'#FF8A5B',b:'#B69CFF',d:'#FFC94D',a:'#FF6B8B',l:'#D4FF3A'};
+var IFAM={keys:'k',skeys:'k',gtr:'g',bass:'b',kit:'d',sdrums:'d',drummer:'d',audio:'a',sampler:'l',loops:'l'};
+function garFamT(ti){var t=tracks[ti];if(!t)return FAM.k;if(ti===0)return FAM.d;if(t.kind==='audio')return FAM.a;if(/guitar|gtr/i.test(t.name))return FAM.g;if(/bass/i.test(t.name))return FAM.b;return FAM.k;}
+function garIconT(ti){var t=tracks[ti];if(!t)return 'keys';if(ti===0)return 'kit';if(t.kind==='audio')return 'audio';if(/guitar|gtr/i.test(t.name))return 'gtr';if(/bass/i.test(t.name))return 'bass';return 'keys';}
+function garSvg(k){return '<svg viewBox="0 0 24 24" aria-hidden="true">'+GICON[k]+'</svg>';}
+var GSVG={play:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4.5v15l12.5-7.5z"/></svg>',rec:'<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="6"/></svg>',
+  copy:'<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M4 16V6a2 2 0 0 1 2-2h10"/></svg>',edit:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16z"/></svg>',
+  trash:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/></svg>',drum:'<svg viewBox="0 0 24 24" aria-hidden="true">'+GICON.drummer+'</svg>'};
+
+/* ---------- bottom sheet ---------- */
+function garSheet(title,html,bind){var s=$('#garSheet');$('#garSheetT').textContent=title;$('#garSheetB').innerHTML=html;s.hidden=false;if(bind)bind($('#garSheetB'));var f=s.querySelector('#garSheetB button, #garSheetB input');if(f)f.focus();}
+function garSheetClose(){$('#garSheet').hidden=true;}
+
+/* ---------- instrument browser ---------- */
+var GBR=[['Play an instrument',['skeys','keys','gtr','bass']],['Drums',['drummer','sdrums','kit']],['Record and create',['audio','sampler','loops']]];
+function garBrowse(){var w=$('#garBrowse'),h='';
+  GBR.forEach(function(g){h+='<div class="gx-grp"><h3>'+g[0]+'</h3><div class="gx-tiles">';
+    g[1].forEach(function(k,i){var I=GINST[k],wide=g[1].length%2===1&&i===g[1].length-1;h+='<button class="gx-tile'+(wide?' wide':'')+'" style="--c:'+FAM[IFAM[k]]+'" data-gi="'+k+'"><span class="gx-ic">'+garSvg(k)+'</span><div><b>'+I.name+'</b><small>'+I.sub+'</small></div></button>';});
+    h+='</div></div>';});
+  w.innerHTML=h;$$('#garBrowse [data-gi]').forEach(function(b){b.addEventListener('click',function(){garOpen(b.getAttribute('data-gi'));});});}
+
+/* ---------- instrument surface ---------- */
+function garFit(){var el=$('#garInst');if(!el||$('#gv-play').hidden)return;var top=el.getBoundingClientRect().top,nav=$('nav'),nb=nav?nav.getBoundingClientRect().top:window.innerHeight,kb=$('#kbwrap'),kbt=kb&&!kb.hidden?kb.getBoundingClientRect().top:nb;
+  var h=Math.max(300,Math.min(560,Math.min(nb,kbt)-top-34));el.style.setProperty('--sh',h+'px');}
+function garStrips(){
+  var inst=GAR.inst,el=$('#garInst'),C=garChords(),nseg=garSegs(inst,C[0]).length,fret=inst==='gtr'||inst==='bass';
+  var SW=inst==='gtr'?[1.2,1.6,2,2.6,3.2,3.8]:[2.4,3,3.6,4.2];
+  el.classList.toggle('fret',fret);
+  var h='<div class="gx-strips" id="garStrips">';
+  C.forEach(function(c,ci){h+='<div class="gx-strip" data-ci="'+ci+'"><button class="gx-ch" data-ch="'+ci+'" aria-label="'+garChName(c)+' chord">'+garChName(c)+'</button><div class="gx-segs">';
+    for(var k=0;k<nseg;k++)h+='<div class="gx-seg'+(inst==='skeys'&&k>=3?' lo':'')+'" data-ci="'+ci+'" data-sg="'+k+'"'+(fret?' style="--sw:'+SW[k]+'px"':'')+'></div>';h+='</div></div>';});
+  h+='</div><details class="gx-chedit"><summary>Change chords</summary><div class="gx-chgrid" id="garChEd"></div><div class="gx-acts" style="margin-top:8px"><button class="gx-btn" id="garChReset">Use the chords of the key</button></div></details>';
+  el.innerHTML=h;garPaintStrips();garChEdit();garFit();
+  var sp=$('#garStrips'),held=new Map();
+  function segAt(x,y){var e=document.elementFromPoint(x,y);return e&&e.closest?e.closest('#garStrips .gx-seg, #garStrips .gx-ch'):null;}
+  function hit(e,id,first){var s=segAt(e.clientX,e.clientY),prev=held.get(id);if(!s){if(prev&&prev.key){noteGroupOff(prev.key);held.set(id,{el:null});}return;}if(prev&&prev.el===s)return;
+    if(prev&&prev.key)noteGroupOff(prev.key);var vel=0.82;
+    if(s.classList.contains('gx-ch')){var ci=+s.getAttribute('data-ch');if(!first){held.set(id,{el:s});return;}
+      if(GAR.ap[garApKind()]>0){if(GAR.apOn===ci)garApStop();else garApStart(ci);held.set(id,{el:s});return;}
+      var c=garChords()[ci],k='gch'+id,ns=inst==='gtr'?garGtrVoice(c):inst==='bass'?[garBassNotes(c)[0]]:garKeysVoice(c,0).concat([garBassRoot(c,36)]);
+      s.classList.add('on');setTimeout(function(){s.classList.remove('on');},160);
+      if(inst==='gtr'){garStrum(ns,0.85);held.set(id,{el:s});return;}
+      noteGroupOn(k,ns,vel);held.set(id,{el:s,key:k});return;}
+    var ci2=+s.getAttribute('data-ci'),sg=+s.getAttribute('data-sg'),notes=garSegs(inst,garChords()[ci2])[sg],key='gsg'+id;
+    noteGroupOn(key,notes,vel);held.set(id,{el:s,key:key});s.classList.add('hit');setTimeout(function(){s.classList.remove('hit');},170);
+  }
+  sp.addEventListener('pointerdown',function(e){e.preventDefault();ensureAudio();try{sp.setPointerCapture(e.pointerId);}catch(x){}hit(e,e.pointerId,true);});
+  sp.addEventListener('pointermove',function(e){if(held.has(e.pointerId))hit(e,e.pointerId,false);});
+  function up(e){var h0=held.get(e.pointerId);if(h0&&h0.key)noteGroupOff(h0.key);held.delete(e.pointerId);}
+  sp.addEventListener('pointerup',up);sp.addEventListener('pointercancel',up);
+}
+function noteGroupOn(k,ns,vel){ns.forEach(function(m,j){noteOn(k+'_'+j,m,vel);});}
+function noteGroupOff(k){Array.from(voices.keys()).forEach(function(x){if(String(x).indexOf(k+'_')===0)noteOff(x);});}
+function garStrum(ns,vel){if(!ensureAudio())return;var t=ctx.currentTime+0.01;ns.forEach(function(m,j){playNote(GAR.ti,m,vel*(1-j*0.03),t+j*0.014,1.6);garRecNoteNow(GAR.ti,m,vel);});}
+function garRecNoteNow(ti,m,v){if(!seq.on||!seq.rec)return;var ck=garClock(),pos=ck.pos(ctx.currentTime-recLatency()),tg=seq.mode==='arrange'?jamTarget(ti,pos):seq.mode==='loops'?llRecAt(ti,pos):null;if(!tg)return;var pt=patterns[tg.p],s=seq.quant?Math.round(tg.s)%pt.len:Math.round(tg.s*100)/100;noteArr(pt,ti).push({s:s,l:8,m:m,v:Math.round(v*100)/100});markDirty();}
+function garPaintStrips(){$$('#garStrips .gx-strip').forEach(function(s){s.classList.toggle('ap',GAR.apOn===+s.getAttribute('data-ci'));});}
+function garFlashSeg(ci){var s=document.querySelector('#garStrips .gx-strip[data-ci="'+ci+'"] .gx-ch');if(!s)return;s.style.opacity='.75';setTimeout(function(){s.style.opacity='';},90);}
+function garChEdit(){var w=$('#garChEd');if(!w)return;var C=garChords(),h='';
+  C.forEach(function(c,i){h+='<select data-ce="'+i+'" aria-label="Chord '+(i+1)+'">';for(var r=0;r<12;r++)Object.keys(GCHQ).forEach(function(q){h+='<option value="'+r+'|'+q+'"'+(c[0]===r&&c[1]===q?' selected':'')+'>'+garChName([r,q])+'</option>';});h+='</select>';});
+  w.innerHTML=h;$$('[data-ce]').forEach(function(s){s.addEventListener('change',function(){var C2=garChords().map(function(x){return x.slice();}),v=s.value.split('|');C2[+s.getAttribute('data-ce')]=[+v[0],v[1]];GAR.chords=C2;markDirty();garStrips();$('#garInst details').open=true;});});
+  var rb=$('#garChReset');if(rb)rb.onclick=function(){GAR.chords=null;markDirty();garStrips();};
+}
+var GPADN={kick:[/^kick/i,0],snare:[/snare/i,1],clap:[/clap/i,2],rim:[/rim/i,3],hat:[/closed|^hat|hi.?hat/i,4],ohat:[/open/i,5],shaker:[/shak/i,6],cowbell:[/cow/i,7],tomlo:[/tom ?lo|low/i,8],tommid:[/tom ?mid|mid/i,9],tomhi:[/tom ?hi|high/i,10],crash:[/crash/i,11],ride:[/ride/i,13]};
+function garPad(k){var d=GPADN[k];if(!d)return -1;for(var i=0;i<pads.length;i++)if(pads[i]&&pads[i].buf&&d[0].test(pads[i].name||''))return i;return pads[d[1]]&&pads[d[1]].buf?d[1]:-1;}
+function garKit(){var L=[['crash','Crash'],['ohat','Open hat'],['hat','Hi-hat'],['tomhi','High tom'],['tomlo','Low tom'],['clap','Clap'],['kick','Kick',1],['snare','Snare']];
+  var el=$('#garInst');el.classList.remove('fret');var h='<div class="gx-pads" id="garPads">';L.forEach(function(x){var i=garPad(x[0]);if(i<0)return;h+='<button class="gx-pad'+(x[2]?' big':'')+'" data-gp="'+i+'">'+x[1]+'</button>';});h+='</div>';
+  el.innerHTML=h;garFit();
+  $$('#garPads .gx-pad').forEach(function(b){b.addEventListener('pointerdown',function(e){e.preventDefault();if(!ensureAudio())return;var i=+b.getAttribute('data-gp'),r=b.getBoundingClientRect(),vel=clamp(0.55+0.45*(1-(e.clientY-r.top)/r.height),0.3,1);trigPad(i,vel);recPad(i,vel);b.classList.add('hit');setTimeout(function(){b.classList.remove('hit');},110);});});
+}
+/* drummer + smart drums shared parts */
+function garRegion(o,id){var h='<div class="gx-sec"><div class="gx-row"><span>Length</span><div class="gx-seg2" id="'+id+'L">';[1,2,4].forEach(function(b){h+='<button data-bl="'+b+'" aria-pressed="'+(o.bars===b)+'">'+b+(b>1?' bars':' bar')+'</button>';});
+  h+='</div></div><div class="gx-row"><span>Loop</span><div class="gx-seg2" id="'+id+'P" style="overflow-x:auto;max-width:66%">';for(var i=0;i<8;i++)h+='<button data-tp="'+i+'" aria-pressed="'+(garTargetPat(o)===i)+'"'+(patHas(patterns[i])?' class="has"':'')+' style="min-width:30px;padding:0 6px">'+PATN[i]+'</button>';
+  return h+'</div></div></div>';}
+function garBindRegion(o,id,fn){$$('#'+id+'L [data-bl]').forEach(function(b){b.addEventListener('click',function(){o.bars=+b.getAttribute('data-bl');$$('#'+id+'L [data-bl]').forEach(function(x){x.setAttribute('aria-pressed',x===b);});fn();});});
+  $$('#'+id+'P [data-tp]').forEach(function(b){b.addEventListener('click',function(){o.pat=+b.getAttribute('data-tp');setPattern(o.pat);$$('#'+id+'P [data-tp]').forEach(function(x){x.setAttribute('aria-pressed',x===b);});});});}
+function garActs(id){return '<div class="gx-acts" id="'+id+'"><button class="gx-btn pri" data-pv="1">'+GSVG.play+'Preview</button><button class="gx-btn" data-pv="2">Add to song</button></div>';}
+function garBindActs(id,o,fn){var w=$('#'+id);if(!w)return;
+  w.querySelector('[data-pv="1"]').addEventListener('click',function(){if(seq.on){transportStop();garUpd();return;}fn();setPattern(garTargetPat(o));transportStart('pattern');garUpd();});
+  w.querySelector('[data-pv="2"]').addEventListener('click',function(){fn();var pi=garTargetPat(o),pt=patterns[pi],s0=Math.floor(Math.max(0,daw.play)/16)*16;
+    daw.clips=daw.clips.filter(function(c){return !(c.ti===0&&c.type==='pat'&&c.s<s0+pt.len&&c.s+c.l>s0);});newClip({type:'pat',ti:0,s:s0,l:pt.len,p:pi,o:0});dawNeed=true;markDirty();toast('Drums added to the song at bar '+(s0/16+1)+'.',1800);});}
+function garXY(id,getPts,onMove,labels){
+  var h='<div class="gx-xy" id="'+id+'"><canvas></canvas><span class="gx-ax" style="left:10px;bottom:8px">'+labels[0]+'</span><span class="gx-ax" style="right:10px;bottom:8px">'+labels[1]+'</span><span class="gx-ax" style="left:10px;top:8px">'+labels[2]+'</span><span class="gx-ax" style="left:10px;top:50%;transform:translateY(-50%)"></span></div>';
+  return {html:h,bind:function(){var box=$('#'+id),cv=box.querySelector('canvas'),drag=null,fam=getComputedStyle($('#t-gar')).getPropertyValue('--fam').trim()||FAM.d;
+    function draw(){var r=box.getBoundingClientRect(),dpr=window.devicePixelRatio||1;cv.width=r.width*dpr;cv.height=r.height*dpr;var g=cv.getContext('2d');g.scale(dpr,dpr);
+      for(var i=1;i<6;i++){g.fillStyle='#22222D';for(var j=1;j<4;j++){g.beginPath();g.arc(r.width*i/6,r.height*j/4,1.4,0,7);g.fill();}}
+      getPts().forEach(function(p){var x=8+p.x*(r.width-16),y=8+(1-p.y)*(r.height-16),rad=p.l?15:16;
+        if(p.sel){g.fillStyle=fam+'33';g.beginPath();g.arc(x,y,rad+9,0,7);g.fill();}
+        g.fillStyle=p.sel?fam:'#3A3A48';g.beginPath();g.arc(x,y,rad,0,7);g.fill();
+        if(p.l){g.fillStyle=p.sel?'#0B0B10':'#F4F4F7';g.font='600 10px Space Grotesk, sans-serif';g.textAlign='center';g.fillText(p.l,x,y+3.5);}});}
+    function at(e){var r=box.getBoundingClientRect();return {x:clamp((e.clientX-r.left-8)/(r.width-16),0,1),y:clamp(1-(e.clientY-r.top-8)/(r.height-16),0,1)};}
+    box.addEventListener('pointerdown',function(e){e.preventDefault();ensureAudio();drag=e.pointerId;try{box.setPointerCapture(e.pointerId);}catch(x){}onMove(at(e),true);draw();});
+    box.addEventListener('pointermove',function(e){if(drag!==e.pointerId)return;onMove(at(e),false);draw();});
+    box.addEventListener('pointerup',function(){drag=null;});box.addEventListener('pointercancel',function(){drag=null;});
+    draw();box._draw=draw;}};
+}
+var GSMP=[['kick','Kick','Kick'],['snare','Snare','Snare'],['clap','Clap','Clap'],['hat','Hi-hat','Hat'],['ohat','Open hat','Open'],['shaker','Shaker','Shkr'],['toms','Toms','Toms'],['crash','Crash','Crash'],['cowbell','Cowbell','Bell'],['ride','Ride','Ride']];
+function garSmartDrums(){var S=GAR.smart,el=$('#garInst');el.classList.remove('fret');
+  var h='<div class="gx-chips" id="garSmp" aria-label="Drums on the grid">';
+  GSMP.forEach(function(p){if(p[0]!=='toms'&&garPad(p[0])<0)return;h+='<button class="gx-chip'+(S.pieces[p[0]]?' on':'')+'" data-sp="'+p[0]+'" aria-pressed="'+(S.sel===p[0])+'">'+p[1]+'</button>';});h+='</div>';
+  var xy=garXY('garSxy',function(){return Object.keys(S.pieces).map(function(k){var n=(GSMP.filter(function(x){return x[0]===k;})[0]||[k,k,k])[2];return {x:S.pieces[k].x,y:S.pieces[k].y,l:n,sel:k===S.sel};});},
+    function(pt){if(!S.sel)return;S.pieces[S.sel]={x:pt.x,y:pt.y};chips();garDrumsChanged(garApplySmart);},['Simple','Complex','Loud']);
+  h+=xy.html+garRegion(S,'garSr')+garActs('garSpv')+'<div class="gx-acts"><button class="gx-btn" id="garSdice">Shuffle drums</button><button class="gx-btn" id="garSclr">Clear grid</button></div>';
+  el.innerHTML=h;xy.bind();
+  function chips(){$$('#garSmp [data-sp]').forEach(function(b){var k=b.getAttribute('data-sp');b.setAttribute('aria-pressed',S.sel===k);b.classList.toggle('on',!!S.pieces[k]);});}
+  $$('#garSmp [data-sp]').forEach(function(b){b.addEventListener('click',function(){var k=b.getAttribute('data-sp');if(S.sel===k&&S.pieces[k]){delete S.pieces[k];S.sel=null;}else{S.sel=k;if(!S.pieces[k])S.pieces[k]={x:0.35,y:0.6};var pd=garPad(k==='toms'?'tommid':k);if(pd>=0)trigPad(pd,0.8);}chips();$('#garSxy')._draw();garDrumsChanged(garApplySmart);});});
+  $('#garSdice').addEventListener('click',function(){S.pieces={};var ks=['kick','snare','hat'];['clap','ohat','shaker','toms','cowbell','ride'].forEach(function(k){if(Math.random()<0.35)ks.push(k);});ks.forEach(function(k){S.pieces[k]={x:Math.random()*0.85,y:0.35+Math.random()*0.65};});S.sel=null;chips();$('#garSxy')._draw();garApplySmart();});
+  $('#garSclr').addEventListener('click',function(){S.pieces={};S.sel=null;chips();$('#garSxy')._draw();garApplySmart();});
+  garBindRegion(S,'garSr',garApplySmart);garBindActs('garSpv',S,garApplySmart);
+}
+var GSTD={pop:'Steady backbeat',rock:'Driving eighths',hiphop:'Laid-back swing',onedrop:'Reggae, kick on 3',steppers:'Reggae, kick on every beat',house:'Four on the floor',funk:'Busy sixteenths',trap:'Half-time with rolls'};
+function garDrummer(){var D=GAR.drum,el=$('#garInst');el.classList.remove('fret');
+  var h='<div class="gx-styles" id="garDst" role="group" aria-label="Style">';Object.keys(GSTY).forEach(function(k){h+='<button class="gx-sty" data-ds="'+k+'" aria-pressed="'+(D.style===k)+'"><b>'+GSTY[k].n+'</b><small>'+GSTD[k]+'</small></button>';});h+='</div>';
+  var xy=garXY('garDxy',function(){return [{x:D.cx,y:D.ly,l:'',sel:true}];},function(pt){D.cx=pt.x;D.ly=pt.y;garDrumsChanged(garApplyDrummer);},['Simple','Complex','Loud']);
+  h+=xy.html+'<div class="gx-sec"><div class="gx-row"><span>Cymbals and hi-hat</span><button class="gx-sw" id="garDcym" aria-pressed="'+D.cym+'" aria-label="Cymbals and hi-hat"></button></div><div class="gx-row"><span>Percussion</span><button class="gx-sw" id="garDperc" aria-pressed="'+D.perc+'" aria-label="Percussion"></button></div>'+
+    '<div class="gx-row"><span>Fills</span><input type="range" class="gx-rng" id="garDf" min="0" max="1" step="0.01" value="'+D.fills+'" aria-label="Fills"></div><div class="gx-row"><span>Swing</span><input type="range" class="gx-rng" id="garDs" min="0" max="0.5" step="0.01" value="'+D.swing+'" aria-label="Swing"></div></div>'+
+    garRegion(D,'garDr')+garActs('garDpv')+'<button class="gx-btn" id="garDvar">Play it differently</button>';
+  el.innerHTML=h;xy.bind();
+  var sel=el.querySelector('.gx-sty[aria-pressed="true"]');if(sel)sel.scrollIntoView({block:'nearest',inline:'center'});
+  $$('#garDst [data-ds]').forEach(function(b){b.addEventListener('click',function(){D.style=b.getAttribute('data-ds');$$('#garDst [data-ds]').forEach(function(x){x.setAttribute('aria-pressed',x===b);});if((D.style==='onedrop'||D.style==='steppers')&&garPad('rim')<0)toast('This style sounds best with the Reggae kit (Pads → Kit), which has a rim click.',2600);garApplyDrummer();});});
+  $('#garDcym').addEventListener('click',function(){D.cym=!D.cym;this.setAttribute('aria-pressed',D.cym);garApplyDrummer();});
+  $('#garDperc').addEventListener('click',function(){D.perc=!D.perc;this.setAttribute('aria-pressed',D.perc);garApplyDrummer();});
+  $('#garDf').addEventListener('input',function(){D.fills=+this.value;garDrumsChanged(garApplyDrummer);});
+  $('#garDs').addEventListener('input',function(){D.swing=+this.value;garDrumsChanged(garApplyDrummer);});
+  $('#garDvar').addEventListener('click',function(){D.seed=1+Math.floor(Math.random()*9999);garApplyDrummer();toast('New variation.',1000);});
+  garBindRegion(D,'garDr',garApplyDrummer);garBindActs('garDpv',D,garApplyDrummer);
+}
+function garAudioUI(){var el=$('#garInst');el.classList.remove('fret');var t=tracks[GAR.ti];
+  el.innerHTML='<div class="gx-mic"><button id="garMicRec" class="'+(arr.rec?'on':'')+'" aria-label="Record">'+GSVG.rec.replace('<svg','<svg style="width:34px;height:34px;fill:#F4F4F7;stroke:none"')+'</button><p>Records your microphone onto '+escapeH(t?t.name:'an audio track')+' from the playhead, with one bar to count in. Use wired headphones so the speaker does not bleed into the take.</p></div><div class="gx-sec"><div class="gx-row"><span>Hear yourself (headphones)</span><button class="gx-sw" id="garMon" aria-pressed="'+!!daw.mon+'" aria-label="Hear yourself"></button></div></div>';
+  $('#garMicRec').addEventListener('click',garRecord);$('#garMon').addEventListener('click',function(){daw.mon=!daw.mon;this.setAttribute('aria-pressed',daw.mon);var dm=$('#dawMon');if(dm)dm.checked=daw.mon;});}
+function garKeysUI(){var el=$('#garInst');el.classList.remove('fret');el.innerHTML='<div class="gx-empty" style="padding:18px"><b>Play the keys below</b><p>Slide along the keyboard to change octave, and tap the record button above to record onto '+escapeH(tracks[GAR.ti].name)+'.</p></div>';}
+
+var GSND={keys:['piano','rhodes','organ','strings','pluck','lead','melodica','skank'],gtr:['egtr','agtr','pluck','skank'],bass:['fbass','dub','sub','b808','sawbass']};
+function garSoundSel(){var k=GAR.inst==='gtr'?'gtr':GAR.inst==='bass'?'bass':(GAR.inst==='keys'||GAR.inst==='skeys')?'keys':null,w=$('#garSnd');
+  w.hidden=!k;if(!k)return;var cur=tracks[GAR.ti]&&tracks[GAR.ti].sound&&tracks[GAR.ti].sound.slots&&tracks[GAR.ti].sound.slots.A.stock;if(GAR.ti===selTrack&&slots.A)cur=slots.A.stock;
+  var ids=GSND[k].filter(function(id){return STOCK[id];}),more=Object.keys(STOCK).filter(function(id){return ids.indexOf(id)<0;});
+  w.innerHTML=(cur?'':'<option value="">'+escapeH(slots.A&&GAR.ti===selTrack?slots.A.name:'Your sound')+'</option>')+'<optgroup label="Suggested">'+ids.map(function(id){return '<option value="'+id+'"'+(cur===id?' selected':'')+'>'+STOCK[id].name+'</option>';}).join('')+'</optgroup><optgroup label="More sounds">'+more.map(function(id){return '<option value="'+id+'"'+(cur===id?' selected':'')+'>'+STOCK[id].name+'</option>';}).join('')+'</optgroup>';}
+function garTrackSel(){var s=$('#garTrack'),kind=(GINST[GAR.inst]||{}).track,h='',n=0;
+  tracks.forEach(function(t,i){var ok=kind==='drums'?i===0:kind==='audio'?t.kind==='audio':t.kind==='keys';if(ok){n++;h+='<option value="'+i+'"'+(i===GAR.ti?' selected':'')+'>'+escapeH(t.name)+'</option>';}});s.innerHTML=h;s.hidden=n<2;}
+function garOpen(inst){
+  var I=GINST[inst];if(!I)return;if(I.go){showTab(I.go);return;}if(I.view){garView(I.view);return;}
+  if(!ensureAudio())return;if(GAR.apOn>=0)garApStop();
+  GAR.inst=inst;var ti=garFindTrack(I.track);if(ti<0)return;GAR.ti=ti;if(tracks[ti].kind==='keys'&&ti!==selTrack)selectTrack(ti);
+  if(inst==='bass'&&tracks[ti].sound&&tracks[ti].sound.slots&&!tracks[ti].sound.slots.A.stock&&STOCK.fbass)loadStock('fbass');
+  garView('play');
+}
+function garRenderPlay(){
+  var inst=GAR.inst||'skeys';GAR.inst=inst;var I=GINST[inst],fam=FAM[IFAM[inst]];$('#t-gar').style.setProperty('--fam',fam);
+  $('#garInstName').textContent=I.name;garTrackSel();garSoundSel();
+  var apk=garApKind(),smart=inst==='skeys'||inst==='gtr'||inst==='bass';$('#garApRow').hidden=!smart;$('#garOpts').hidden=!(smart||inst==='keys');
+  if(smart){var a=$('#garAp');a.innerHTML='<button data-ap="0">Off</button>'+GAP[apk].map(function(p,i){return '<button data-ap="'+(i+1)+'" aria-label="'+p.n+'">'+(i+1)+'</button>';}).join('');
+    $$('#garAp [data-ap]').forEach(function(b){b.setAttribute('aria-pressed',+b.getAttribute('data-ap')===GAR.ap[apk]);b.addEventListener('click',function(){GAR.ap[apk]=+b.getAttribute('data-ap');$$('#garAp [data-ap]').forEach(function(x){x.setAttribute('aria-pressed',x===b);});if(GAR.ap[apk]===0)garApStop();garHint();});});}
+  $('#kbwrap').hidden=inst!=='keys';if(inst==='keys')setKbCollapsed(false);
+  if(smart)garStrips();else if(inst==='kit')garKit();else if(inst==='sdrums')garSmartDrums();else if(inst==='drummer')garDrummer();else if(inst==='audio')garAudioUI();else if(inst==='keys')garKeysUI();
+  garHint();garBanner();
+}
+function garHint(){var inst=GAR.inst,t='';
+  if(inst==='skeys'||inst==='gtr'||inst==='bass'){var k=garApKind(),a=GAR.ap[k];t=a?'Autoplay plays “'+GAP[k][a-1].n+'” in time. Tap a chord to start it, another to change, the same one to stop.':(inst==='gtr'?'Tap a chord name to strum it, or drag across the strings.':inst==='bass'?'Each column has root at the bottom, then third, fifth and octave.':'Top three rows play the chord in different positions. The two darker rows are bass notes.');}
+  else if(inst==='kit')t='Hit higher on a pad to play louder.';else if(inst==='sdrums')t='Choose a drum, then place it: further right plays more notes, higher plays louder.';else if(inst==='drummer')t='Drag the dot: further right plays busier, higher plays harder. Changes are heard on the next loop.';
+  $('#garHint').textContent=t;$('#garHint').hidden=!t;}
+function garBanner(){var b=$('#garBanner'),R=GAR.ll.rec;if(R&&seq.rec&&seq.mode==='loops'){b.hidden=false;b.innerHTML='<span>Recording into '+escapeH(tracks[R.ti].name)+', loop '+PATN[R.p]+'</span><button id="garBanStop">Stop</button>';$('#garBanStop').onclick=function(){llRecStop();};}else b.hidden=true;}
+
+/* ---------- Live Loops UI ---------- */
+function garMini(ti,p){var pt=patterns[p],len=pt.len,W=100,H=40,h='<svg viewBox="0 0 '+W+' '+H+'" preserveAspectRatio="none" aria-hidden="true">',col=garFamT(ti);
+  if(ti===0){var rows=[];pt.drums.forEach(function(a,i){if(a.slice(0,len).some(Boolean))rows.push(i);});rows=rows.slice(0,6);var rh=H/Math.max(3,rows.length);
+    rows.forEach(function(i,r){for(var s=0;s<len;s++){var v=pt.drums[i][s];if(!v)continue;var vv=typeof v==='number'?v:0.8;h+='<rect x="'+(s/len*W+0.4)+'" y="'+(r*rh+rh*0.2)+'" width="'+Math.max(1.4,W/len-0.8)+'" height="'+(rh*0.6)+'" rx="0.6" fill="'+col+'" fill-opacity="'+(0.35+0.65*vv)+'"/>';}});}
+  else{var ns=pt.notes[ti]||[];if(!ns.length)return '';var lo=127,hi=0;ns.forEach(function(n){lo=Math.min(lo,n.m);hi=Math.max(hi,n.m);});var span=Math.max(12,hi-lo+1);
+    ns.forEach(function(n){var y=H-((n.m-lo+0.5)/span)*H;h+='<rect x="'+(n.s/len*W)+'" y="'+(y-1.6)+'" width="'+Math.max(1.5,n.l/len*W-0.6)+'" height="3.2" rx="1" fill="'+col+'"/>';});}
+  return h+'</svg>';}
+function llRender(){
+  var w=$('#garGrid');if(!w||$('#gv-loops').hidden)return;var rows=llRows(),L=GAR.ll,h='<span></span>';
+  for(var p=0;p<8;p++){var any=rows.some(function(ti){return llHas(ti,p);}),on=rows.some(function(ti){return L.act[ti]&&L.act[ti].p===p;});h+='<button class="gx-colh'+(on?' on':'')+'" data-scn="'+p+'" aria-label="Play every loop in column '+PATN[p]+'"'+(any?'':' disabled')+'>'+GSVG.play+PATN[p]+'</button>';}
+  rows.forEach(function(ti){var t=tracks[ti],on=!!L.act[ti],c=garFamT(ti);h+='<button class="gx-rh'+(on?' on':'')+'" data-rst="'+ti+'" style="--c:'+c+'" aria-label="'+(on?'Stop ':'')+escapeH(t.name)+'"><i>'+garSvg(garIconT(ti))+'</i><span>'+escapeH(t.name)+'</span></button>';
+    for(var p=0;p<8;p++){var has=llHas(ti,p),pl=on&&L.act[ti].p===p,q=L.q[ti]===p||(pl&&L.q[ti]===-1),rc=L.rec&&L.rec.ti===ti&&L.rec.p===p;
+      h+='<button class="gx-cell'+(has?' has':'')+(pl?' play':'')+(q?' q':'')+(rc?' rc':'')+'" style="--c:'+c+'" data-cell="'+ti+':'+p+'" aria-label="'+escapeH(t.name)+', loop '+PATN[p]+(has?(pl?', playing':''):', empty')+'">'+(has?garMini(ti,p):'<span class="pl">+</span>')+(pl?'<b data-pr="'+ti+'"></b>':'')+'</button>';}});
+  w.innerHTML=h;$('#garPerf').setAttribute('aria-pressed',!!L.perf);
+}
+function llProgress(){if(!llRunning()||$('#gv-loops').hidden)return;var L=GAR.ll,pos=(ctx.currentTime-(ctx.outputLatency||0)-seq.audStart)/stepDur();
+  $$('#garGrid [data-pr]').forEach(function(b){var a=L.act[+b.getAttribute('data-pr')];if(!a)return;var len=patterns[a.p].len,f=pos<a.g0?0:((pos-a.g0)%len)/len;b.style.width=(f*100)+'%';});}
+function llInstFor(ti){return ti===0?'kit':/guitar/i.test(tracks[ti].name)?'gtr':/bass/i.test(tracks[ti].name)?'bass':'skeys';}
+function llCellSheet(ti,p){var has=llHas(ti,p),t=tracks[ti],nm=t.name+', loop '+PATN[p],h='';
+  h+='<button class="gx-act" data-a="rec"><span class="dot"></span>'+(has?'Record over this loop':'Record a new loop with '+GINST[llInstFor(ti)].name)+'</button>';
+  if(ti===0)h+='<button class="gx-act" data-a="drum">'+GSVG.drum+(has?'Replace with Drummer':'Let Drummer play this loop')+'</button>';
+  if(has){h+='<button class="gx-act" data-a="copy">'+GSVG.copy+'Duplicate to the next empty cell</button><button class="gx-act" data-a="edit">'+GSVG.edit+'Edit notes in Song</button><button class="gx-act danger" data-a="clr">'+GSVG.trash+'Delete loop</button>';}
+  garSheet(nm,h,function(b){$$('#garSheetB [data-a]').forEach(function(x){x.addEventListener('click',function(){var a=x.getAttribute('data-a');garSheetClose();
+    if(a==='rec')llRecord(ti,p);
+    else if(a==='drum'){GAR.drum.pat=p;garApplyDrummer();llRender();toast('Drummer is playing loop '+PATN[p]+'. Adjust it in Instruments → Drummer.',2400);}
+    else if(a==='copy'){var to=-1;for(var k=0;k<8;k++)if(k!==p&&!llHas(ti,k)){to=k;break;}if(to<0){toast('This row has no empty cell.');return;}var A=patterns[p],B=patterns[to];if(ti===0){A.drums.forEach(function(r,i){B.drums[i]=r.slice();});}else{noteArr(B,ti);B.notes[ti]=JSON.parse(JSON.stringify(A.notes[ti]));}if(!patHas(B)||B.len<A.len)B.len=A.len;markDirty();renderPatSegs();llRender();toast('Duplicated to '+PATN[to]+'.',1200);}
+    else if(a==='edit'){setPattern(p);if(ti>0)try{selectTrack(ti);songSel=ti;}catch(e){}showTab(ti===0?'t-pad':'t-song');}
+    else if(a==='clr'){var pt=patterns[p];if(ti===0){pt.drums.forEach(function(r){for(var s=0;s<r.length;s++)r[s]=false;});pt.locks={};}else pt.notes[ti]=[];if(GAR.ll.act[ti]&&GAR.ll.act[ti].p===p)GAR.ll.q[ti]=-1;markDirty();renderPatSegs();if(p===curPat){try{paintSteps();renderPadDots();drawRoll();}catch(e){}}llRender();toast('Loop deleted.',1200);}
+  });});});}
+
+/* ---------- Tracks UI ---------- */
+function garTl(){
+  var w=$('#garTl');if(!w||$('#gv-tracks').hidden)return;
+  if(!daw.clips.length){w.innerHTML='<div class="gx-empty"><b>Your song is empty</b><p>Record an instrument, add a Drummer, or capture a Live Loops performance. Everything you add shows up here.</p><div class="gx-acts" style="width:100%"><button class="gx-btn pri" id="garEmI">Choose an instrument</button><button class="gx-btn" id="garEmL">Open Live Loops</button></div></div>';
+    $('#garEmI').onclick=function(){garView('sounds');};$('#garEmL').onclick=function(){garView('loops');};w._end=0;$('#gv-tracks .gx-tfoot').hidden=true;return;}
+  $('#gv-tracks .gx-tfoot').hidden=false;
+  var end=Math.max(32,Math.ceil((arrEnd()+8)/16)*16),h='<div class="gx-ruler"><span></span><div id="garRuler">',bars=end/16,step=bars>24?8:bars>12?4:bars>6?2:1;
+  for(var b=0;b<bars;b+=step)h+='<span style="left:'+(b*16/end*100)+'%">'+(b+1)+'</span>';h+='</div></div>';
+  tracks.forEach(function(t,i){var c=garFamT(i);h+='<div class="gx-trow"><div class="gx-th'+(i===GAR.ti?' sel':'')+'" style="--c:'+c+'"><button class="gx-tn" data-gt="'+i+'" aria-label="Play '+escapeH(t.name)+'"><b>'+escapeH(t.name)+'</b></button><span class="gx-ms"><button data-gm="'+i+'" aria-pressed="'+!!t.mute+'" aria-label="Mute '+escapeH(t.name)+'">M</button><button data-gso="'+i+'" aria-pressed="'+!!t.solo+'" aria-label="Solo '+escapeH(t.name)+'">S</button></span></div><div class="gx-lane" data-gl="'+i+'"><canvas></canvas></div></div>';});
+  w.innerHTML=h+'<div class="gx-ph" id="garPh"></div>';w._end=end;
+  $$('#garTl .gx-lane').forEach(function(l){garLane(l,+l.getAttribute('data-gl'),end);});
+  $$('#garTl [data-gt]').forEach(function(d){d.addEventListener('click',function(e){if(e.target.closest('[data-gm],[data-gso]'))return;var i=+d.getAttribute('data-gt'),t=tracks[i];GAR.ti=i;garOpen(i===0?'drummer':t.kind==='audio'?'audio':llInstFor(i));});});
+  $$('#garTl [data-gm]').forEach(function(b){b.addEventListener('click',function(){var t=tracks[+b.getAttribute('data-gm')];t.mute=!t.mute;applyMix();renderMixer();markDirty();garTl();});});
+  $$('#garTl [data-gso]').forEach(function(b){b.addEventListener('click',function(){var t=tracks[+b.getAttribute('data-gso')];t.solo=!t.solo;applyMix();renderMixer();markDirty();garTl();});});
+  function seek(el,e){var r=el.getBoundingClientRect(),g=Math.round(clamp((e.clientX-r.left)/r.width,0,1)*end/4)*4;if(seq.on&&seq.mode!=='arrange')transportStop();setPlayhead(g);garPh();garUpd();}
+  $$('#garTl .gx-lane, #garRuler').forEach(function(l){l.addEventListener('click',function(e){seek(l,e);});});
+  garPh();
+}
+function garLane(l,ti,end){var cv=l.querySelector('canvas'),r=l.getBoundingClientRect(),dpr=window.devicePixelRatio||1;cv.width=Math.max(1,r.width*dpr);cv.height=Math.max(1,r.height*dpr);var g=cv.getContext('2d'),W=r.width,H=r.height,col=garFamT(ti);g.scale(dpr,dpr);
+  g.fillStyle='#1A1A23';for(var b=1;b<end/16;b++){g.fillRect(Math.round(b*16/end*W),0,1,H);}
+  daw.clips.forEach(function(c){if(c.ti!==ti)return;var x0=c.s/end*W,len=c.type==='pat'?c.l:clipLen(c),w=Math.max(3,len/end*W-1.5);
+    g.globalAlpha=c.mute?0.25:1;g.fillStyle=col+'2E';g.strokeStyle=col+'99';g.lineWidth=1;g.beginPath();if(g.roundRect)g.roundRect(x0+0.5,5.5,w,H-11,6);else g.rect(x0+0.5,5.5,w,H-11);g.fill();g.stroke();
+    g.save();g.beginPath();g.rect(x0+1,6,w-1,H-12);g.clip();g.fillStyle=col;
+    if(c.type==='pat'){var pt=patterns[c.p];if(pt){var pl=pt.len,o=c.o||0;
+      if(ti===0){var rows=[];pt.drums.forEach(function(a,i){if(a.slice(0,pl).some(Boolean))rows.push(i);});rows=rows.slice(0,5);var rh=(H-18)/Math.max(3,rows.length);
+        for(var s=0;s<len;s++){var ps=((s+o)%pl+pl)%pl;rows.forEach(function(i,k){if(pt.drums[i][ps])g.fillRect(x0+s/end*W+1,9+k*rh,Math.max(1,W/end-0.5),Math.max(1.5,rh*0.55));});}}
+      else{var ns=pt.notes[ti]||[],lo=127,hi=0;ns.forEach(function(n){lo=Math.min(lo,n.m);hi=Math.max(hi,n.m);});var span=Math.max(12,hi-lo+1);
+        for(var rep=-1;rep*pl<len;rep++)ns.forEach(function(n){var s0=rep*pl+n.s-o;if(s0+n.l<0||s0>=len)return;var y=H-9-((n.m-lo+0.5)/span)*(H-18);g.fillRect(x0+s0/end*W+1,y-1.2,Math.max(1.5,n.l/end*W-0.5),2.4);});}}}
+    else if(c.buf){var d=c.buf.getChannelData(0),n=Math.max(1,Math.floor(w)),stp=Math.max(1,Math.floor(d.length/n)),mid=H/2;g.globalAlpha*=0.9;for(var x=0;x<n;x++){var m=0;for(var j=x*stp;j<Math.min(d.length,(x+1)*stp);j+=8)m=Math.max(m,Math.abs(d[j]));var hh=Math.max(1,m*(H-16)/2);g.fillRect(x0+x+1,mid-hh,1,hh*2);}}
+    g.restore();g.globalAlpha=1;
+    if(c.name&&w>48){g.fillStyle='#F4F4F7';g.font='600 10px Space Grotesk, sans-serif';g.fillText(String(c.name).slice(0,24),x0+6,16);}});
+}
+function garPh(){var ph=$('#garPh'),w=$('#garTl');if(!ph||!w||!w._end)return;var lane=w.querySelector('.gx-lane');if(!lane){ph.hidden=true;return;}
+  var pos=seq.on&&seq.mode==='arrange'?Math.max(0,arrPosNow()):daw.play,wr=w.getBoundingClientRect(),lr=lane.getBoundingClientRect();ph.hidden=false;ph.style.left=(lr.left-wr.left+clamp(pos/w._end,0,1)*lr.width-1)+'px';ph.style.top=(lr.top-wr.top)+'px';}
+
+/* ---------- views, transport, status ---------- */
+function garView(v){if(v==='inst')v=GAR.inst&&GAR.surf?'play':'sounds';GAR.view=v;if(v==='play')GAR.surf=true;if(v==='sounds')GAR.surf=false;
+  ['sounds','play','loops','tracks'].forEach(function(k){$('#gv-'+k).hidden=k!==v;});
+  var tab=v==='sounds'||v==='play'?'inst':v;$$('#garViews [data-gv]').forEach(function(b){b.setAttribute('aria-selected',b.getAttribute('data-gv')===tab);});
+  $('#kbwrap').hidden=!(v==='play'&&GAR.inst==='keys');if(v!=='play'&&GAR.apOn>=0)garApStop();
+  if(v==='play')garRenderPlay();if(v==='loops'){$('#t-gar').style.setProperty('--fam',FAM.l);llRender();}if(v==='tracks')garTl();if(v==='sounds')garBrowse();garUpd();$('main').scrollTop=0;if(v==='play')requestAnimationFrame(garFit);}
+function garPlay(){
+  if(GAR.view==='loops'){if(llRunning()){transportStop();}else{var L=GAR.ll,rows=llRows(),any=false;L.act={};L.q={};rows.forEach(function(ti){var p=-1;if(llHas(ti,curPat))p=curPat;else for(var k=0;k<8;k++)if(llHas(ti,k)){p=k;break;}if(p>=0){L.q[ti]=p;any=true;}});if(!any){toast('Record a loop first: tap an empty cell.',1800);return;}llStart();}garUpd();return;}
+  if(seq.on){transportStop();}else transportStart('arrange');garUpd();
+}
+function garRecord(){
+  if(GAR.view==='loops'){if(GAR.ll.rec&&seq.rec){llRecStop();return;}toast('Tap an empty cell to record a loop into it.',2000);return;}
+  if(seq.on&&seq.mode==='loops'&&GAR.ll.rec){llRecStop();return;}
+  if(arr.rec){transportStop();setTimeout(garUpd,200);return;}
+  if(GAR.inst==='audio'){var ti=GAR.ti;tracks.forEach(function(t,i){if(t.kind==='audio')t.arm=i===ti;});daw.lane=ti;dawRecord();setTimeout(garUpd,300);return;}
+  if(seq.on&&seq.mode==='arrange'&&seq.rec){seq.rec=false;recFlush();transportStop();garUpd();if(GAR.view==='tracks')garTl();return;}
+  if(!GAR.inst||GAR.view!=='play'){toast('Choose an instrument first, then record.',1800);garView('sounds');return;}
+  if(GAR.inst==='drummer'||GAR.inst==='sdrums'){toast('The drum part is written for you. Use “Add to song” to place it, or record into a loop in Live Loops.',2800);return;}
+  if(!ensureAudio())return;if(seq.on)transportStop();if(GAR.ti>0&&tracks[GAR.ti].kind==='keys'&&GAR.ti!==selTrack)selectTrack(GAR.ti);
+  seq.rec=true;seq.src='arrange';jamSess++;jamTarget.warned=false;arr.pre=daw.count?16:0;transportStart('arrange');garUpd();
+}
+function garPosTxt(){var g,cnt=false;if(seq.on&&seq.mode==='arrange'){g=arrPosNow();if(g<arr.startG){cnt=true;}}else if(seq.on){g=Math.max(0,(ctx.currentTime-(ctx.outputLatency||0)-seq.audStart)/stepDur());}else g=daw.play;
+  if(cnt)return {t:'Count in '+(4-Math.floor(((g-arr.startG+16)%16)/4)),c:true};g=Math.max(0,g);return {t:(Math.floor(g/16)+1)+'.'+(Math.floor((g%16)/4)+1),c:false};}
+function garUpd(){
+  var p=$('#garPlay');if(!p)return;var lo=GAR.view==='loops',on=lo?llRunning():seq.on&&seq.mode!=='loops';
+  p.classList.toggle('on',on);p.setAttribute('aria-label',on?'Stop':'Play');var recOn=(seq.rec&&seq.on)||!!arr.rec;$('#garRec').classList.toggle('on',recOn);$('#garRec').setAttribute('aria-label',recOn?'Stop recording':'Record');
+  $('#garBpm').textContent=Math.round(P.bpm.v);$('#garClick').hidden=!seq.metro;
+  var st='',rc=false;if(recOn){rc=true;st=GAR.ll.rec&&seq.mode==='loops'?'Recording into '+tracks[GAR.ll.rec.ti].name+', loop '+PATN[GAR.ll.rec.p]:'Recording '+(arr.rec?'audio':(tracks[GAR.ti]?tracks[GAR.ti].name:''));}
+  else if(seq.on&&seq.mode==='loops'&&GAR.ll.perfLog){st='Capturing your performance to Tracks';rc=true;}else if(seq.on&&seq.mode==='pattern')st='Previewing loop '+PATN[curPat];
+  var se=$('#garSt');se.textContent=st;se.classList.toggle('rec',rc);garBanner();
+  var mr=$('#garMicRec');if(mr)mr.classList.toggle('on',!!arr.rec);
+  if(GAR.view==='loops')llRender();
+  $$('#garSpv [data-pv="1"], #garDpv [data-pv="1"]').forEach(function(b){b.innerHTML=seq.on&&seq.mode==='pattern'?'Stop preview':GSVG.play+'Preview';});
+}
+function garTick(){if(!$('#t-gar').classList.contains('active'))return;if(GAR.view==='loops')llProgress();if(GAR.view==='tracks')garPh();
+  var ps=garPosTxt();if(ps.t!==GAR.ui.pos){GAR.ui.pos=ps.t;$('#garPos').textContent=ps.t;$('#garPosBtn').classList.toggle('cnt',ps.c);}
+  var tx=(seq.on?'1':'0')+seq.mode+(seq.rec?1:0)+(arr.rec?1:0)+Math.round(P.bpm.v)+(seq.metro?1:0);if(tx!==GAR.ui.last){var was=GAR.ui.last;GAR.ui.last=tx;garUpd();if(GAR.view==='tracks'&&was&&was[0]==='1'&&tx[0]==='0')garTl();}
+  var ll=JSON.stringify(GAR.ll.act)+JSON.stringify(GAR.ll.q);if(GAR.view==='loops'&&ll!==GAR.ui.ll){GAR.ui.ll=ll;llRender();}}
+function garShown(){garView(GAR.view==='play'&&!GAR.inst?'sounds':GAR.view);}
+function garTempoSheet(){var h='<div class="gx-tempo"><button id="gtDn" aria-label="Slower">−</button><b id="gtV">'+Math.round(P.bpm.v)+'</b><button id="gtUp" aria-label="Faster">+</button></div><button class="gx-btn" id="gtTap">Tap tempo</button>'+
+  '<div class="gx-sec"><div class="gx-row"><span>Metronome</span><button class="gx-sw" id="gtMet" aria-pressed="'+!!seq.metro+'" aria-label="Metronome"></button></div><div class="gx-row"><span>Count in one bar before recording</span><button class="gx-sw" id="gtCnt" aria-pressed="'+!!daw.count+'" aria-label="Count-in"></button></div></div>';
+  garSheet('Tempo and click',h,function(){function v(){$('#gtV').textContent=Math.round(P.bpm.v);garUpd();}
+    var rep=null;function hold(b,d){b.addEventListener('pointerdown',function(){$(d).click();v();rep=setTimeout(function r(){$(d).click();v();rep=setTimeout(r,70);},380);});['pointerup','pointerleave','pointercancel'].forEach(function(ev){b.addEventListener(ev,function(){clearTimeout(rep);});});}
+    hold($('#gtDn'),'#dawBpmDn');hold($('#gtUp'),'#dawBpmUp');$('#gtTap').addEventListener('click',function(){$('#dawTap').click();v();});
+    $('#gtMet').addEventListener('click',function(){seq.metro=!seq.metro;this.setAttribute('aria-pressed',seq.metro);var tm=$('#trMetro');if(tm)tm.checked=seq.metro;updDawTr();garUpd();});
+    $('#gtCnt').addEventListener('click',function(){daw.count=!daw.count;this.setAttribute('aria-pressed',daw.count);updDawTr();});});}
 function initGarage(){
-  var ks=$('#garKey'),h='';for(var i=0;i<12;i++)h+='<option value="'+i+'">'+GNOTE[i]+' maj</option>';for(i=0;i<12;i++)h+='<option value="'+i+'m">'+GNOTE[i]+' min</option>';ks.innerHTML=h;ks.value='0';
+  var ks=$('#garKey'),h='<optgroup label="Major">';for(var i=0;i<12;i++)h+='<option value="'+i+'">'+GNOTE[i]+' major</option>';h+='</optgroup><optgroup label="Minor">';for(i=0;i<12;i++)h+='<option value="'+i+'m">'+GNOTE[i]+' minor</option>';ks.innerHTML=h+'</optgroup>';ks.value='0';
   ks.addEventListener('change',function(){GAR.minor=/m$/.test(ks.value);GAR.key=parseInt(ks.value,10);GAR.chords=null;markDirty();if(GAR.view==='play')garRenderPlay();garUpd();});
-  $$('#garViews [data-gv]').forEach(function(b){b.addEventListener('click',function(){garView(b.getAttribute('data-gv'));});});
+  $$('#garViews [data-gv]').forEach(function(b){b.addEventListener('click',function(){var v=b.getAttribute('data-gv');if(v==='inst'&&(GAR.view==='play'||GAR.view==='sounds'))v=GAR.view==='play'?'sounds':'sounds';garView(v);});});
+  $('#garBack').addEventListener('click',function(){garView('sounds');});
   $('#garPlay').addEventListener('click',garPlay);$('#garRec').addEventListener('click',garRecord);
-  $('#garHome').addEventListener('click',function(){if(seq.on)transportStop();setPlayhead(0);garPh();});
-  $('#garMetro').addEventListener('click',function(){seq.metro=!seq.metro;var tm=$('#trMetro');if(tm)tm.checked=seq.metro;updDawTr();garUpd();});
-  $('#garCount').addEventListener('click',function(){daw.count=!daw.count;updDawTr();garUpd();});
-  $('#garBpmDn').addEventListener('click',function(){$('#dawBpmDn').click();garUpd();});$('#garBpmUp').addEventListener('click',function(){$('#dawBpmUp').click();garUpd();});
-  $('#garSnd').addEventListener('change',function(){if(!this.value)return;if(GAR.ti!==selTrack)selectTrack(GAR.ti);loadStock(this.value);garSoundChips();});
+  $('#garHome').addEventListener('click',function(){if(seq.on)transportStop();setPlayhead(0);garPh();garUpd();});
+  $('#garPosBtn').addEventListener('click',garTempoSheet);
+  $('#garSheet').addEventListener('click',function(e){if(e.target.getAttribute('data-close'))garSheetClose();});
+  document.addEventListener('keydown',function(e){if(e.key==='Escape'&&!$('#garSheet').hidden)garSheetClose();});
+  $('#garSnd').addEventListener('change',function(){if(!this.value)return;if(GAR.ti!==selTrack)selectTrack(GAR.ti);loadStock(this.value);garSoundSel();});
   $('#garTrack').addEventListener('change',function(){if(GAR.apOn>=0)garApStop();GAR.ti=+this.value;if(tracks[GAR.ti].kind==='keys')selectTrack(GAR.ti);garRenderPlay();});
-  $('#garGrid').addEventListener('click',function(e){var L=GAR.ll,b=e.target.closest('button');if(!b)return;ensureAudio();
+  var grid=$('#garGrid'),lp=null,lpFired=false;
+  grid.addEventListener('pointerdown',function(e){var c=e.target.closest('[data-cell]');if(!c)return;lpFired=false;clearTimeout(lp);lp=setTimeout(function(){var v=c.getAttribute('data-cell').split(':');if(llHas(+v[0],+v[1])){lpFired=true;if(navigator.vibrate)try{navigator.vibrate(12);}catch(x){}llCellSheet(+v[0],+v[1]);}},450);});
+  ['pointerup','pointercancel','pointerleave'].forEach(function(ev){grid.addEventListener(ev,function(){clearTimeout(lp);});});
+  grid.addEventListener('contextmenu',function(e){if(e.target.closest('[data-cell]'))e.preventDefault();});
+  grid.addEventListener('click',function(e){var L=GAR.ll,b=e.target.closest('button');if(!b)return;ensureAudio();
     if(b.hasAttribute('data-scn')){var p=+b.getAttribute('data-scn'),rows=llRows();if(!llRunning()){L.act={};L.q={};}rows.forEach(function(ti){L.q[ti]=llHas(ti,p)?p:-1;});if(!llRunning())llStart();llRender();garUpd();return;}
     if(b.hasAttribute('data-rst')){var ti=+b.getAttribute('data-rst');if(llRunning()&&L.act[ti])L.q[ti]=-1;llRender();return;}
-    if(b.hasAttribute('data-cell')){var v=b.getAttribute('data-cell').split(':'),ti2=+v[0],p2=+v[1];
-      if(L.edit){L.sel=L.sel&&L.sel.ti===ti2&&L.sel.p===p2?null:{ti:ti2,p:p2};llRender();return;}
-      L.sel={ti:ti2,p:p2};if(!llHas(ti2,p2)){if(llRunning()&&L.act[ti2])L.q[ti2]=-1;else{L.edit=true;}llRender();return;}
+    if(b.hasAttribute('data-cell')){if(lpFired){lpFired=false;return;}var v=b.getAttribute('data-cell').split(':'),ti2=+v[0],p2=+v[1];
+      if(!llHas(ti2,p2)){llCellSheet(ti2,p2);return;}
       if(llRunning()&&L.act[ti2]&&L.act[ti2].p===p2&&L.q[ti2]==null)L.q[ti2]=-1;else llLaunch(ti2,p2);llRender();garUpd();}});
   $('#garStopAll').addEventListener('click',function(){if(llRunning())transportStop();GAR.ll.act={};GAR.ll.q={};llRender();garUpd();});
-  $('#garEdit').addEventListener('click',function(){GAR.ll.edit=!GAR.ll.edit;if(!GAR.ll.edit)GAR.ll.sel=null;llRender();});
-  $('#garPerf').addEventListener('click',function(){var L=GAR.ll;L.perf=!L.perf;if(L.perf&&llRunning()){L.perfLog=[];Object.keys(L.act).forEach(function(k){L.perfLog.push({ti:+k,p:L.act[k].p,g:Math.ceil(seq.step/16)*16});});}if(!L.perf)L.perfLog=null;llRender();garUpd();toast(L.perf?'Capture on: your launches are written to Tracks when you stop.':'Capture off.',1800);});
-  $('#garCellRec').addEventListener('click',function(){var S=GAR.ll.sel;if(GAR.ll.rec&&seq.rec){llRecStop();return;}if(S)llRecord(S.ti,S.p);});
-  $('#garCellDrum').addEventListener('click',function(){var S=GAR.ll.sel;if(!S)return;GAR.drum.pat=S.p;garApplyDrummer();llRender();toast('Drummer wrote '+PATN[S.p]+' ('+GSTY[GAR.drum.style].n+'). Tweak it in Play → Drummer.',2200);});
-  $('#garCellCopy').addEventListener('click',function(){var S=GAR.ll.sel;if(!S||!llHas(S.ti,S.p))return;var to=-1;for(var p=0;p<8;p++)if(p!==S.p&&!llHas(S.ti,p)){to=p;break;}if(to<0){toast('No empty cell in this row.');return;}
-    var A=patterns[S.p],B=patterns[to];if(S.ti===0){A.drums.forEach(function(a,i){B.drums[i]=a.slice();});}else{noteArr(B,S.ti);B.notes[S.ti]=JSON.parse(JSON.stringify(A.notes[S.ti]));}if(!patHas(B)||B.len<A.len)B.len=A.len;GAR.ll.sel={ti:S.ti,p:to};markDirty();renderPatSegs();llRender();});
-  $('#garCellClr').addEventListener('click',function(){var S=GAR.ll.sel;if(!S)return;var pt=patterns[S.p];if(S.ti===0){pt.drums.forEach(function(a){for(var s=0;s<a.length;s++)a[s]=false;});pt.locks={};}else pt.notes[S.ti]=[];markDirty();renderPatSegs();if(S.p===curPat){try{paintSteps();renderPadDots();drawRoll();}catch(e){}}llRender();});
+  $('#garPerf').addEventListener('click',function(){var L=GAR.ll;L.perf=!L.perf;if(L.perf&&llRunning()){L.perfLog=[];Object.keys(L.act).forEach(function(k){L.perfLog.push({ti:+k,p:L.act[k].p,g:Math.ceil(seq.step/16)*16});});}if(!L.perf)L.perfLog=null;llRender();garUpd();toast(L.perf?'What you play from now on is added to Tracks when you stop.':'Capture to Tracks is off.',2000);});
   $('#garAddTr').addEventListener('click',function(){garView('sounds');});
   $('#garToStudio').addEventListener('click',function(){showTab('t-daw');});
-  setInterval(garTick,90);
+  window.addEventListener('resize',function(){if($('#t-gar').classList.contains('active')){garFit();if(GAR.view==='tracks')garTl();}});
+  setInterval(garTick,60);
 }
-function llStopped(){llCommitPerf(seq.step);GAR.ll.act={};GAR.ll.q={};if(GAR.ll.rec){seq.rec=false;GAR.ll.rec=null;}seq.mode='pattern';}
 
 buildControls();initStudio();initDaw();initJam();initPocket();initRoll2();initDrums2();initRef();initFM();initFm1();initF1();initLoopB();requestAnimationFrame(meterTick);initGarage();
 $('#hitTgt').addEventListener('click',hitTarget);$$('[data-tgt]').forEach(function(b){b.addEventListener('click',function(){MT.tgt=+b.getAttribute('data-tgt');$$('[data-tgt]').forEach(function(x){x.setAttribute('aria-pressed',x===b?'true':'false');});});});initSpatial();initAmp();initScore();initPads();initAI();buildFxUI();buildDsync();updDelayTime();buildMatrix();buildKeyboard();requestAnimationFrame(loop);
