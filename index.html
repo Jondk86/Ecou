@@ -935,12 +935,14 @@ nav button[aria-selected="true"] svg{background:color-mix(in srgb,var(--ac) 18%,
     <div class="card" id="trxCard">
       <div class="row"><span class="kicker">Audio to sheet music</span><span class="mu" id="trxInfo"></span></div>
       <p class="note">Choose an MP3 or WAV and Ecou writes out the notes, right on your phone. It works best with one instrument or a voice, recorded clearly.</p>
-      <div class="row"><span class="mu">Write</span><div class="seg" role="group" aria-label="What to transcribe" id="trxMode"><button data-tm="melody" aria-pressed="true">The melody</button><button data-tm="poly" aria-pressed="false">Every note</button></div></div>
+      <div class="seg" role="group" aria-label="What to transcribe" id="trxMode" style="display:grid;grid-template-columns:repeat(3,1fr)"><button data-tm="melody" aria-pressed="true">Melody</button><button data-tm="poly" aria-pressed="false">Every note</button><button data-tm="stems" aria-pressed="false">Each instrument</button></div>
+      <p class="note" id="trxStemNote" hidden>For a full song: Ecou splits it into vocals, bass, other instruments and drums, and writes a staff for each. The first time, it downloads the stem splitter (about 175 MB, kept on the phone). Splitting is slow on phones without GPU support, so you pick a section first.</p>
       <label class="btn primary" for="f-TRX" id="trxPick">Choose a recording</label>
       <input type="file" id="f-TRX" accept="audio/*,.mp3,.wav,.m4a" class="vh">
       <div id="trxRes" hidden style="display:flex;flex-direction:column;gap:10px">
         <div class="row"><b id="trxName" style="font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"></b><button class="btn" id="trxPlay" style="min-height:38px;font-size:13px">Listen</button></div>
         <div class="row"><span class="mu">Tempo</span><div class="tempo"><button class="mv" id="trxHalf" aria-label="Half the tempo" style="width:auto;padding:0 8px;font-size:12px">½</button><button class="mv" id="trxBpmDn" aria-label="Slower">−</button><span class="tbpm"><b id="trxBpm">120</b><small>BPM</small></span><button class="mv" id="trxBpmUp" aria-label="Faster">+</button><button class="mv" id="trxDbl" aria-label="Double the tempo" style="width:auto;padding:0 8px;font-size:12px">×2</button></div></div>
+        <div class="chips" id="trxParts" hidden></div>
         <div class="btns"><button class="btn primary" id="trxView">View score</button><button class="btn" id="trxPdf">Export PDF</button></div>
         <button class="btn" id="trxXml">Export MusicXML + MIDI</button>
         <p class="note">If the notes look rushed or stretched, adjust the tempo. The key follows the Key setting under Sheet music.</p>
@@ -5057,7 +5059,7 @@ var SCVIS=null,SCF={on:false,mode:'rec',pos:0,t0:0,src:null,timer:null,startT:nu
 function scDegCol(m,sd){var k=sd&&sd.key?sd.key:SKEYS[0],minor=k[2]==='minor',ton=TONIC[minor?k[0].replace('m',''):k[0]];if(ton==null)ton=0;
   var sc=minor?[0,2,3,5,7,8,10]:[0,2,4,5,7,9,11],d=sc.indexOf(((m-ton)%12+12)%12);return d<0?'#6E6E7E':DEGC[d];}
 function scFollowReady(sd){var bar=$('#scPlay');SCF.sd=sd;scStop(true);
-  if(!bar||!(SCOREX&&TRX.ev&&TRX.orig)){if(bar)bar.hidden=true;return;}
+  if(!bar||!(SCOREX&&TRX.parts&&TRX.orig)){if(bar)bar.hidden=true;return;}scStemsUI();
   bar.hidden=false;var q=trxQuant();SCF.lo=127;SCF.hi=0;q.forEach(function(n){SCF.lo=Math.min(SCF.lo,n.m);SCF.hi=Math.max(SCF.hi,n.m);});
   SCF.lo=Math.max(21,Math.min(SCF.lo,60)-2);SCF.hi=Math.min(108,Math.max(SCF.hi,72)+2);SCF.pos=0;$('#scSeek').max=String(Math.ceil(TRX.orig.duration));$('#scSeek').value='0';scTime();
   var inner=$('#scoreInner');inner.style.position='relative';if(!$('#scCursor')){var c=document.createElement('div');c.id='scCursor';inner.appendChild(c);}
@@ -5078,99 +5080,175 @@ function scKbDraw(){var cv=$('#scKb');if(!cv||!SCF.kb)return;var g=cv.getContext
   whites.forEach(function(m,i){xi[m]=i;var on=SCF.lit[m];g.fillStyle=on?scDegCol(m,SCF.sd):'#EDEDF2';g.fillRect(i*ww+0.5,0,ww-1,H);if(m%12===0){g.fillStyle=on?'#0B0B10':'#8A8A98';g.font='9px Space Grotesk, sans-serif';g.fillText('C'+(m/12-1),i*ww+2,H-4);}});
   for(m=SCF.lo;m<=SCF.hi;m++){if(!isB(m)||xi[m-1]==null)continue;var x=(xi[m-1]+1)*ww-ww*0.32,on2=SCF.lit[m];g.fillStyle=on2?scDegCol(m,SCF.sd):'#1E1E28';g.fillRect(x,0,ww*0.64,H*0.6);}}
 function scStop(silent){SCF.on=false;cancelAnimationFrame(SCF.raf);if(SCF.timer){try{SCF.timer.stop();}catch(e){}SCF.timer=null;}clearTimeout(SCF.tw);
-  if(SCF.src){try{SCF.src.stop();}catch(e){}SCF.src=null;}if(SCF.startT!=null){SCF.pos=Math.min(scNow(),TRX.orig?TRX.orig.duration:0);SCF.startT=null;}
+  if(SCF.src){try{SCF.src.stop();}catch(e){}SCF.src=null;}(SCF.srcs||[]).forEach(function(x){try{x.stop();}catch(e){}});SCF.srcs=[];if(SCF.startT!=null){SCF.pos=Math.min(scNow(),TRX.orig?TRX.orig.duration:0);SCF.startT=null;}
   if(SCF.notes){try{transportStop();}catch(e){}SCF.notes=false;}var b=$('#scPP');if(b){b.textContent='▶';b.setAttribute('aria-label','Play');}if(!silent)scClear();var c=$('#scCursor');if(c&&!silent)c.hidden=true;}
 function scPlay(){if(!TRX.orig||!SCVIS||!SCVIS[0]||!ensureAudio())return;scStop(true);
   var lat=(ctx.outputLatency||0)+(ctx.baseLatency||0),now=ctx.currentTime+0.12,off=Math.max(0,Math.min(SCF.pos,TRX.orig.duration-0.05)),t0=TRX.t0||0,sd=60/TRX.bpm/4,mode=SCF.mode;
   if(off>=TRX.orig.duration-0.1){off=0;SCF.pos=0;}
-  if(mode!=='notes'){var s=ctx.createBufferSource(),g=ctx.createGain();g.gain.value=mode==='both'?0.7:1;s.buffer=TRX.orig;s.connect(g);g.connect(ctx.destination);s.start(now,off);SCF.src=s;s.onended=function(){if(SCF.src===s&&SCF.on)scStop();};}
-  if(mode!=='rec'){var ti=KEYSI()[0]||1;trxQuant().forEach(function(n){var at=t0+n.s*sd-off;if(at<-0.01)return;playNote(ti,n.m,n.v*0.85,now+at,Math.max(0.08,n.l*sd));});SCF.notes=true;
+  SCF.srcs=[];
+  if(mode==='rec'){var s=ctx.createBufferSource();s.buffer=TRX.orig;s.connect(ctx.destination);s.start(now,off);SCF.src=s;s.onended=function(){if(SCF.src===s&&SCF.on)scStop();};}
+  if(mode==='stems'){TRX.parts.forEach(function(p){if(!p.buf)return;var s2=ctx.createBufferSource(),g2=ctx.createGain();g2.gain.value=p.aud?1:0;s2.buffer=p.buf;s2.connect(g2);g2.connect(ctx.destination);s2.start(now,off);p._g=g2;SCF.srcs.push(s2);});}
+  if(mode==='notes'){var ti=KEYSI()[0]||1;trxQuant().forEach(function(n){var at=t0+n.s*sd-off;if(at<-0.01)return;playNote(ti,n.m,n.v*0.85,now+at,Math.max(0.08,n.l*sd));});SCF.notes=true;
+    TRX.parts.forEach(function(p){if(p.k!=='drum'||!p.show)return;trxQP(p).forEach(function(n){var at=t0+n.s*sd-off;if(at<-0.01)return;var pd=n.pad===0?garPad('kick'):n.pad===1?garPad('snare'):garPad('hat');if(pd>=0)trigPad(pd,0.8,now+at);});});
     if(mode==='notes'){var endS=0;trxQuant().forEach(function(n){endS=Math.max(endS,t0+(n.s+n.l)*sd);});SCF.tw2=setTimeout(function(){if(SCF.on&&SCF.mode==='notes')scStop();},Math.max(0,(endS-off+0.8))*1000);}}
   SCF.q=trxQuant();SCF.startT=now;SCF.on=true;var b=$('#scPP');b.textContent='❚❚';b.setAttribute('aria-label','Pause');
   SCF.timer=new ABCJS.TimingCallbacks(SCVIS[0],{qpm:TRX.bpm,eventCallback:scEvent});
   var scoreSec=off-t0,delay=(now-ctx.currentTime)+lat;
   if(scoreSec>=0){SCF.tw=setTimeout(function(){if(SCF.on&&SCF.timer)SCF.timer.start(scoreSec+lat*0,'seconds');},delay*1000);}
   else SCF.tw=setTimeout(function(){if(SCF.on&&SCF.timer)SCF.timer.start(0,'seconds');},(delay-scoreSec)*1000);
-  (function loop(){if(!SCF.on)return;if($('#scoreOv').hidden){scStop();return;}var p=scNow();$('#scSeek').value=String(p);scTime();var act=scActive(p-lat-(TRX.t0||0)),key=act.join(',');if(key!==SCF.litKey){SCF.litKey=key;var L={};act.forEach(function(m){L[m]=1;});SCF.lit=L;scKbDraw();}if(p>=TRX.orig.duration+0.3&&SCF.mode!=='notes'){scStop();return;}SCF.raf=requestAnimationFrame(loop);})();}
+  (function loop(){if(!SCF.on)return;if($('#scoreOv').hidden){scStop();return;}var p=scNow();$('#scSeek').value=String(p);scTime();var act=scActive(p-lat-(TRX.t0||0)),key=act.join(',');if(key!==SCF.litKey){SCF.litKey=key;var L={};act.forEach(function(m){L[m]=1;});SCF.lit=L;scKbDraw();}if(p>=TRX.orig.duration+0.3&&SCF.mode!=='notes'){scStop();scClear();SCF.pos=0;return;}SCF.raf=requestAnimationFrame(loop);})();}
 function initScf(){
   var ov=$('#scoreOv');if(!ov||$('#scPlay'))return;var d=document.createElement('div');d.id='scPlay';d.hidden=true;
-  d.innerHTML='<canvas id="scKb" aria-hidden="true"></canvas><div class="sc-row"><button id="scPP" class="sc-pp" aria-label="Play">▶</button><div class="sc-mid"><input type="range" id="scSeek" min="0" max="1" step="0.1" value="0" aria-label="Position"><div class="sc-sub"><span id="scT">0:00 / 0:00</span><div class="seg" role="group" aria-label="What to hear" id="scMode"><button data-scm="rec" aria-pressed="true">Recording</button><button data-scm="notes" aria-pressed="false">Notes</button><button data-scm="both" aria-pressed="false">Both</button></div></div></div></div>';
+  d.innerHTML='<canvas id="scKb" aria-hidden="true"></canvas><div class="sc-row"><button id="scPP" class="sc-pp" aria-label="Play">▶</button><div class="sc-mid"><input type="range" id="scSeek" min="0" max="1" step="0.1" value="0" aria-label="Position"><div class="sc-sub"><span id="scT">0:00 / 0:00</span><div class="seg" role="group" aria-label="What to hear" id="scMode"><button data-scm="rec" aria-pressed="true">Original</button><button data-scm="stems" aria-pressed="false">Stems</button><button data-scm="notes" aria-pressed="false">Notes</button></div></div></div></div><div class="chips" id="scStems" hidden></div>';
   ov.appendChild(d);
   $('#scPP').addEventListener('click',function(){if(SCF.on)scStop(true);else scPlay();});
-  $$('#scMode [data-scm]').forEach(function(b){b.addEventListener('click',function(){SCF.mode=b.getAttribute('data-scm');$$('#scMode [data-scm]').forEach(function(x){x.setAttribute('aria-pressed',x===b);});if(SCF.on)scPlay();});});
+  $$('#scMode [data-scm]').forEach(function(b){b.addEventListener('click',function(){SCF.mode=b.getAttribute('data-scm');scStemsUI();if(SCF.on)scPlay();});});
   var sk=$('#scSeek');sk.addEventListener('input',function(){var was=SCF.on;if(was)scStop(true);SCF.pos=+sk.value;scTime();if(was)scPlay();});
   $('#scoreClose').addEventListener('click',function(){scStop();});
   window.addEventListener('resize',function(){if(!$('#scPlay').hidden)scKb();});
 }
+function scStemsUI(){var multi=TRX.parts&&TRX.parts.length>1;var sb=$('#scMode [data-scm="stems"]');if(sb)sb.hidden=!multi;if(!multi&&SCF.mode==='stems')SCF.mode='rec';
+  $$('#scMode [data-scm]').forEach(function(x){x.setAttribute('aria-pressed',x.getAttribute('data-scm')===SCF.mode);});
+  var w=$('#scStems');w.hidden=!(multi&&SCF.mode==='stems');if(!multi)return;
+  w.innerHTML=TRX.parts.map(function(p,i){return '<button data-sst="'+i+'" aria-pressed="'+!!p.aud+'">'+p.name+'</button>';}).join('')+'<button data-sso="1">All</button><span class="mu" style="font-size:11px;width:100%">Tap to mute or unmute. Hold to hear one alone.</span>';
+  $$('#scStems [data-sst]').forEach(function(b){b.addEventListener('click',function(){var p=TRX.parts[+b.getAttribute('data-sst')];p.aud=!p.aud;b.setAttribute('aria-pressed',p.aud);if(p._g)p._g.gain.setTargetAtTime(p.aud?1:0,ctx.currentTime,0.02);});
+    var lp=null;b.addEventListener('pointerdown',function(){lp=setTimeout(function(){var i=+b.getAttribute('data-sst');TRX.parts.forEach(function(p,j){p.aud=j===i;if(p._g)p._g.gain.setTargetAtTime(p.aud?1:0,ctx.currentTime,0.02);});scStemsUI();toast('Solo: '+TRX.parts[i].name,1000);},500);});['pointerup','pointerleave'].forEach(function(ev){b.addEventListener(ev,function(){clearTimeout(lp);});});});
+  var so=w.querySelector('[data-sso]');so.textContent='All';so.addEventListener('click',function(){TRX.parts.forEach(function(p){p.aud=true;if(p._g)p._g.gain.setTargetAtTime(1,ctx.currentTime,0.02);});scStemsUI();});}
 
 /* ===================== AUDIO → SHEET MUSIC =====================
-   Transcribes an uploaded recording with Spotify's Basic Pitch model (runs on the phone, Apache-2.0), quantizes the notes
-   to the detected tempo and hands them to the existing score, PDF, MusicXML and MIDI exporters. */
-var TRX={ev:null,name:'',bpm:120,mode:'melody',busy:false,dur:0,cancel:false};
+   One instrument: Spotify's Basic Pitch (Apache-2.0) writes the notes. A full song: HT-Demucs (via the demucs JS port and
+   ONNX Runtime Web) first splits it into vocals, bass, other and drums on the phone, then each stem gets its own staff.
+   Both models run in Web Workers so the screen stays responsive. */
+var TRX={parts:null,orig:null,name:'',bpm:120,mode:'melody',busy:false,dur:0,cancel:false,t0:0,sec:{start:0,len:60}};
 var SCOREX=null;
-/* the model runs in a Web Worker so the screen stays responsive; the script is loaded next to the page, or from the published copy */
-function trxLibUrl(){return new Promise(function(res){var u=new URL('vendor/basic-pitch/basicpitch.js',location.href).href;fetch(u,{method:'HEAD'}).then(function(r){res(r.ok?new URL('./',location.href).href:SMPALT);},function(){res(SMPALT);});});}
+var TRXSTEM={vocals:{n:'Vocals',k:'mel',clef:'treble'},bass:{n:'Bass',k:'mel',clef:'bass'},other:{n:'Other instruments',k:'poly',clef:'treble'},drums:{n:'Drums',k:'drum',clef:'perc'}};
+function trxBase(){return new Promise(function(res){var u=new URL('vendor/basic-pitch/basicpitch.js',location.href).href;fetch(u,{method:'HEAD'}).then(function(r){res(r.ok?new URL('./',location.href).href:SMPALT);},function(){res(SMPALT);});});}
 var TRXW="self.window=self;self.onmessage=async function(e){var d=e.data;try{importScripts(d.lib);var BP=self.EcouBP,tf=BP.tf,be='cpu';try{if(await tf.setBackend('webgl'))be='webgl';}catch(x){}if(tf.getBackend()!=='webgl'){await tf.setBackend('cpu');be='cpu';}await tf.ready();postMessage({t:'be',be:be});"+
  "var bp=new BP.BasicPitch(d.model),fr=[],on=[],ct=[];await bp.evaluateModel(d.pcm,function(f,o,c){for(var i=0;i<f.length;i++){fr.push(f[i]);on.push(o[i]);ct.push(c[i]);}},function(p){postMessage({t:'p',p:p});});"+
- "var poly=d.mode==='poly',n=BP.outputToNotesPoly(fr,on,poly?0.5:0.55,poly?0.3:0.35,poly?7:9,true,null,null,true);n=BP.noteFramesToTime(BP.addPitchBendsToNoteEvents(ct,n));"+
+ "var poly=d.mode==='poly',n=BP.outputToNotesPoly(fr,on,poly?0.5:0.55,poly?0.3:0.35,poly?7:9,true,d.maxF||null,d.minF||null,true);n=BP.noteFramesToTime(BP.addPitchBendsToNoteEvents(ct,n));"+
  "postMessage({t:'done',notes:n.map(function(x){return [x.startTimeSeconds,x.durationSeconds,x.pitchMidi,x.amplitude];})});}catch(err){postMessage({t:'err',m:String(err&&err.message||err)});}};";
-var trxWk=null;
+var trxWk=null,trxDm=null;
+/* ---------- progress dialog ---------- */
 function trxOv(show,title){var o=$('#trxOv');if(!o){o=document.createElement('div');o.id='trxOv';o.setAttribute('role','dialog');o.setAttribute('aria-modal','true');o.setAttribute('aria-label','Writing sheet music');
-  o.innerHTML='<div class="trx-p"><b id="trxOvT">Writing the notes</b><span id="trxOvN"></span><div class="trx-bar"><i id="trxOvB"></i></div><div class="row"><span id="trxOvS" class="mu">Reading the file…</span><span id="trxOvPc" class="mu"></span></div><button class="btn" id="trxOvC">Cancel</button></div>';document.body.appendChild(o);
+  o.innerHTML='<div class="trx-p"><b id="trxOvT">Writing the notes</b><span id="trxOvN"></span><div id="trxOvSec" hidden></div><div id="trxOvRun"><div class="trx-bar"><i id="trxOvB"></i></div><div class="row"><span id="trxOvS" class="mu">Reading the file…</span><span id="trxOvPc" class="mu"></span></div></div><button class="btn" id="trxOvC">Cancel</button></div>';document.body.appendChild(o);
   $('#trxOvC').addEventListener('click',trxCancel);}
-  o.hidden=!show;if(title)$('#trxOvN').textContent=title;}
+  o.hidden=!show;if(title)$('#trxOvN').textContent=title;if(show){$('#trxOvSec').hidden=true;$('#trxOvRun').hidden=false;$('#trxOvT').textContent=TRX.mode==='stems'?'Splitting and writing the song':'Writing the notes';}}
 function trxStep(t,f){$('#trxOvS').textContent=t;if(f!=null){$('#trxOvB').style.width=Math.round(f*100)+'%';$('#trxOvPc').textContent=Math.round(f*100)+'%';}}
-function trxCancel(){if(trxWk){trxWk.terminate();trxWk=null;}TRX.cancel=true;TRX.busy=false;trxOv(false);toast('Stopped.',1000);}
+function trxCancel(){if(trxWk){trxWk.terminate();trxWk=null;}if(trxDm&&TRX.busy){trxDm.terminate();trxDm=null;}TRX.cancel=true;TRX.busy=false;trxOv(false);if(TRX.prevSrc){try{TRX.prevSrc.stop();}catch(e){}}toast('Stopped.',1000);}
 function trxPaint(){return new Promise(function(r){requestAnimationFrame(function(){setTimeout(r,40);});});}
-function trxResample(buf){var len=Math.ceil(buf.duration*22050),oc=new OfflineAudioContext(1,len,22050),s=oc.createBufferSource();s.buffer=buf;s.connect(oc.destination);s.start();return oc.startRendering();}
-function trxFail(m){trxOv(false);TRX.busy=false;toast(m,3800);}
+function trxRes(buf,sr,ch){var len=Math.ceil(buf.duration*sr),oc=new OfflineAudioContext(ch,len,sr),s=oc.createBufferSource();s.buffer=buf;s.connect(oc.destination);s.start();return oc.startRendering();}
+function trxFail(m){trxOv(false);TRX.busy=false;toast(m,4000);}
+function trxMsg(e){var m=(e&&e.message)||'';if(m==='cancel')return;trxFail(m==='long'?'That recording is longer than 7 minutes. Trim it and try again.':m==='none'?'No clear notes were found. A solo instrument or voice works best.':m==='mem'?'This phone ran out of memory. Choose a shorter section and try again.':m.indexOf('worker')===0||m.indexOf('model')===0||m.indexOf('demucs')===0?'The analysis stopped ('+m.replace(/^\w+: /,'')+'). Try a shorter section.':'This file could not be read. Try an MP3 or WAV.');}
+/* ---------- note detection (Basic Pitch) ---------- */
+function trxBP(buf,mode,f0,f1,label,opt){return trxRes(buf,22050,1).then(function(r22){return trxBase().then(function(base){return new Promise(function(res,rej){
+  var url=URL.createObjectURL(new Blob([TRXW],{type:'text/javascript'}));try{trxWk=new Worker(url);}catch(e){rej(new Error('worker'));return;}var t0=performance.now();
+  trxWk.onmessage=function(e){var d=e.data;if(d.t==='p'){var f=f0+(f1-f0)*d.p,el=(performance.now()-t0)/1000;trxStep(label+(d.p>0.08?' · about '+Math.max(1,Math.round(el/d.p*(1-d.p)))+' s left':''),f);}
+    else if(d.t==='be')trxStep(label,f0);else if(d.t==='done'){trxWk.terminate();trxWk=null;URL.revokeObjectURL(url);res(d.notes);}else if(d.t==='err'){trxWk.terminate();trxWk=null;rej(new Error('model: '+d.m));}};
+  trxWk.onerror=function(e){rej(new Error('worker: '+(e.message||'error')));};var pcm=r22.getChannelData(0).slice();
+  trxWk.postMessage({lib:base+'vendor/basic-pitch/basicpitch.js',model:base+'vendor/basic-pitch/model.json',pcm:pcm,mode:mode,minF:opt&&opt.minF,maxF:opt&&opt.maxF},[pcm.buffer]);});});});}
+function trxEv(ns){return ns.filter(function(e){return e[3]>0.18&&e[2]>=21&&e[2]<=108;}).map(function(e){return {t:e[0],d:e[1],m:e[2],a:e[3]};}).sort(function(a,b){return a.t-b.t;});}
+/* ---------- drums: onsets split into kick, snare and hi-hat by where their energy sits ---------- */
+function trxDrums(x,sr){var hop=Math.round(sr/100),n=Math.floor(x.length/hop),E=[new Float32Array(n),new Float32Array(n),new Float32Array(n)];
+  function a1(f){return 1-Math.exp(-2*Math.PI*f/sr);}var aL=a1(120),aM1=a1(180),aM2=a1(3000),aH=a1(7000),lp=0,lp2=0,m1=0,m2=0,hp=0,sm=[0,0,0];
+  for(var i=0;i<n;i++){var e=[0,0,0];for(var j=i*hop,k=j+hop;j<k;j++){var v=x[j];lp+=aL*(v-lp);lp2+=aL*(lp-lp2);m1+=aM1*(v-m1);m2+=aM2*(v-m2);hp+=aH*(v-hp);var mid=m2-m1,hi=v-hp;e[0]+=lp2*lp2;e[1]+=mid*mid;e[2]+=hi*hi;}
+    for(var b=0;b<3;b++){sm[b]=sm[b]*0.4+e[b]*0.6;E[b][i]=sm[b];}}
+  var PAD=[0,1,4],GAP=[8,8,6],ons=[[],[],[]];
+  for(b=0;b<3;b++){var L=new Float32Array(n),F=new Float32Array(n),mx=1e-12;for(i=0;i<n;i++){L[i]=Math.log(1e-10+E[b][i]);mx=Math.max(mx,E[b][i]);}
+    for(i=1;i<n;i++)F[i]=Math.max(0,L[i]-Math.max(L[i-1],L[Math.max(0,i-2)],L[Math.max(0,i-3)]));var last=-99;
+    for(i=1;i<n-1;i++){if(F[i]<0.9||F[i]<F[i+1]||i-last<GAP[b])continue;var peak=0;for(k=i;k<Math.min(n,i+4);k++)peak=Math.max(peak,E[b][k]);if(peak<mx*0.03)continue;
+      var lo=Math.max(0,i-50),hi2=Math.min(n,i+50),loc=0;for(k=lo;k<hi2;k++)loc=Math.max(loc,E[b][k]);if(peak<loc*0.08)continue;last=i;ons[b].push({i:i,a:Math.min(1,Math.sqrt(peak/mx))});}}
+  var MX=[0,1,2].map(function(b){var m=1e-12;for(var q=0;q<n;q++)m=Math.max(m,E[b][q]);return m;});
+  function pk(b,i){var p=0;for(var q=i;q<Math.min(n,i+4);q++)p=Math.max(p,E[b][q]);return Math.sqrt(p/MX[b]);}
+  var all=[];[0,1,2].forEach(function(b){ons[b].forEach(function(o){all.push({i:o.i,b:b});});});all.sort(function(p,q){return p.i-q.i;});
+  var cl=[];all.forEach(function(o){var c=cl[cl.length-1];if(c&&o.i-c.i<=3){c.bs[o.b]=1;}else{var bs=[0,0,0];bs[o.b]=1;cl.push({i:o.i,bs:bs});}});
+  var out=[];cl.forEach(function(c){var p0=pk(0,c.i),p1=pk(1,c.i),p2=pk(2,c.i),t=c.i*hop/sr,kick=c.bs[0]&&p0>=0.3&&p0>=p1*0.8,snare=c.bs[1]&&p1>=0.3&&(p0<0.45||p1>p0*1.25);
+    if(kick)out.push({t:t,pad:0,a:p0});if(snare)out.push({t:t,pad:1,a:p1});if(c.bs[2]&&!snare&&p2>=0.2)out.push({t:t,pad:4,a:p2});});
+  return out.sort(function(p,q){return p.t-q.t;});}
+/* ---------- the stem splitter (Demucs) ---------- */
+function trxDemucs(){if(trxDm&&trxDm._ready)return Promise.resolve(trxDm);var base=new URL('./',location.href).href+'vendor/demucs/';
+  return fetch(base+'worker.js',{method:'HEAD'}).then(function(r){if(!r.ok)throw new Error('demucs: the stem splitter is only available on the published app');}).then(function(){return new Promise(function(res,rej){
+    try{trxDm=new Worker(base+'worker.js',{type:'module'});}catch(e){rej(new Error('worker'));return;}
+    trxDm.onmessage=function(e){var d=e.data;if(d.t==='dl')trxStep(d.f<1?'Downloading the stem splitter (once, about 175 MB)… ':'Starting the stem splitter…',0.02+d.f*0.13);else if(d.t==='stage')trxStep('Starting the stem splitter…',0.15);
+      else if(d.t==='ready'){trxDm._ready=true;trxDm._ep=d.ep;res(trxDm);}else if(d.t==='err')rej(new Error('demucs: '+d.m));};
+    trxDm.onerror=function(e){rej(new Error('demucs: '+(e.message||'could not start')));};
+    trxDm.postMessage({t:'init',base:base,parts:[base+'htdemucs.onnx.part0',base+'htdemucs.onnx.part1'],size:174263526});});});}
+function trxSplit(buf){return trxRes(buf,44100,2).then(function(b){return trxDemucs().then(function(w){return new Promise(function(res,rej){var t0=performance.now();
+  trxStep(w._ep==='webgpu'?'Splitting into vocals, bass, other and drums…':'Splitting into vocals, bass, other and drums (no GPU here, so this takes a while)…',0.16);
+  w.onmessage=function(e){var d=e.data;if(d.t==='p'){var el=(performance.now()-t0)/1000;trxStep('Splitting the stems'+(d.f>0.04?' · about '+trxDur(el/d.f*(1-d.f))+' left':'…'),0.16+d.f*0.49);}
+    else if(d.t==='done'){var st={};d.names.forEach(function(nm,i){var ab=ctx.createBuffer(1,d.stems[i].length,44100);ab.getChannelData(0).set(d.stems[i]);st[nm]=ab;});try{w.terminate();}catch(x){}trxDm=null;res(st);}else if(d.t==='err')rej(new Error(/memory|alloc|Out of/i.test(d.m)?'mem':'demucs: '+d.m));};
+  var L=b.getChannelData(0).slice(),R=b.getChannelData(1).slice();w.postMessage({t:'run',L:L,R:R,chunk:20,overlap:0.1},[L.buffer,R.buffer]);});});});}
+function trxDur(s){s=Math.round(s);return s<90?s+' s':Math.round(s/60)+' min';}
+function trxRms(b){var d=b.getChannelData(0),s=0;for(var i=0;i<d.length;i+=4)s+=d[i]*d[i];return Math.sqrt(s/(d.length/4));}
+function trxCut(b,start,len){var sr=b.sampleRate,a=Math.floor(start*sr),n=Math.min(b.length-a,Math.floor(len*sr)),o=ctx.createBuffer(b.numberOfChannels,Math.max(1,n),sr);for(var c=0;c<b.numberOfChannels;c++)o.getChannelData(c).set(b.getChannelData(c).subarray(a,a+n));return o;}
+/* section picker shown before splitting a whole song */
+function trxPickSection(b){return new Promise(function(res,rej){var box=$('#trxOvSec'),d=b.duration;$('#trxOvRun').hidden=true;box.hidden=false;$('#trxOvT').textContent='Choose a section';
+  var L=Math.min(d,TRX.sec.len||60),S=0;box.innerHTML='<p class="note" style="margin:0">Splitting a song takes time on a phone, so start with a part of it. You can always run another part later.</p><div class="row"><span class="mu">Length</span><div class="seg" id="trxSL"><button data-sl="30">30 s</button><button data-sl="60">1 min</button><button data-sl="120">2 min</button><button data-sl="0">Whole</button></div></div><label class="ctl"><span class="row"><span>Start at</span><output id="trxSSo">0:00</output></span><input type="range" id="trxSS" min="0" max="'+Math.max(0,Math.floor(d-5))+'" step="1" value="0"></label><div class="btns"><button class="btn" id="trxSP">▶ Preview</button><button class="btn primary" id="trxSGo">Split and write</button></div>';
+  function fmt(x){var m=Math.floor(x/60),s=Math.floor(x%60);return m+':'+(s<10?'0':'')+s;}
+  function upd(){$$('#trxSL [data-sl]').forEach(function(x){var v=+x.getAttribute('data-sl');x.setAttribute('aria-pressed',(v||d)===L||(v===0&&L>=d));});$('#trxSSo').textContent=fmt(S)+' – '+fmt(Math.min(d,S+L));}
+  $$('#trxSL [data-sl]').forEach(function(x){x.addEventListener('click',function(){var v=+x.getAttribute('data-sl');L=v?Math.min(v,d):d;if(!v)S=0;$('#trxSS').value=S;upd();});});
+  $('#trxSS').addEventListener('input',function(){S=+this.value;if(S+L>d)L=Math.max(5,d-S);upd();});
+  $('#trxSP').addEventListener('click',function(){if(TRX.prevSrc){try{TRX.prevSrc.stop();}catch(e){}TRX.prevSrc=null;this.textContent='▶ Preview';return;}var s=ctx.createBufferSource();s.buffer=b;s.connect(ctx.destination);s.start(0,S,Math.min(L,12));TRX.prevSrc=s;var bt=this;bt.textContent='■ Stop';s.onended=function(){bt.textContent='▶ Preview';TRX.prevSrc=null;};});
+  $('#trxSGo').addEventListener('click',function(){if(TRX.prevSrc){try{TRX.prevSrc.stop();}catch(e){}}TRX.sec={start:S,len:L};box.hidden=true;$('#trxOvRun').hidden=false;$('#trxOvT').textContent='Splitting and writing the song';res({start:S,len:L});});
+  upd();});}
+/* ---------- main flow ---------- */
 function trxFile(file){
   if(TRX.busy||!file)return;if(!ensureAudio())return;TRX.busy=true;TRX.cancel=false;TRX.name=(file.name||'Recording').replace(/\.[^.]+$/,'');$('#trxRes').hidden=true;
-  trxOv(true,TRX.name);trxStep('Reading the file…',0.02);var orig=null,t0=performance.now();
-  trxPaint().then(function(){return file.arrayBuffer();}).then(function(ab){trxStep('Decoding the audio…',0.05);return trxPaint().then(function(){return smpDecode(ab);});})
-  .then(function(b){if(TRX.cancel)throw new Error('cancel');orig=b;TRX.orig=b;TRX.dur=b.duration;if(b.duration>420)throw new Error('long');TRX.bpm=Math.round(detectBpm(b)||120);trxStep('Preparing the audio…',0.08);return trxPaint().then(function(){return trxResample(b);});})
-  .then(function(r22){if(TRX.cancel)throw new Error('cancel');trxStep('Loading the note detector…',0.1);return trxLibUrl().then(function(base){return {base:base,pcm:r22.getChannelData(0).slice()};});})
-  .then(function(o){return new Promise(function(res,rej){var url=URL.createObjectURL(new Blob([TRXW],{type:'text/javascript'}));try{trxWk=new Worker(url);}catch(e){rej(new Error('worker'));return;}
-      trxWk.onmessage=function(e){var d=e.data;if(d.t==='be'){trxStep(d.be==='webgl'?'Listening for notes…':'Listening for notes (this phone uses the slower mode)…',0.12);}
-        else if(d.t==='p'){var el=(performance.now()-t0)/1000,f=0.12+d.p*0.85;trxStep('Listening for notes… '+(d.p>0.05?'about '+Math.max(1,Math.round(el/f*(1-f)))+' s left':''),f);}
-        else if(d.t==='done'){trxWk.terminate();trxWk=null;URL.revokeObjectURL(url);res(d.notes);}else if(d.t==='err'){trxWk.terminate();trxWk=null;rej(new Error('model: '+d.m));}};
-      trxWk.onerror=function(e){rej(new Error('worker: '+(e.message||'error')));};
-      trxWk.postMessage({lib:o.base+'vendor/basic-pitch/basicpitch.js',model:o.base+'vendor/basic-pitch/model.json',pcm:o.pcm,mode:TRX.mode},[o.pcm.buffer]);});})
-  .then(function(ns){TRX.ev=ns.filter(function(e){return e[3]>0.18&&e[2]>=21&&e[2]<=108;}).map(function(e){return {t:e[0],d:e[1],m:e[2],a:e[3]};}).sort(function(a,b){return a.t-b.t;});
-    if(!TRX.ev.length)throw new Error('none');trxStep('Done',1);TRX.busy=false;setTimeout(function(){trxOv(false);},500);trxShowRes();var c=$('#trxCard');if(c)c.scrollIntoView({block:'start'});})
-  .catch(function(e){var m=(e&&e.message)||'';if(m==='cancel')return;trxFail(m==='long'?'That recording is longer than 7 minutes. Trim it and try again.':m==='none'?'No clear notes were found. A solo instrument or voice works best.':m.indexOf('worker')===0||m.indexOf('model')===0?'The note detector stopped ('+m.replace(/^\w+: /,'')+'). Try a shorter clip.':'This file could not be read. Try an MP3 or WAV.');})
-  .then(function(){var fi=$('#f-TRX');if(fi)fi.value='';});
+  trxOv(true,TRX.name);trxStep('Reading the file…',0.02);var stems=TRX.mode==='stems';
+  trxPaint().then(function(){return file.arrayBuffer();}).then(function(ab){trxStep('Decoding the audio…',0.04);return trxPaint().then(function(){return smpDecode(ab);});})
+  .then(function(b){if(TRX.cancel)throw new Error('cancel');if(b.duration>420)throw new Error('long');
+    if(!stems){TRX.orig=b;TRX.dur=b.duration;TRX.bpm=Math.round(detectBpm(b)||120);
+      return trxBP(b,TRX.mode,0.1,0.97,'Listening for notes…').then(function(ns){var ev=trxEv(ns);if(!ev.length)throw new Error('none');TRX.parts=[{id:'main',name:TRX.mode==='poly'?'Piano':'Melody',k:TRX.mode==='poly'?'poly':'mel',ev:ev,buf:b,show:true,aud:true}];});}
+    return trxPickSection(b).then(function(sec){if(TRX.cancel)throw new Error('cancel');var part=trxCut(b,sec.start,sec.len);TRX.orig=part;TRX.dur=part.duration;TRX.bpm=Math.round(detectBpm(part)||detectBpm(b)||120);
+      return trxSplit(part).then(function(st){if(TRX.cancel)throw new Error('cancel');var parts=[],ref=trxRms(part)||1;
+        var jobs=[['vocals',0.65,0.76,{}],['bass',0.76,0.84,{maxF:500}],['other',0.84,0.96,{}]].reduce(function(p,j){return p.then(function(){var S=TRXSTEM[j[0]],buf=st[j[0]];if(!buf||trxRms(buf)<ref*0.04)return;
+          return trxBP(buf,S.k==='poly'?'poly':'melody',j[1],j[2],'Writing '+S.n.toLowerCase()+'…',j[3]).then(function(ns){var ev=trxEv(ns);if(ev.length>2)parts.push({id:j[0],name:S.n,k:S.k,clef:S.clef,ev:ev,buf:buf,show:true,aud:true});});});},Promise.resolve());
+        return jobs.then(function(){var db=st.drums;if(db&&trxRms(db)>ref*0.04){trxStep('Writing drums…',0.97);var ev=trxDrums(db.getChannelData(0),db.sampleRate);if(ev.length>3)parts.push({id:'drums',name:'Drums',k:'drum',clef:'perc',ev:ev,buf:db,show:true,aud:true});}
+          if(!parts.length)throw new Error('none');var order=['vocals','other','bass','drums'];parts.sort(function(a,b){return order.indexOf(a.id)-order.indexOf(b.id);});TRX.parts=parts;});});});})
+  .then(function(){trxStep('Done',1);TRX.busy=false;setTimeout(function(){trxOv(false);},500);trxShowRes();var c=$('#trxCard');if(c)c.scrollIntoView({block:'start'});})
+  .catch(trxMsg).then(function(){var fi=$('#f-TRX');if(fi)fi.value='';});
 }
-/* one note at a time: keep the strongest note wherever notes overlap, then end each note where the next begins */
+/* ---------- quantize ---------- */
 function trxMelody(ev){var out=[];ev.forEach(function(e){var last=out[out.length-1];if(last&&e.t<last.t+last.d-0.03){if(e.a>last.a*1.15&&Math.abs(e.t-last.t)<0.08)out[out.length-1]=e;else if(e.a>last.a*1.15){last.d=Math.max(0.05,e.t-last.t);out.push(e);}return;}out.push(e);});
   for(var i=0;i<out.length-1;i++)if(out[i].t+out[i].d>out[i+1].t)out[i].d=Math.max(0.05,out[i+1].t-out[i].t);return out;}
-function trxQuant(){var ev=TRX.mode==='poly'?TRX.ev:trxMelody(TRX.ev),sd=60/TRX.bpm/4,t0=ev[0].t,seen={},q=[];TRX.t0=t0;
-  ev.forEach(function(e){var s=Math.max(0,Math.round((e.t-t0)/sd)),l=Math.max(1,Math.round(e.d/sd));if(TRX.mode!=='poly'){var k=s;if(seen[k])return;seen[k]=1;}else{var k2=s+':'+e.m;if(seen[k2])return;seen[k2]=1;}q.push({s:s,l:Math.min(l,64),m:Math.round(e.m),v:clamp(0.4+e.a*0.6,0.3,1)});});
-  if(TRX.mode!=='poly'){for(var i=0;i<q.length-1;i++)if(q[i].s+q[i].l>q[i+1].s)q[i].l=Math.max(1,q[i+1].s-q[i].s);}
-  var cap=128*16;return q.filter(function(n){return n.s<cap;});}
+function trxT0(){var t=1e9;(TRX.parts||[]).forEach(function(p){if(p.show&&p.ev.length)t=Math.min(t,p.ev[0].t);});if(t>1e8)t=0;TRX.t0=t;return t;}
+function trxQP(p){var sd=60/TRX.bpm/4,t0=TRX.t0,seen={},q=[];
+  if(p.k==='drum'){p.ev.forEach(function(e){var s=Math.max(0,Math.round((e.t-t0)/sd)),k=s+':'+e.pad;if(seen[k])return;seen[k]=1;q.push({s:s,l:1,pad:e.pad,v:e.a});});return q;}
+  var ev=p.k==='poly'?p.ev:trxMelody(p.ev);ev.forEach(function(e){var s=Math.max(0,Math.round((e.t-t0)/sd)),l=Math.max(1,Math.round(e.d/sd)),k=p.k==='poly'?s+':'+e.m:s;if(seen[k])return;seen[k]=1;q.push({s:s,l:Math.min(l,64),m:Math.round(e.m),v:clamp(0.4+e.a*0.6,0.3,1)});});
+  if(p.k!=='poly'){for(var i=0;i<q.length-1;i++)if(q[i].s+q[i].l>q[i+1].s)q[i].l=Math.max(1,q[i+1].s-q[i].s);}return q.filter(function(n){return n.s<128*16;});}
+/* notes of every shown pitched part (used by playback and the keyboard) */
+function trxQuant(){trxT0();var all=[];(TRX.parts||[]).forEach(function(p){if(p.show&&p.k!=='drum')all=all.concat(trxQP(p));});return all.sort(function(a,b){return a.s-b.s;});}
 function trxKey(list){var h=new Array(12).fill(0);list.forEach(function(x){h[x.m%12]+=x.l;});
-  function corr(p,r){var a,mh=0,mp=0,i;for(i=0;i<12;i++){mh+=h[(i+r)%12];mp+=p[i];}mh/=12;mp/=12;var num=0,dh=0,dp=0;for(i=0;i<12;i++){var x=h[(i+r)%12]-mh,y=p[i]-mp;num+=x*y;dh+=x*x;dp+=y*y;}return num/Math.sqrt(dh*dp+1e-12);}
+  function corr(p,r){var mh=0,mp=0,i;for(i=0;i<12;i++){mh+=h[(i+r)%12];mp+=p[i];}mh/=12;mp/=12;var num=0,dh=0,dp=0;for(i=0;i<12;i++){var x=h[(i+r)%12]-mh,y=p[i]-mp;num+=x*y;dh+=x*x;dp+=y*y;}return num/Math.sqrt(dh*dp+1e-12);}
   var best=SKEYS[0],bv=-2;SKEYS.forEach(function(k){var nm=k[0].replace('m',''),r=TONIC[k[2]==='minor'?nm:k[0]],v=corr(k[2]==='minor'?KMIN:KMAJ,r);if(v>bv){bv=v;best=k;}});return best;}
-function trxSd(){var q=trxQuant(),end=0;q.forEach(function(n){end=Math.max(end,n.s+n.l);});var total=Math.max(16,Math.ceil(end/16)*16),parts=[],keys={},names={},prog={},tis=[];
-  function part(id,name,list,clef){if(!list.length)return;keys[id]=list;names[id]=name;prog[id]=0;tis.push(id);parts.push({ti:id,name:name,clef:clef,seg:segments(list,total,false)});}
-  if(TRX.mode==='poly'){part('rh','Right hand',q.filter(function(n){return n.m>=60;}),'treble');part('lh','Left hand',q.filter(function(n){return n.m<60;}),'bass');}
-  else{var avg=q.reduce(function(a,x){return a+x.m;},0)/q.length;part('mel','Melody',q,avg<55?'bass':'treble');}
-  var kv=$('#scoreKey').value,key=kv==='auto'?trxKey(q):SKEYS[+kv];
-  return {S:{total:total,keys:keys,drums:[]},key:key,parts:parts,bars:total/16,tis:tis,names:names,prog:prog,bpm:TRX.bpm,title:TRX.name};}
-function trxShowRes(){var q=trxQuant(),k=trxKey(q);$('#trxRes').hidden=false;$('#trxBpm').textContent=TRX.bpm;
-  $('#trxInfo').textContent=q.length+' notes · '+k[0]+(k[2]==='minor'?'':' major');$('#trxName').textContent=TRX.name;}
-function trxUse(fn){if(!TRX.ev){toast('Choose a recording first.');return;}SCOREX=trxSd;fn();}
+function trxSd(){trxT0();var parts=[],keys={},names={},prog={},tis=[],drums=[],end=0,Q={};
+  (TRX.parts||[]).forEach(function(p){if(!p.show)return;var q=trxQP(p);Q[p.id]=q;q.forEach(function(n){end=Math.max(end,n.s+n.l);});});
+  var total=Math.max(16,Math.ceil(end/16)*16),pitched=[];
+  function part(id,name,list,clef,pg){if(!list.length)return;keys[id]=list;names[id]=name;prog[id]=pg||0;tis.push(id);parts.push({ti:id,name:name,clef:clef,seg:segments(list,total,false)});}
+  (TRX.parts||[]).forEach(function(p){if(!p.show)return;var q=Q[p.id];
+    if(p.k==='drum'){drums=q.map(function(x){return {s:x.s,pad:x.pad};});parts.push({ti:0,name:'Drums',clef:'perc',drum:true,seg:segments(q.map(function(x){return {s:x.s,l:1,pad:x.pad};}),total,true)});return;}
+    pitched=pitched.concat(q);var pg=p.id==='bass'?33:p.id==='vocals'?52:0;
+    if(p.k==='poly'){part(p.id+'_h',p.id==='main'?'Right hand':p.name,q.filter(function(n){return n.m>=60;}),'treble',pg);part(p.id+'_l',p.id==='main'?'Left hand':p.name+' (low)',q.filter(function(n){return n.m<60;}),'bass',pg);}
+    else{var avg=q.reduce(function(a,x){return a+x.m;},0)/Math.max(1,q.length);part(p.id,p.name,q,p.clef||(avg<55?'bass':'treble'),pg);}});
+  var kv=$('#scoreKey').value,key=kv==='auto'?trxKey(pitched.length?pitched:[{m:60,l:1}]):SKEYS[+kv];
+  return {S:{total:total,keys:keys,drums:drums},key:key,parts:parts,bars:total/16,tis:tis,names:names,prog:prog,bpm:TRX.bpm,title:TRX.name};}
+function trxShowRes(){var all=trxQuant(),k=trxKey(all.length?all:[{m:60,l:1}]),n=0;(TRX.parts||[]).forEach(function(p){n+=p.ev.length;});$('#trxRes').hidden=false;$('#trxBpm').textContent=TRX.bpm;
+  $('#trxInfo').textContent=n+' notes · '+k[0]+(k[2]==='minor'?'':' major');$('#trxName').textContent=TRX.name;
+  var w=$('#trxParts');w.hidden=TRX.parts.length<2;w.innerHTML='<span class="mu" style="font-size:12px;width:100%">On the score</span>'+TRX.parts.map(function(p,i){return '<button data-tp2="'+i+'" aria-pressed="'+!!p.show+'">'+p.name+' <small style="opacity:.7">'+p.ev.length+'</small></button>';}).join('');
+  $$('#trxParts [data-tp2]').forEach(function(b){b.addEventListener('click',function(){var p=TRX.parts[+b.getAttribute('data-tp2')];if(p.show&&TRX.parts.filter(function(x){return x.show;}).length<2){toast('Keep at least one part on the score.',1400);return;}p.show=!p.show;b.setAttribute('aria-pressed',p.show);});});}
+function trxUse(fn){if(!TRX.parts){toast('Choose a recording first.');return;}SCOREX=trxSd;fn();}
 var trxSrcs=[];
-function trxListen(){if(!TRX.ev||!ensureAudio())return;var b=$('#trxPlay');if(trxSrcs.length){transportStop();trxSrcs=[];b.textContent='Listen';return;}
+function trxListen(){if(!TRX.parts||!ensureAudio())return;var b=$('#trxPlay');if(trxSrcs.length){transportStop();trxSrcs=[];b.textContent='Listen';return;}
   var q=trxQuant(),sd=60/TRX.bpm/4,t0=ctx.currentTime+0.1,ti=KEYSI()[0]||1,end=0;q.forEach(function(n){playNote(ti,n.m,n.v*0.9,t0+n.s*sd,Math.max(0.08,n.l*sd));end=Math.max(end,n.s+n.l);});trxSrcs=[1];b.textContent='Stop';
   setTimeout(function(){if(trxSrcs.length){trxSrcs=[];b.textContent='Listen';}},(end*sd+1.5)*1000);}
 function initTrx(){
   $('#f-TRX').addEventListener('change',function(){if(this.files&&this.files[0])trxFile(this.files[0]);});
-  $$('#trxMode [data-tm]').forEach(function(b){b.addEventListener('click',function(){TRX.mode=b.getAttribute('data-tm');$$('#trxMode [data-tm]').forEach(function(x){x.setAttribute('aria-pressed',x===b);});if(TRX.ev)trxShowRes();});});
+  $$('#trxMode [data-tm]').forEach(function(b){b.addEventListener('click',function(){TRX.mode=b.getAttribute('data-tm');$$('#trxMode [data-tm]').forEach(function(x){x.setAttribute('aria-pressed',x===b);});$('#trxPick').textContent=TRX.mode==='stems'?'Choose a song':'Choose a recording';$('#trxStemNote').hidden=TRX.mode!=='stems';});});
   $('#trxBpmDn').addEventListener('click',function(){TRX.bpm=Math.max(40,TRX.bpm-1);trxShowRes();});$('#trxBpmUp').addEventListener('click',function(){TRX.bpm=Math.min(240,TRX.bpm+1);trxShowRes();});
   $('#trxHalf').addEventListener('click',function(){TRX.bpm=Math.max(40,Math.round(TRX.bpm/2));trxShowRes();});$('#trxDbl').addEventListener('click',function(){TRX.bpm=Math.min(240,TRX.bpm*2);trxShowRes();});
   $('#trxView').addEventListener('click',function(){trxUse(openScore);});$('#trxPdf').addEventListener('click',function(){trxUse(exportPDF);});$('#trxXml').addEventListener('click',function(){trxUse(exportNotation);});
   $('#trxPlay').addEventListener('click',trxListen);
+  /* lets the stem splitter use every CPU core on later visits (cross-origin isolation through a service worker) */
+  if('serviceWorker' in navigator&&location.protocol==='https:'){try{navigator.serviceWorker.register('sw.js').catch(function(){});}catch(e){}}
 }
 
 /* ===================== RECORDED INSTRUMENTS =====================
