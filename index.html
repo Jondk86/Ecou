@@ -103,6 +103,11 @@ nav button[aria-selected="true"]{color:var(--ac)}
 .fmops{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}.fmops button{min-height:48px;border-radius:12px;border:1px solid var(--ln);background:var(--s2);color:var(--tx);font:inherit;font-weight:700;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:4px}.fmops button small{font-size:10px;font-weight:600;color:var(--mu)}.fmops button[aria-pressed=true]{border-color:var(--ac);outline:1px solid var(--ac)}
 .eng-fm .smp-only{display:none!important}
 .fm1log{max-height:180px;overflow:auto;background:var(--s2);border-radius:10px;padding:8px;font-size:11px;margin:0;white-space:pre-wrap}
+.loopb{border:2px solid var(--ac)}.lbl{display:grid;gap:6px}
+.lbr{display:flex;align-items:center;gap:8px;border:1px solid var(--ln);border-radius:12px;padding:6px 8px;background:var(--s2)}.lbr[aria-selected=true]{border-color:var(--ac);outline:1px solid var(--ac)}
+.lbr .lbn{flex:1;text-align:left;background:none;border:0;color:var(--tx);font:inherit;min-height:40px;padding:0;display:flex;flex-direction:column;justify-content:center}.lbr .lbn small{color:var(--mu);font-size:11px}
+.lbr .dot{width:10px;height:10px;border-radius:5px;background:var(--ln)}.lbr[aria-selected=true] .dot{background:var(--or)}.lbr.has .lbc{color:var(--ac)}
+#lbRec.live{animation:qblink .6s steps(2,start) infinite}
 .fxl{display:grid;gap:4px;border:1px solid var(--ln);border-radius:12px;padding:8px 10px}.fxr{gap:6px}.lnk{flex:1;text-align:left;background:none;border:0;color:var(--tx);font:inherit;font-size:13px;padding:6px 0;min-height:36px}
 .mv{width:36px;height:36px;border-radius:10px;border:1px solid var(--ln);background:var(--s1);color:var(--tx);font-size:15px;font-weight:700;padding:0}
 .mv:disabled{opacity:.3}
@@ -401,11 +406,26 @@ nav button{overflow:hidden;white-space:nowrap}
 
   <!-- PADS -->
   <section class="tab active" id="t-pad">
+    <div class="card loopb" id="loopCard">
+      <div class="row"><span class="kicker" style="color:var(--ac)">Loop builder</span><span class="mu" id="lbInfo"></span></div>
+      <p class="note" id="lbHow">1 · Pick a layer below. 2 · Press <strong>● Record layer</strong> and play pads or keys over the loop. 3 · When the loop sounds right, pick the next layer and record again. Then <strong>Add to song</strong>.</p>
+      <div class="row" style="flex-wrap:wrap;gap:6px"><div class="seg" role="group" aria-label="Loop length"><button data-lbl="16">1 bar</button><button data-lbl="32">2 bars</button><button data-lbl="64">4 bars</button></div>
+        <div class="row" style="gap:4px"><button class="mv" id="lbBpmD" aria-label="Slower">−</button><strong id="lbBpm" style="min-width:56px;text-align:center">120</strong><button class="mv" id="lbBpmU" aria-label="Faster">+</button></div></div>
+      <div id="lbLayers" class="lbl" role="list" aria-label="Layers"></div>
+      <div class="btn3"><button class="btn primary" id="lbPlay">▶ Loop</button><button class="btn rec" id="lbRec">● Record layer</button><button class="btn" id="lbUndo" disabled>↶ Undo take</button></div>
+      <div class="row" style="flex-wrap:wrap;gap:8px"><label class="chk"><span>Click</span><input type="checkbox" id="lbMetro" checked></label><label class="chk"><span>Count-in</span><input type="checkbox" id="lbCount" checked></label><label class="chk"><span>Stop rec after 1 loop</span><input type="checkbox" id="lbOne" checked></label><label class="chk"><span>Snap to grid</span><input type="checkbox" id="lbQ" checked></label></div>
+      <details class="strip" id="lbFix"><summary>Fix timing (put what you played on the beat)</summary>
+        <div class="row" style="flex-wrap:wrap;gap:6px"><span class="mu">Grid</span><div class="seg" role="group" aria-label="Timing grid"><button data-lbg="1" aria-pressed="true">1/16</button><button data-lbg="2" aria-pressed="false">1/8</button><button data-lbg="4" aria-pressed="false">1/4</button><button data-lbg="1.3333" aria-pressed="false">1/8 triplet</button></div></div>
+        <label class="ctl"><span class="row"><span>Strength</span><output id="lbStrO">80%</output></span><input type="range" id="lbStr" min="10" max="100" step="5" value="80" aria-label="Timing correction strength"></label>
+        <div class="btns"><button class="btn primary" id="lbFixOne">Fix selected layer</button><button class="btn" id="lbFixAll">Fix all layers</button></div>
+        <p class="note">100% = exactly on the grid. 50–80% keeps some of your feel. Drums sit on 1/16 steps, so triplets apply to the melodic layers only. Undo with ↶ Undo take.</p></details>
+      <div class="btns"><button class="btn" id="lbNext">Next part →</button><button class="btn" id="lbSong">Add to song ×2</button></div>
+    </div>
     <div class="row"><h2>Pads</h2><label class="chk" style="min-height:0;font-size:13px;color:var(--mu)"><span>Through insert FX</span><input type="checkbox" id="padFx" checked></label></div>
     <div class="card" style="gap:8px">
       <div class="row"><button class="mv tgl wide" id="nrBtn" aria-pressed="false">Note repeat</button><div class="seg" role="group" aria-label="Repeat rate"><button data-nr="2">1/8</button><button data-nr="4" aria-pressed="true">1/16</button><button data-nr="8">1/32</button></div></div>
       <div class="row"><span class="mu">Kit</span><div class="chips" id="kitChips" style="justify-content:flex-end"></div></div>
-      <div class="row"><button class="mv tgl wide" id="keysBtn" aria-pressed="false">Keys mode</button><div class="seg" role="group" aria-label="Scale"><button data-ks="minor" aria-pressed="true">Minor</button><button data-ks="major">Major</button><button data-ks="penta">Penta</button><button data-ks="chrom">Chrom</button></div></div>
+      <div class="row"><button class="mv tgl wide" id="keysBtn" aria-pressed="false">Keys mode</button><select id="keysSrc" class="dsel" aria-label="What the pads play in Keys mode"></select><div class="seg" role="group" aria-label="Scale"><button data-ks="minor" aria-pressed="true">Minor</button><button data-ks="major">Major</button><button data-ks="penta">Penta</button><button data-ks="chrom">Chrom</button></div></div>
     </div>
     <div id="pads" class="pads" aria-label="Drum pads"></div>
     <div class="card" style="gap:10px">
@@ -1435,7 +1455,10 @@ function trigPad(i,vel,when,semi){
   src.onended=function(){v.dead=true;try{pan.disconnect();}catch(e){}padVoices=padVoices.filter(function(x){return x!==v;});};
   flashQ.push({i:i,t:t});
 }
-function padKeyLabels(){if(!keysMode)return;$$('#pads .pad').forEach(function(el,i){var b=el.querySelector('b');if(b)b.textContent=nname(60+keySemi(i));});}
+function keysBase(){if(!(keysSrc>0&&tracks[keysSrc]))return 60;return keysSrc===3||/bass/i.test(tracks[keysSrc].name)?48:72;}
+function padKeyLabels(){if(!keysMode)return;$$('#pads .pad').forEach(function(el,i){var b=el.querySelector('b');if(b)b.textContent=nname(keysBase()+keySemi(i)+12*keysOct);});}
+var keysSrc=1,keysOct=0,keysDown={};
+function renderKeysSrc(){var sel=$('#keysSrc');if(!sel)return;var opts=tracks.map(function(t,i){return t.kind==='keys'?'<option value="'+i+'"'+(i===keysSrc?' selected':'')+'>'+t.name+'</option>':'';}).join('')+'<option value="0"'+(keysSrc===0?' selected':'')+'>Selected pad sound</option>';sel.innerHTML=opts;}
 function renderPads(){
   var w=$('#pads');
   w.innerHTML=pads.map(function(p,i){var has=p.pat.some(Boolean);return '<button class="pad'+(i===padSel?' sel':'')+(p.buf?'':' empty')+'" data-pad="'+i+'" aria-pressed="'+(i===padSel)+'" aria-label="Pad '+(i+1)+' '+p.name+'"><b>'+p.name+'</b>'+(has?'<span class="dot"></span>':'')+'<i style="background:'+(PADCOL[p.cls]||PADCOL.other)+'"></i></button>';}).join('');
@@ -1527,9 +1550,10 @@ function initPads(){
   var pw=$('#pads');
   pw.addEventListener('pointerdown',function(e){var b=e.target.closest('.pad');if(!b)return;e.preventDefault();var i=+b.getAttribute('data-pad'),r=b.getBoundingClientRect(),rel=clamp((e.clientY-r.top)/r.height,0,1),vel=0.35+0.65*rel;
     if(nrOn){nrStart(i,vel);if(!keysMode&&i!==padSel)selectPad(i);return;}
+    if(keysMode&&keysSrc>0&&tracks[keysSrc]&&tracks[keysSrc].kind==='keys'){if(selTrack!==keysSrc)selectTrack(keysSrc);var mk=keysBase()+keySemi(i)+12*keysOct;try{b.setPointerCapture(e.pointerId);}catch(x){}keysDown[e.pointerId]='pk'+i;noteOn('pk'+i,mk,vel);b.classList.add('hit');return;}
     if(keysMode){var sm=keySemi(i);trigPad(padSel,vel,0,sm);recPad(padSel,vel,sm);b.classList.add('hit');setTimeout(function(){b.classList.remove('hit');},90);return;}
     trigPad(i,vel);recPad(i,vel);if(i!==padSel)selectPad(i);});
-  ['pointerup','pointercancel','pointerleave'].forEach(function(ev){pw.addEventListener(ev,function(e){var b=e.target.closest&&e.target.closest('.pad');if(b)nrStop(+b.getAttribute('data-pad'));else nrHeld.forEach(function(j,k){nrStop(k);});});});
+  ['pointerup','pointercancel','pointerleave','lostpointercapture'].forEach(function(ev){pw.addEventListener(ev,function(e){if(keysDown[e.pointerId]){var k=keysDown[e.pointerId];delete keysDown[e.pointerId];noteOff(k);$$('#pads .pad.hit').forEach(function(x){if('pk'+x.getAttribute('data-pad')===k)x.classList.remove('hit');});}if(ev==='lostpointercapture')return;var b=e.target.closest&&e.target.closest('.pad');if(b)nrStop(+b.getAttribute('data-pad'));else nrHeld.forEach(function(j,k){nrStop(k);});});});
   pw.addEventListener('contextmenu',function(e){e.preventDefault();});
   $('#seqPlay').addEventListener('click',function(){transportToggle();});
   $('#seqCopyBar').addEventListener('click',function(){var pt=patterns[curPat],o=page*16,n=pt.len/16;pt.drums.forEach(function(a){for(var b=0;b<n;b++){if(b===page)continue;for(var q=0;q<16;q++)a[b*16+q]=a[o+q];}});pt.notes.forEach(function(ns,ti){if(!ti)return;var keep=ns.filter(function(x){return x.s>=o&&x.s<o+16;});pt.notes[ti]=[];for(var b=0;b<n;b++)keep.forEach(function(x){pt.notes[ti].push({s:x.s-o+b*16,l:x.l,m:x.m,v:x.v});});});bindPads();markDirty();paintSteps();renderPadDots();renderPatSegs();drawRoll();toast('Bar '+(page+1)+' copied to all '+n+' bars.',1800);});
@@ -1986,7 +2010,7 @@ function fitRoll(){var ns=[];patterns.forEach(function(pt){ns=ns.concat(pt.notes
 function updTransportUI(){
   var on=seq.on;$('#hPlay').textContent=on?'■':'▶';$('#hPlay').setAttribute('aria-label',on?'Stop':'Play');
   $('#trPlay').textContent=on?'■ Stop':'▶ Play';$('#seqPlay').textContent=on?'■ Stop':'▶ Play';
-  updJam();
+  updJam();try{lbRender();}catch(e){}
   $('#trRec').classList.toggle('live',seq.rec);$('#trRec').textContent=seq.rec?'● Recording notes':'● Record notes';
   $$('[data-mode]').forEach(function(b){b.setAttribute('aria-pressed',b.getAttribute('data-mode')===seq.mode?'true':'false');});
   $('#trInfo').textContent=Math.round(P.bpm.v)+' BPM'+(seq.on?' · playing '+(seq.mode==='song'?'song':'pattern '+patterns[curPat].name):'');
@@ -3110,7 +3134,8 @@ function initPocket(){
   // note repeat + keys mode
   $('#nrBtn').addEventListener('click',function(){nrOn=!nrOn;this.setAttribute('aria-pressed',nrOn);});
   $$('[data-nr]').forEach(function(b){b.addEventListener('click',function(){nrRate=+b.getAttribute('data-nr');$$('[data-nr]').forEach(function(x){x.setAttribute('aria-pressed',x===b?'true':'false');});});});
-  $('#keysBtn').addEventListener('click',function(){keysMode=!keysMode;this.setAttribute('aria-pressed',keysMode);$('#pads').classList.toggle('keys',keysMode);renderPads();toast(keysMode?'Keys mode: the pads play '+pads[padSel].name+' in '+keyScale+' — bottom-left is the root.':'Pads mode.',2200);});
+  renderKeysSrc();$('#keysSrc').addEventListener('change',function(e){keysSrc=+e.target.value;if(keysSrc>0)selectTrack(keysSrc);renderPads();toast(keysSrc>0?'Pads play '+tracks[keysSrc].name+' ('+keyScale+' scale, bottom-left = root).':'Pads play the selected pad sound at different pitches.',2000);});
+  $('#keysBtn').addEventListener('click',function(){keysMode=!keysMode;renderKeysSrc();this.setAttribute('aria-pressed',keysMode);$('#pads').classList.toggle('keys',keysMode);renderPads();if(keysMode&&keysSrc>0&&tracks[keysSrc])selectTrack(keysSrc);toast(keysMode?'Keys mode: the pads play '+(keysSrc>0&&tracks[keysSrc]?tracks[keysSrc].name:pads[padSel].name)+' in '+keyScale+' — bottom-left is the root. Change the instrument next to the button.':'Pads mode.',2400);});
   $$('[data-ks]').forEach(function(b){b.addEventListener('click',function(){keyScale=b.getAttribute('data-ks');$$('[data-ks]').forEach(function(x){x.setAttribute('aria-pressed',x===b?'true':'false');});if(keysMode)renderPads();});});
   $('#commitBtn').addEventListener('click',commitPattern);
   // step locks
@@ -3684,6 +3709,64 @@ function initF1(){renderF1();
   $('#f1InScan').addEventListener('click',f1ScanInputs);$('#f1In').addEventListener('change',function(e){audioInId=e.target.value;try{localStorage.setItem('ecou.audioIn',audioInId);}catch(x){}releaseMics&&releaseMics();toast(audioInId?'Recording input changed. Capture and audio tracks now record from it.':'Back to the phone microphone.',2200);});
   if(audioInId){var o=document.createElement('option');o.value=audioInId;o.textContent='Saved input';o.selected=true;$('#f1In').appendChild(o);}
   setInterval(f1MapTick,33);}
+
+/* ---------- LOOP BUILDER: record layer by layer over a looping pattern ---------- */
+var lb={layer:0,undo:[],recEnd:0,counting:false};
+function lbLayers(){return tracks.map(function(t,i){return {t:t,i:i};}).filter(function(x){return x.t.kind!=='audio';});}
+function lbCount(pt,i){if(i===0){var n=0;pt.drums.forEach(function(a){for(var k=0;k<pt.len;k++)if(a[k])n++;});return n;}return (pt.notes[i]||[]).length;}
+function lbSound(t,i){if(i===0)return 'pads';var S=i===selTrack?{engine:engine,fmP:fmP,slots:slots}:t.sound;if(!S)return '';if(S.engine==='fm')return 'FM · '+FMC.name(S.fmP||FMV[0].p);return (S.slots&&S.slots.A&&S.slots.A.name)||'';}
+function lbRender(){var w=$('#lbLayers');if(!w)return;var pt=patterns[curPat];
+  w.innerHTML=lbLayers().map(function(x){var n=lbCount(pt,x.i),sel=x.i===lb.layer;return '<div class="lbr'+(n?' has':'')+'" role="listitem" aria-selected="'+sel+'"><span class="dot"></span><button class="lbn" data-lbs="'+x.i+'"><strong>'+x.t.name+'</strong><small>'+lbSound(x.t,x.i)+'</small></button><span class="mu lbc">'+(n?n+(x.i===0?' hits':' notes'):'empty')+'</span>'+
+    '<button class="mv" data-lbm="'+x.i+'" aria-pressed="'+!!x.t.mute+'" aria-label="Mute '+x.t.name+'">M</button><button class="mv" data-lbx="'+x.i+'" aria-label="Clear '+x.t.name+' in this loop"'+(n?'':' disabled')+'>✕</button></div>';}).join('');
+  $$('[data-lbs]').forEach(function(b){b.addEventListener('click',function(){lbSelect(+b.getAttribute('data-lbs'));});});
+  $$('[data-lbm]').forEach(function(b){b.addEventListener('click',function(){var t=tracks[+b.getAttribute('data-lbm')];t.mute=!t.mute;ensureAudio();applyMix();renderMixer();renderDawHeads();markDirty();lbRender();});});
+  $$('[data-lbx]').forEach(function(b){armTap(b,'Tap again to clear',function(){var i=+b.getAttribute('data-lbx');lbSnap();var pt=patterns[curPat];if(i===0)pt.drums.forEach(function(a){for(var k=0;k<a.length;k++)a[k]=false;});else pt.notes[i]=[];markDirty();paintSteps();renderPadDots();drawRoll();renderPatSegs();lbRender();});});
+  var bpm=Math.round(P.bpm.v);$('#lbBpm').textContent=bpm+' BPM';$('#lbInfo').textContent='Pattern '+pt.name+' · '+(pt.len/16)+' bar'+(pt.len>16?'s':'');
+  $$('[data-lbl]').forEach(function(b){b.setAttribute('aria-pressed',String(+b.getAttribute('data-lbl')===pt.len));});
+  $('#lbUndo').disabled=!lb.undo.length;var on=seq.on&&seq.mode==='pattern';$('#lbPlay').textContent=on||lb.counting?'■ Stop':'▶ Loop';
+  $('#lbRec').classList.toggle('live',!!seq.rec&&on);$('#lbRec').textContent=lb.counting?'Count-in…':(seq.rec&&on?'● Recording '+tracks[lb.layer].name:'● Record layer');}
+function lbSelect(i){lb.layer=i;var t=tracks[i];if(!t)return;if(i>0&&t.kind==='keys'){keysSrc=i;renderKeysSrc();selectTrack(i);setKbCollapsed(false);toast('Layer: '+t.name+' — play it on the keys below.',1600);}else{setKbCollapsed(true);toast('Layer: Drums — play the pads.',1400);}lbRender();}
+function lbSnap(){var pt=patterns[curPat];lb.undo.push({pi:curPat,d:JSON.stringify({drums:pt.drums,notes:pt.notes,locks:pt.locks||{},len:pt.len})});if(lb.undo.length>20)lb.undo.shift();}
+function lbUndo(){var u=lb.undo.pop();if(!u)return;var pt=patterns[u.pi],d=JSON.parse(u.d);pt.drums=d.drums;pt.notes=d.notes;pt.locks=d.locks;pt.len=d.len;if(seq.rec){recPend.clear&&recPend.clear();}markDirty();bindPads();paintSteps();renderPadDots();drawRoll();renderPatSegs();lbRender();toast('Last take undone.',1200);}
+function lbLoopDur(){return patterns[curPat].len*stepDur();}
+function lbStartLoop(thenRec){if(!ensureAudio())return;seq.metro=$('#lbMetro').checked;
+  if(thenRec&&$('#lbCount').checked){var b=60/P.bpm.v,t0=ctx.currentTime+0.1;for(var k=0;k<4;k++)click(t0+k*b,k===0);lb.counting=true;lbRender();
+    setTimeout(function(){lb.counting=false;if(seq.on)transportStop();transportStart('pattern');lbBeginTake();},Math.max(0,(t0+4*b-ctx.currentTime-0.08)*1000));return;}
+  if(seq.on)transportStop();transportStart('pattern');if(thenRec)lbBeginTake();lbRender();}
+function lbBeginTake(){lbSnap();seq.quant=$('#lbQ').checked;seq.rec=true;lb.recEnd=$('#lbOne').checked?ctx.currentTime+lbLoopDur()+0.05:0;updTransportUI();lbRender();}
+function lbEndTake(msg){recFlush();seq.rec=false;lb.recEnd=0;updTransportUI();lbRender();if(msg){var pt=patterns[curPat],n=lbCount(pt,lb.layer);toast(tracks[lb.layer].name+' recorded ('+n+(lb.layer===0?' hits':' notes')+'). The loop keeps playing: pick the next layer and press ● again.',3200);}}
+function lbRecBtn(){if(lb.counting)return;if(seq.rec&&seq.on){lbEndTake(true);return;}if(lb.layer>0&&tracks[lb.layer].kind==='keys'&&selTrack!==lb.layer)selectTrack(lb.layer);
+  if(seq.on&&seq.mode==='pattern'){seq.metro=$('#lbMetro').checked;lbBeginTake();toast('Recording '+tracks[lb.layer].name+'…',1000);}else lbStartLoop(true);}
+function lbNextPart(){var pt=patterns[curPat],j=-1;for(var k=0;k<patterns.length;k++){var q=(curPat+1+k)%patterns.length;if(q!==curPat&&!patHas(patterns[q])){j=q;break;}}if(j<0){toast('All patterns are in use. Clear one first.');return;}
+  var dst=patterns[j],d=JSON.parse(JSON.stringify({drums:pt.drums,notes:pt.notes,locks:pt.locks||{},len:pt.len}));dst.drums=d.drums;dst.notes=d.notes;dst.locks=d.locks;dst.len=d.len;setPattern(j);markDirty();lbRender();
+  toast('Part '+dst.name+' starts as a copy of '+pt.name+'. Change or clear layers to make the variation (it plays from the next bar).',3200);}
+function lbAddSong(){var pt=patterns[curPat];if(!patHas(pt)){toast('Record something in this loop first.');return;}var reps=2,st=Math.ceil(arrEnd()/16)*16,n=0;
+  for(var ti=0;ti<tracks.length;ti++){if(tracks[ti].kind==='audio')continue;if(lbCount(pt,ti)>0){newClip({type:'pat',ti:ti,s:st,l:pt.len*reps,p:curPat,o:0});n++;}}
+  for(var r=0;r<reps;r++)song.push(curPat);renderSongUI&&renderSongUI();dawNeed=true;markDirty();
+  toast('Pattern '+pt.name+' added to the song: bars '+(st/16+1)+'–'+((st+pt.len*reps)/16)+' in Studio ('+n+' layer'+(n===1?'':'s')+').',3000);}
+/* timing correction (quantize) with strength; g = grid in 16th-note steps */
+var lbGrid=1;
+function lbQuantize(layers){var pt=patterns[curPat],g=lbGrid,st=(+$('#lbStr').value||80)/100,moved=0;lbSnap();
+  layers.forEach(function(ti){
+    if(ti===0){if(g%1!==0)return;var L=pt.len,nd=pt.drums.map(function(){return new Array(Math.max(64,L)).fill(false);}),nl={},lk=pt.locks||{};
+      pt.drums.forEach(function(a,i){for(var k=0;k<L;k++){if(!a[k])continue;var tg=Math.round(k/g)*g,dst=st>=0.5?tg%L:k;if(dst!==k)moved++;var v=a[k]===true?1:a[k],ov=nd[i][dst];nd[i][dst]=ov&&ov!==true?Math.max(ov,v):(ov===true?true:a[k]);if(lk[i+':'+k])nl[i+':'+dst]=lk[i+':'+k];}});
+      pt.drums=nd;Object.keys(lk).forEach(function(key){if(!/^\d+:\d+$/.test(key))nl[key]=lk[key];});pt.locks=nl;return;}
+    var ns=pt.notes[ti]||[];ns.forEach(function(n){var tg=Math.round(n.s/g)*g,ns2=n.s+(tg-n.s)*st;ns2=Math.round(ns2*100)/100;if(ns2>=pt.len)ns2-=pt.len;if(Math.abs(ns2-n.s)>0.01)moved++;n.s=Math.max(0,ns2);
+      if(st>=0.99&&n.l>=g*0.6){n.l=Math.max(g,Math.round(n.l/g)*g);}else if(n.s+n.l>pt.len)n.l=Math.max(0.25,pt.len-n.s);});});
+  markDirty();paintSteps();renderPadDots();drawRoll();renderPatSegs();lbRender();
+  toast(moved?'Timing fixed: '+moved+' note'+(moved===1?'':'s')+' moved to the '+({1:'1/16',2:'1/8',4:'1/4'}[g]||'1/8 triplet')+' grid ('+Math.round(st*100)+'%).':'Already on the grid.',2400);}
+function initLoopB(){
+  $$('[data-lbg]').forEach(function(b){b.addEventListener('click',function(){lbGrid=+b.getAttribute('data-lbg');$$('[data-lbg]').forEach(function(x){x.setAttribute('aria-pressed',String(x===b));});});});
+  $('#lbStr').addEventListener('input',function(e){$('#lbStrO').textContent=e.target.value+'%';});
+  $('#lbFixOne').addEventListener('click',function(){lbQuantize([lb.layer]);});$('#lbFixAll').addEventListener('click',function(){lbQuantize(lbLayers().map(function(x){return x.i;}));});
+  $$('[data-lbl]').forEach(function(b){b.addEventListener('click',function(){setPatLen(+b.getAttribute('data-lbl'));lbRender();});});
+  $('#lbBpmD').addEventListener('click',function(){setParam('bpm',Math.round(P.bpm.v)-1);markDirty();lbRender();});$('#lbBpmU').addEventListener('click',function(){setParam('bpm',Math.round(P.bpm.v)+1);markDirty();lbRender();});
+  $('#lbPlay').addEventListener('click',function(){if(lb.counting){lb.counting=false;lbRender();return;}if(seq.on&&seq.mode==='pattern'){if(seq.rec)lbEndTake(false);transportStop();lbRender();}else lbStartLoop(false);});
+  $('#lbRec').addEventListener('click',lbRecBtn);$('#lbUndo').addEventListener('click',lbUndo);$('#lbNext').addEventListener('click',lbNextPart);$('#lbSong').addEventListener('click',lbAddSong);
+  $('#lbMetro').addEventListener('change',function(e){seq.metro=e.target.checked;});
+  setInterval(function(){if(lb.recEnd&&seq.rec&&ctx&&ctx.currentTime>=lb.recEnd)lbEndTake(true);if(seq.rec&&!seq.on&&lb.recEnd)lbEndTake(false);},50);
+  setInterval(function(){if($('#t-pad').classList.contains('active')){var c=lbLayers().map(function(x){return lbCount(patterns[curPat],x.i);}).join(',')+curPat+seq.on+seq.rec;if(c!==lb.sig){lb.sig=c;lbRender();}}},400);
+  lbRender();}
 /* ---------- STUDIO: timeline DAW ---------- */
 var dawKbDone=false,DAWCOL=['#D4FF3A','#5CE1E6','#FF8A5B','#B69CFF','#FFD166','#7BE495','#FF6FB5','#6FA8FF','#F2A65A','#9AE6E0','#E0A3FF','#C2E812'];
 while(SPCOL.length<DAWCOL.length)SPCOL.push(DAWCOL[SPCOL.length]);
@@ -3844,7 +3927,7 @@ function addInstTrack(name,silent,stock){
   t.sound=S;tracks.push(t);var i=tracks.length-1;t.sp={az:[-50,50,-80,80][(n-3)%4],el:10,dist:1.6,orbit:0};
   patterns.forEach(function(pt){while(pt.notes.length<=i)pt.notes.push([]);});
   if(ctx){buildTrackNode(t,i);t.n.f.frequency.value=normToHz(S.cutoff);t.n.f.Q.value=S.reso;applyMix();spRoute();}
-  renderMixer();renderSpUI();renderTrackSegs();daw.lane=i;dawNeed=true;renderDawHeads();if(!silent){markDirty();toast(t.name+' added ('+(st?STOCK[stock||'piano'].name:'sound')+'). Pick its sound in Instr., write notes in Song.',2600);}return i;
+  renderMixer();renderSpUI();renderTrackSegs();try{renderKeysSrc();}catch(e){}daw.lane=i;dawNeed=true;renderDawHeads();if(!silent){markDirty();toast(t.name+' added ('+(st?STOCK[stock||'piano'].name:'sound')+'). Pick its sound in Instr., write notes in Song.',2600);}return i;
 }
 /* bounce in place: render one instrument lane of the timeline to an audio clip, mute the source */
 function bounceLane(ti){
@@ -4472,7 +4555,7 @@ function dawLoad(d,gb){
   if(dcv){renderDawHeads();renderInsp();renderMarkers();updDawTr();}dawNeed=true;
 }
 
-buildControls();initStudio();initDaw();initJam();initPocket();initRoll2();initDrums2();initRef();initFM();initFm1();initF1();requestAnimationFrame(meterTick);
+buildControls();initStudio();initDaw();initJam();initPocket();initRoll2();initDrums2();initRef();initFM();initFm1();initF1();initLoopB();requestAnimationFrame(meterTick);
 $('#hitTgt').addEventListener('click',hitTarget);$$('[data-tgt]').forEach(function(b){b.addEventListener('click',function(){MT.tgt=+b.getAttribute('data-tgt');$$('[data-tgt]').forEach(function(x){x.setAttribute('aria-pressed',x===b?'true':'false');});});});initSpatial();initAmp();initScore();initPads();initAI();buildFxUI();buildDsync();updDelayTime();buildMatrix();buildKeyboard();requestAnimationFrame(loop);
 (function(){var h=(location.hash||'').slice(1);for(var k in TABH)if(TABH[k]===h){showTab(k,true);}})();
 $('#midiOn').addEventListener('click',midiConnect);
