@@ -7,14 +7,14 @@
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#0B0B10">
 <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
-<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png"><script>(function(){var d=document.documentElement,st=null;function mq(sw,sh){if(!st){st=document.createElement('style');st.id='fitmq';document.head.appendChild(st);}var out='';if(sw){for(var a=0;a<document.styleSheets.length;a++){var ss=document.styleSheets[a],rs;if(ss.ownerNode===st)continue;try{rs=ss.cssRules;}catch(e){continue;}for(var b=0;b<rs.length;b++){var r=rs[b];if(!r.media||!r.conditionText)continue;var c=r.conditionText,m=c.match(/^\(max-(width|height):\s*(\d+)px\)$/);if(!m)continue;if((m[1]==='width'?sw:sh)<=+m[2]){for(var k=0;k<r.cssRules.length;k++)out+=r.cssRules[k].cssText+'\n';}}}}st.textContent=out;}function fit(){var sw=screen.width,iw=innerWidth,z=1;if(navigator.maxTouchPoints>0&&sw>0&&sw<=600&&iw>sw*1.25)z=iw/sw;if(z===1){d.style.zoom='';d.style.removeProperty('--appH');d.classList.remove('zfit');if(st)mq(0);return;}d.style.zoom=z.toFixed(4);d.style.setProperty('--appH',(innerHeight/z)+'px');d.classList.add('zfit');var go=function(){mq(sw,innerHeight/z);};if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',go);else go();}fit();addEventListener('resize',fit);})();</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 :root{--bg:#0B0B10;--s1:#17171F;--s2:#1F1F2A;--ln:#2A2A36;--tx:#F4F4F7;--mu:#A3A3B2;--ac:#D4FF3A;--cy:#5CE1E6;--or:#FF8A5B}
 *{box-sizing:border-box}
 html,body{margin:0;height:100%;background:var(--bg);color:var(--tx);font-family:'Space Grotesk',system-ui,sans-serif;-webkit-tap-highlight-color:transparent}
-body{display:flex;flex-direction:column;height:100vh;height:100dvh;overflow:hidden;padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom)}
+body{display:flex;flex-direction:column;height:var(--appH,100vh);height:var(--appH,100dvh);overflow:hidden;padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom)}
 button{font-family:inherit;cursor:pointer}
 header{display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid var(--ln)}
 .logo{font-weight:700;letter-spacing:.12em;font-size:18px}
