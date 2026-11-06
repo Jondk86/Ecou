@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Ecou – Help &amp; FAQ</title>
+<meta name="theme-color" content="#0B0B10">
+<link rel="icon" type="image/png" href="icons/icon-192.png">
+<style>
+:root{--bg:#0B0B10;--s1:#15151C;--s2:#1E1E28;--ln:#2B2B37;--tx:#E9E9F0;--mu:#9A9AAB;--ac:#C8F25A}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font:16px/1.6 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+main{max-width:760px;margin:0 auto;padding:20px 18px 80px}
+header{display:flex;align-items:center;gap:12px;margin:4px 0 20px}
+header img{width:44px;height:44px;border-radius:11px}
+header .t{flex:1}
+h1{font-size:24px;margin:0;line-height:1.2}
+.mu{color:var(--mu);font-size:14px;margin:0}
+.lang{display:flex;background:var(--s1);border:1px solid var(--ln);border-radius:999px;padding:3px}
+.lang button{border:0;background:none;color:var(--mu);font:600 13px system-ui,sans-serif;padding:6px 12px;border-radius:999px}
+.lang button[aria-pressed="true"]{background:var(--s2);color:var(--tx)}
+nav.toc{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 24px}
+nav.toc a{background:var(--s1);border:1px solid var(--ln);color:var(--tx);text-decoration:none;font-size:14px;padding:6px 12px;border-radius:999px}
+h2{font-size:19px;margin:34px 0 10px;scroll-margin-top:16px}
+h2 .n{color:var(--ac);margin-right:6px}
+p,li{color:#C9C9D6}
+ol,ul{padding-left:22px}li{margin:4px 0}
+b{color:var(--tx)}
+a{color:var(--ac)}
+details{background:var(--s1);border:1px solid var(--ln);border-radius:14px;margin:8px 0;padding:0 16px}
+details[open]{padding-bottom:6px}
+summary{cursor:pointer;font-weight:600;color:var(--tx);padding:14px 0;list-style:none;display:flex;justify-content:space-between;gap:12px}
+summary::-webkit-details-marker{display:none}
+summary::after{content:"+";color:var(--mu);font-weight:400}
+details[open] summary::after{content:"–"}
+.card{background:var(--s1);border:1px solid var(--ln);border-radius:14px;padding:4px 16px;margin:10px 0}
+.tip{border-left:3px solid var(--ac);padding:2px 0 2px 12px;margin:12px 0}
+kbd{background:var(--s2);border:1px solid var(--ln);border-radius:6px;padding:0 6px;font:inherit;font-size:14px;color:var(--tx)}
+footer{margin-top:48px;border-top:1px solid var(--ln);padding-top:16px;font-size:14px;color:var(--mu)}
+[data-l]{display:none}
+html[lang="en"] [data-l="en"],html[lang="ro"] [data-l="ro"]{display:block}
+</style>
+</head>
+<body>
+<main>
+<header>
+  <img src="icons/icon-192.png" alt="">
+  <div class="t"><h1 data-l="en">Help &amp; FAQ</h1><h1 data-l="ro">Ajutor și întrebări</h1><p class="mu">Ecou</p></div>
+  <div class="lang" role="group" aria-label="Language"><button data-set="en">EN</button><button data-set="ro">RO</button></div>
+</header>
+
+<!-- ================= ENGLISH ================= -->
+<div data-l="en">
+<p><a href="./">← Back to Ecou</a></p>
+<nav class="toc">
+  <a href="#en-start">Getting started</a><a href="#en-install">Install</a><a href="#en-garage">Garage</a><a href="#en-sounds">Sounds &amp; amps</a><a href="#en-score">Sheet music</a><a href="#en-capture">Your own sounds</a><a href="#en-save">Save &amp; export</a><a href="#en-faq">FAQ</a>
+</nav>
+
+<h2 id="en-start"><span class="n">1</span>Getting started</h2>
+<ol>
+  <li>Open Ecou and tap <b>Start with a new project</b>. Sound starts on your first tap.</li>
+  <li>Go to the <b>Garage</b> tab and pick an instrument, for example <b>Smart Keys</b>.</li>
+  <li>Tap the chord strips to play. Turn on <b>Autoplay 1–4</b> to have Ecou play a pattern for you.</li>
+  <li>Press <b>●</b> to record, play, then press <b>▶</b> to hear it back.</li>
+</ol>
+<div class="tip">Change the key and tempo in the top bar. All smart instruments follow the key you choose.</div>
+
+<h2 id="en-install"><span class="n">2</span>Install the app</h2>
+<div class="card">
+<p><b>Android.</b> Install the Ecou app (APK, or from Google Play once it's published). If Android asks, allow installing apps from this source. The app updates its content by itself, so you don't need to reinstall it for new features.</p>
+<p><b>iPhone and iPad.</b> Open <b>ecou.geoptimize.io</b> in <b>Safari</b>, tap <b>Share</b> and choose <b>Add to Home Screen</b>. Ecou then opens full screen like any app.</p>
+<p><b>Computer.</b> Open ecou.geoptimize.io in Chrome or Edge. You can install it from the install icon in the address bar.</p>
+</div>
+
+<h2 id="en-garage"><span class="n">3</span>Garage</h2>
+<ul>
+  <li><b>Instruments.</b> Smart Keys, Smart Guitar and Smart Bass play whole chords in your key. Keyboard gives you normal piano keys with any sound. Drum Kit lets you finger-drum on pads.</li>
+  <li><b>Drummer.</b> Pick a style, then drag the dot: left–right makes the beat simpler or busier, up–down makes it louder or softer.</li>
+  <li><b>Live Loops.</b> Tap cells to start loops in time, and tap a column header to launch a whole column at once. Press <b>●</b> to capture what you launch into Tracks.</li>
+  <li><b>Tracks.</b> See everything you recorded on a timeline, and mute (M) or solo (S) tracks. Tap a track to open its instrument.</li>
+  <li><b>Harmony colours.</b> Keys and chords are coloured by their role in the key (I, IV, V, minor chords…). Turn it on or off in the tempo menu.</li>
+</ul>
+
+<h2 id="en-sounds"><span class="n">4</span>Sounds, amps and pedals</h2>
+<ul>
+  <li>Recorded instruments (grand piano, guitars, basses, strings, winds, brass, acoustic drums) are downloaded the first time you choose them. After that they work faster.</li>
+  <li>For guitar sounds, switch to <b>Amp</b> in Smart Guitar. Choose an amp, a cabinet and pedals, or start from a preset.</li>
+  <li>To play a real guitar or sing through the amp, use <b>Capture → Live input</b> with headphones.</li>
+</ul>
+
+<h2 id="en-score"><span class="n">5</span>Audio to sheet music</h2>
+<ol>
+  <li>Go to <b>Song → Audio to sheet music</b> and choose an MP3 or WAV.</li>
+  <li>Pick <b>Melody</b> for a single line (voice, solo) or <b>Every note</b> for chords and piano.</li>
+  <li>For long songs, choose the section you want. Recognition runs on your phone, so it can take a minute.</li>
+  <li>Open the score and press play: the cursor follows the music. Export to PDF, MusicXML or MIDI.</li>
+</ol>
+<div class="tip">Best results come from clear recordings of one instrument or voice. Full band mixes give more approximate notes.</div>
+
+<h2 id="en-capture"><span class="n">6</span>Turn any sound into an instrument</h2>
+<ol>
+  <li>Go to <b>Capture</b> and tap <b>● Record sample</b>.</li>
+  <li>Hold the phone 20–30 cm away and record one clean hit or a held note: a glass, your voice, a door.</li>
+  <li>Ecou trims the silence, finds the note and spreads the sound across the keyboard. Play it in <b>Instr.</b> or in the Garage.</li>
+</ol>
+<p>In <b>Mod</b> you can shape the sound by tilting the phone or with the camera.</p>
+
+<h2 id="en-save"><span class="n">7</span>Save and export</h2>
+<ul>
+  <li>Projects save on your phone. Use <b>Continue last project</b> to pick up where you left off.</li>
+  <li>Export the song as WAV from <b>Studio → Export timeline</b>, or stems from <b>Mix → Export stems</b>.</li>
+  <li>Projects are not stored online. If you uninstall the app or clear its data, they are deleted, so export anything you want to keep.</li>
+</ul>
+
+<h2 id="en-faq"><span class="n">8</span>FAQ</h2>
+<details><summary>I don't hear anything</summary>
+<p>Tap the screen once, since sound only starts after a tap. Turn up the media volume. On iPhone, turn off the silent switch on the side of the phone. Check that Bluetooth isn't sending the sound to another device.</p></details>
+<details><summary>The sound comes late when I tap</summary>
+<p>Wired headphones or the phone speaker have the least delay. Bluetooth headphones always add a noticeable delay. Closing other apps also helps.</p></details>
+<details><summary>I hear a loud whistle or echo</summary>
+<p>That's feedback: the microphone is picking up the speaker. It happens with Live input or recording with monitoring on. Use headphones, or stop Live input in Capture.</p></details>
+<details><summary>Ecou looks tiny, like a desktop page</summary>
+<p>Chrome's "Desktop site" option is on. Open Chrome → ⋮ → Settings → Site settings → Desktop site and turn it off, then reopen Ecou.</p></details>
+<details><summary>The microphone or camera doesn't work</summary>
+<p>Allow access when Ecou asks. If you said no before, open the phone's Settings → Apps → Ecou (or Chrome) → Permissions and allow the microphone or camera.</p></details>
+<details><summary>An instrument takes long to load</summary>
+<p>Recorded instruments are downloaded the first time. On a slow connection this can take a few seconds. You can play right away: Ecou uses a synthesized sound until the recording is ready.</p></details>
+<details><summary>Do I need internet?</summary>
+<p>To open Ecou and download sounds the first time, yes. Your playing, recording and sheet music are processed on your phone.</p></details>
+<details><summary>Can other people hear what I play?</summary>
+<p>No. Ecou has no server and nothing you play or record leaves your phone. If someone else hears you, check that you're not in a call and not sharing a Bluetooth speaker.</p></details>
+<details><summary>Is my data private?</summary>
+<p>Yes. Ecou has no account, no ads and no tracking. Read the <a href="privacy.html">privacy policy</a>.</p></details>
+<details><summary>Something doesn't work, or I have an idea</summary>
+<p>Write to <a href="mailto:ion.dumitru86@gmail.com">ion.dumitru86@gmail.com</a>. Tell us your phone model and what you did before it happened.</p></details>
+</div>
+
+<!-- ================= ROMÂNĂ ================= -->
+<div data-l="ro">
+<p><a href="./">← Înapoi la Ecou</a></p>
+<nav class="toc">
+  <a href="#ro-start">Primii pași</a><a href="#ro-install">Instalare</a><a href="#ro-garage">Garage</a><a href="#ro-sounds">Sunete și amplificatoare</a><a href="#ro-score">Partituri</a><a href="#ro-capture">Sunetele tale</a><a href="#ro-save">Salvare și export</a><a href="#ro-faq">Întrebări</a>
+</nav>
+
+<h2 id="ro-start"><span class="n">1</span>Primii pași</h2>
+<ol>
+  <li>Deschide Ecou și apasă <b>Start with a new project</b>. Sunetul pornește la prima atingere.</li>
+  <li>Intră în tab-ul <b>Garage</b> și alege un instrument, de exemplu <b>Smart Keys</b>.</li>
+  <li>Atinge benzile cu acorduri ca să cânți. Pornește <b>Autoplay 1–4</b> și Ecou cântă un model pentru tine.</li>
+  <li>Apasă <b>●</b> ca să înregistrezi, cântă, apoi apasă <b>▶</b> ca să asculți.</li>
+</ol>
+<div class="tip">Tonalitatea și tempoul se schimbă din bara de sus. Toate instrumentele smart cântă în tonalitatea aleasă.</div>
+
+<h2 id="ro-install"><span class="n">2</span>Instalarea aplicației</h2>
+<div class="card">
+<p><b>Android.</b> Instalează aplicația Ecou (fișierul APK sau din Google Play, după publicare). Dacă Android cere, permite instalarea aplicațiilor din sursa respectivă. Aplicația se actualizează singură, nu trebuie reinstalată pentru funcții noi.</p>
+<p><b>iPhone și iPad.</b> Deschide <b>ecou.geoptimize.io</b> în <b>Safari</b>, apasă <b>Share</b> și alege <b>Add to Home Screen</b>. Ecou se deschide apoi pe tot ecranul, ca orice aplicație.</p>
+<p><b>Calculator.</b> Deschide ecou.geoptimize.io în Chrome sau Edge. O poți instala din iconița de instalare din bara de adrese.</p>
+</div>
+
+<h2 id="ro-garage"><span class="n">3</span>Garage</h2>
+<ul>
+  <li><b>Instrumente.</b> Smart Keys, Smart Guitar și Smart Bass cântă acorduri întregi în tonalitatea ta. Keyboard îți dă o claviatură normală cu orice sunet. Drum Kit e pentru tobe cântate cu degetele pe pad-uri.</li>
+  <li><b>Drummer.</b> Alege un stil, apoi mută punctul: stânga–dreapta face ritmul mai simplu sau mai bogat, sus–jos mai încet sau mai tare.</li>
+  <li><b>Live Loops.</b> Atinge celulele ca să pornești bucle la timp; atinge capul unei coloane ca să pornești toată coloana deodată. Apasă <b>●</b> ca să înregistrezi pe piste ce pornești.</li>
+  <li><b>Tracks.</b> Vezi tot ce ai înregistrat pe o linie de timp și oprești (M) sau izolezi (S) piste. Atinge o pistă ca să-i deschizi instrumentul.</li>
+  <li><b>Culorile armoniei.</b> Clapele și acordurile sunt colorate după rolul lor în tonalitate (I, IV, V, acorduri minore…). Le pornești sau oprești din meniul de tempo.</li>
+</ul>
+
+<h2 id="ro-sounds"><span class="n">4</span>Sunete, amplificatoare și pedale</h2>
+<ul>
+  <li>Instrumentele înregistrate (pian de concert, chitare, bas, corzi, suflători, tobe acustice) se descarcă prima dată când le alegi. Apoi pornesc mai repede.</li>
+  <li>Pentru sunete de chitară, treci pe <b>Amp</b> în Smart Guitar. Alegi amplificatorul, boxa și pedalele, sau pornești de la o presetare.</li>
+  <li>Ca să cânți la o chitară reală sau cu vocea prin amplificator, folosește <b>Capture → Live input</b>, cu căști.</li>
+</ul>
+
+<h2 id="ro-score"><span class="n">5</span>Partituri din audio</h2>
+<ol>
+  <li>Intră în <b>Song → Audio to sheet music</b> și alege un MP3 sau WAV.</li>
+  <li>Alege <b>Melody</b> pentru o singură linie (voce, solo) sau <b>Every note</b> pentru acorduri și pian.</li>
+  <li>La piesele lungi alegi bucata care te interesează. Recunoașterea se face pe telefon și poate dura un minut.</li>
+  <li>Deschide partitura și apasă play: cursorul urmărește muzica. O poți exporta în PDF, MusicXML sau MIDI.</li>
+</ol>
+<div class="tip">Cele mai bune rezultate le dau înregistrările clare cu un singur instrument sau o singură voce. La piesele cu toată trupa, notele sunt aproximative.</div>
+
+<h2 id="ro-capture"><span class="n">6</span>Orice sunet devine instrument</h2>
+<ol>
+  <li>Intră în <b>Capture</b> și apasă <b>● Record sample</b>.</li>
+  <li>Ține telefonul la 20–30 cm și înregistrează o lovitură clară sau o notă ținută: un pahar, vocea, o ușă.</li>
+  <li>Ecou taie liniștea, găsește nota și întinde sunetul pe toată claviatura. Îl cânți în <b>Instr.</b> sau în Garage.</li>
+</ol>
+<p>În <b>Mod</b> poți modela sunetul înclinând telefonul sau cu camera.</p>
+
+<h2 id="ro-save"><span class="n">7</span>Salvare și export</h2>
+<ul>
+  <li>Proiectele se salvează pe telefon. Cu <b>Continue last project</b> continui de unde ai rămas.</li>
+  <li>Exporți piesa în WAV din <b>Studio → Export timeline</b>, sau pistele separat din <b>Mix → Export stems</b>.</li>
+  <li>Proiectele nu sunt salvate online. Dacă dezinstalezi aplicația sau îi ștergi datele, se pierd, așa că exportă ce vrei să păstrezi.</li>
+</ul>
+
+<h2 id="ro-faq"><span class="n">8</span>Întrebări frecvente</h2>
+<details><summary>Nu se aude nimic</summary>
+<p>Atinge ecranul o dată, sunetul pornește doar după o atingere. Dă volumul media mai tare. Pe iPhone, oprește butonul de silențios de pe lateral. Verifică să nu fie sunetul trimis prin Bluetooth către alt dispozitiv.</p></details>
+<details><summary>Sunetul vine cu întârziere când ating</summary>
+<p>Căștile cu fir sau difuzorul telefonului au cea mai mică întârziere. Căștile Bluetooth adaugă mereu o întârziere care se simte. Ajută și să închizi alte aplicații.</p></details>
+<details><summary>Se aude un fluierat sau ecou puternic</summary>
+<p>E microfonia: microfonul prinde difuzorul. Apare la Live input sau la înregistrarea cu ascultare pornită. Folosește căști sau oprește Live input din Capture.</p></details>
+<details><summary>Ecou arată mic, ca pe calculator</summary>
+<p>E pornită opțiunea „Desktop site” din Chrome. Deschide Chrome → ⋮ → Setări → Setări site → Site pentru desktop, oprește-o și redeschide Ecou.</p></details>
+<details><summary>Nu merge microfonul sau camera</summary>
+<p>Permite accesul când îl cere Ecou. Dacă l-ai refuzat înainte, intră în Setările telefonului → Aplicații → Ecou (sau Chrome) → Permisiuni și permite microfonul sau camera.</p></details>
+<details><summary>Un instrument se încarcă greu</summary>
+<p>Instrumentele înregistrate se descarcă prima dată. Pe o conexiune lentă poate dura câteva secunde. Poți cânta imediat: Ecou folosește un sunet sintetizat până e gata înregistrarea.</p></details>
+<details><summary>Am nevoie de internet?</summary>
+<p>Ca să deschizi Ecou și să descarci sunetele prima dată, da. Ce cânți, înregistrezi și partiturile se procesează pe telefon.</p></details>
+<details><summary>Pot auzi alții ce cânt?</summary>
+<p>Nu. Ecou nu are server și nimic din ce cânți sau înregistrezi nu pleacă de pe telefon. Dacă te aude altcineva, verifică să nu fii într-un apel sau conectat la aceeași boxă Bluetooth.</p></details>
+<details><summary>Datele mele sunt private?</summary>
+<p>Da. Ecou nu are cont, reclame sau urmărire. Citește <a href="privacy.html#ro">politica de confidențialitate</a>.</p></details>
+<details><summary>Ceva nu merge sau am o idee</summary>
+<p>Scrie la <a href="mailto:ion.dumitru86@gmail.com">ion.dumitru86@gmail.com</a>. Spune-ne modelul telefonului și ce ai făcut înainte să apară problema.</p></details>
+</div>
+
+<footer><a href="./">Ecou</a> · <a href="privacy.html">Privacy</a> · <a href="samples/CREDITS.md">Credits</a></footer>
+</main>
+<script>
+(function(){var d=document.documentElement,q=new URLSearchParams(location.search).get('lang'),l=q||(function(){try{return localStorage.getItem('ecou.helpLang');}catch(e){}})()||((navigator.language||'').toLowerCase().indexOf('ro')===0?'ro':'en');
+function set(x){d.lang=x;document.querySelectorAll('.lang button').forEach(function(b){b.setAttribute('aria-pressed',b.dataset.set===x?'true':'false');});try{localStorage.setItem('ecou.helpLang',x);}catch(e){}}
+set(l==='ro'?'ro':'en');document.querySelectorAll('.lang button').forEach(function(b){b.addEventListener('click',function(){set(b.dataset.set);});});})();
+</script>
+</body>
+</html>
