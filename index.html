@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Ecou – prototype</title>
+<title>Ecou</title>
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#0B0B10">
 <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
@@ -939,7 +939,7 @@ nav button[aria-selected="true"] svg{background:color-mix(in srgb,var(--ac) 18%,
     <div class="card" id="trxCard">
       <div class="row"><span class="kicker">Audio to sheet music</span><span class="mu" id="trxInfo"></span></div>
       <p class="note">Choose an MP3 or WAV and Ecou writes out the notes, right on your phone. It works best with one instrument or a voice, recorded clearly.</p>
-      <div class="seg" role="group" aria-label="What to transcribe" id="trxMode" style="display:grid;grid-template-columns:repeat(3,1fr)"><button data-tm="melody" aria-pressed="true">Melody</button><button data-tm="poly" aria-pressed="false">Every note</button><button data-tm="stems" aria-pressed="false">Each instrument</button></div>
+      <div class="seg" role="group" aria-label="What to transcribe" id="trxMode" style="display:grid;grid-template-columns:repeat(2,1fr)"><button data-tm="melody" aria-pressed="true">Melody</button><button data-tm="poly" aria-pressed="false">Every note</button></div>
       <p class="note" id="trxStemNote" hidden>For a full song: Ecou splits it into vocals, bass, other instruments and drums, and writes a staff for each. The first time, it downloads the stem splitter (about 175 MB, kept on the phone). Splitting is slow on phones without GPU support, so you pick a section first.</p>
       <label class="btn primary" for="f-TRX" id="trxPick">Choose a recording</label>
       <input type="file" id="f-TRX" accept="audio/*,.mp3,.wav,.m4a" class="vh">
@@ -1100,6 +1100,7 @@ nav button[aria-selected="true"] svg{background:color-mix(in srgb,var(--ac) 18%,
       <p class="note">True-peak-safe limiter: exports stay under the ceiling (−1 dBTP is the streaming standard). Every export reports integrated loudness and true peak. Tap <strong>● REC</strong> to record a live performance with punch-in FX.</p>
     </div>
   </section>
+  <p class="note" style="text-align:center;margin:24px 0 8px">Ecou · <a href="privacy.html" target="_blank" rel="noopener" style="color:var(--tx)">Privacy</a> · <a href="samples/CREDITS.md" target="_blank" rel="noopener" style="color:var(--tx)">Credits</a></p>
 </main>
 
 <div id="kbwrap" hidden>
@@ -5264,7 +5265,7 @@ var SMP={cache:{},loading:{},fail:{}};
 function smpDecode(ab){return new Promise(function(res,rej){try{var p=ctx.decodeAudioData(ab,res,rej);if(p&&p.then)p.then(res,rej);}catch(e){rej(e);}});}
 /* drop encoder padding and silence before the attack, so hits land on the grid */
 function smpTrim(b){var d=b.getChannelData(0),n=d.length,i=0,th=0.0025;while(i<n&&Math.abs(d[i])<th)i++;i=Math.max(0,i-24);if(i<8)return b;var o=ctx.createBuffer(b.numberOfChannels,n-i,b.sampleRate);for(var c=0;c<b.numberOfChannels;c++)o.getChannelData(c).set(b.getChannelData(c).subarray(i));return o;}
-var SMPALT='https://jondk86.github.io/Ecou/';
+var SMPALT='https://ecou.geoptimize.io/';
 function smpGet(url){return fetch(url).then(function(r){if(!r.ok)throw new Error(r.status+' '+url);return r.arrayBuffer();});}
 /* samples live next to the page; if they are not there (for example inside a preview), fall back to the published copy */
 function smpFetch(url){var alt=SMPALT+url;var first=SMP.alt?smpGet(alt):smpGet(url).catch(function(){return smpGet(alt).then(function(ab){SMP.alt=true;return ab;});});return first.then(smpDecode).then(smpTrim);}
