@@ -556,6 +556,17 @@ nav button[aria-selected="true"] svg{background:color-mix(in srgb,var(--ac) 18%,
 .trx-p{width:min(420px,100%);background:var(--s1);border:1px solid var(--ln);border-radius:22px;padding:20px;display:flex;flex-direction:column;gap:12px;box-shadow:0 20px 50px rgba(0,0,0,.5)}
 .trx-p>b{font-size:18px}.trx-p>span{font-size:13px;color:var(--mu);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .trx-bar{height:8px;border-radius:4px;background:var(--ln);overflow:hidden}.trx-bar i{display:block;height:100%;width:0;background:var(--ac);border-radius:4px;transition:width .3s}
+/* follow the score */
+#scPlay{border-top:1px solid var(--ln);background:#0D0D13;padding:8px 12px calc(10px + env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:8px}
+#scPlay[hidden]{display:none}
+#scKb{width:100%;height:56px;display:block;border-radius:8px;background:#EDEDF2}
+.sc-row{display:flex;align-items:center;gap:12px}
+.sc-pp{width:52px;height:52px;border-radius:26px;border:0;background:var(--tx);color:var(--bg);font-size:18px;font-weight:700;flex-shrink:0}
+.sc-mid{flex:1;min-width:0;display:flex;flex-direction:column;gap:4px}
+.sc-sub{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:12px;color:var(--mu);font-variant-numeric:tabular-nums}
+.sc-sub .seg button{min-height:28px;padding:0 9px;font-size:12px}
+#scCursor{position:absolute;width:3px;border-radius:2px;background:rgba(11,11,16,.55);box-shadow:0 0 0 4px rgba(92,225,230,.35);pointer-events:none;transition:left .06s linear}
+#scoreInner .scf-hl,#scoreInner .scf-hl path{fill:var(--scc)!important;stroke:var(--scc)}
 </style>
 </head>
 <body>
@@ -3000,7 +3011,7 @@ function openScore(){
   $('#scoreKeyInfo').textContent='Key: '+sd.key[0]+(sd.key[2]==='minor'?'':' major')+($('#scoreKey').value==='auto'?' (detected)':'');
   $('#scoreOv').hidden=false;pushOverlay('score');setTimeout(function(){$('#scoreClose').focus();},50);var w=$('#scoreInner');
   var cw=$('#scorePaper').clientWidth||360,bpl=cw<600?2:4;
-  renderScore(w,toABC(sd,bpl),{responsive:'resize',add_classes:true,paddingleft:6,paddingright:70,staffwidth:Math.max(380,Math.min(900,cw))});
+  SCVIS=renderScore(w,toABC(sd,bpl),{responsive:'resize',add_classes:true,paddingleft:6,paddingright:70,staffwidth:Math.max(380,Math.min(900,cw))});try{scFollowReady(sd);}catch(e){}
 }
 function svgToCanvas(svg,width){
   return new Promise(function(res,rej){
@@ -5039,6 +5050,59 @@ function harmFromChord(c){if(!HARM.on)return;harmShow(harmInfo({root:c[0],q:c[1]
 function harmLive(){clearTimeout(HARM.t);HARM.t=setTimeout(function(){if(!HARM.on)return;var ms=[];voices.forEach(function(v){if(v&&v.midi!=null&&v.ti===selTrack)ms.push(v.midi);});if(!ms.length)return;var n=harmName(ms);if(n)harmShow(harmInfo(n));},25);}
 function harmToggle(on){HARM.on=on;try{localStorage.setItem('ecou.harm',on?'1':'0');}catch(e){}harmPaintKeys();if(!on)harmShow(null);if(typeof garStrips==='function'&&GAR.view==='play'&&/skeys|gtr|bass/.test(GAR.inst||'')&&!GAR.amp)garStrips();}
 
+/* ===================== FOLLOW THE SCORE =====================
+   After a recording is transcribed, play it (or the written notes, or both) while the score highlights each note in its
+   scale-degree colour, a cursor moves through the bars and a keyboard below shows the notes being played. */
+var SCVIS=null,SCF={on:false,mode:'rec',pos:0,t0:0,src:null,timer:null,startT:null,raf:0,sd:null,kb:null,lo:48,hi:84,lit:{},cur:[]};
+function scDegCol(m,sd){var k=sd&&sd.key?sd.key:SKEYS[0],minor=k[2]==='minor',ton=TONIC[minor?k[0].replace('m',''):k[0]];if(ton==null)ton=0;
+  var sc=minor?[0,2,3,5,7,8,10]:[0,2,4,5,7,9,11],d=sc.indexOf(((m-ton)%12+12)%12);return d<0?'#6E6E7E':DEGC[d];}
+function scFollowReady(sd){var bar=$('#scPlay');SCF.sd=sd;scStop(true);
+  if(!bar||!(SCOREX&&TRX.ev&&TRX.orig)){if(bar)bar.hidden=true;return;}
+  bar.hidden=false;var q=trxQuant();SCF.lo=127;SCF.hi=0;q.forEach(function(n){SCF.lo=Math.min(SCF.lo,n.m);SCF.hi=Math.max(SCF.hi,n.m);});
+  SCF.lo=Math.max(21,Math.min(SCF.lo,60)-2);SCF.hi=Math.min(108,Math.max(SCF.hi,72)+2);SCF.pos=0;$('#scSeek').max=String(Math.ceil(TRX.orig.duration));$('#scSeek').value='0';scTime();
+  var inner=$('#scoreInner');inner.style.position='relative';if(!$('#scCursor')){var c=document.createElement('div');c.id='scCursor';inner.appendChild(c);}
+  scKb();}
+function scTime(){var p=SCF.on?scNow():SCF.pos,d=TRX.orig?TRX.orig.duration:0;function f(x){x=Math.max(0,x);var m=Math.floor(x/60),s=Math.floor(x%60);return m+':'+(s<10?'0':'')+s;}$('#scT').textContent=f(p)+' / '+f(d);}
+function scNow(){return SCF.startT==null?SCF.pos:SCF.pos+(ctx.currentTime-SCF.startT);}
+function scClear(){$$('#scoreInner .scf-hl').forEach(function(e){e.classList.remove('scf-hl');e.style.removeProperty('--scc');});SCF.lit={};scKbDraw();}
+function scActive(t){var sd=60/TRX.bpm/4,out=[];(SCF.q||[]).forEach(function(n){if(n.s*sd<=t+0.02&&(n.s+n.l)*sd>t+0.02)out.push(n.m);});return out.sort(function(a,b){return b-a;});}
+function scEvent(ev){if(!ev){return;}
+  $$('#scoreInner .scf-hl').forEach(function(e){e.classList.remove('scf-hl');});var lit={},ps=scActive((ev.milliseconds||0)/1000);
+  (ev.elements||[]).forEach(function(group,gi){(group||[]).forEach(function(el){if(!el||!el.classList)return;var col=scDegCol(ps[Math.min(gi,ps.length-1)]||60,SCF.sd);el.classList.add('scf-hl');el.style.setProperty('--scc',col);});});
+  var c=$('#scCursor'),svg=$('#scoreInner svg');if(c&&svg&&ev.left!=null){var vb=svg.viewBox&&svg.viewBox.baseVal,sr=svg.getBoundingClientRect(),ir=$('#scoreInner').getBoundingClientRect(),k=vb&&vb.width?sr.width/vb.width:1;
+    c.style.left=(sr.left-ir.left+ev.left*k-7)+'px';c.style.top=(sr.top-ir.top+ev.top*k)+'px';c.style.height=(ev.height*k)+'px';c.hidden=false;
+    var paper=$('#scorePaper'),r=c.getBoundingClientRect(),pr=paper.getBoundingClientRect();if(r.top<pr.top+20||r.bottom>pr.bottom-20)paper.scrollTo({top:paper.scrollTop+(r.top-pr.top)-pr.height*0.3,behavior:'smooth'});}}
+function scKb(){var cv=$('#scKb');if(!cv)return;var r=cv.getBoundingClientRect(),dpr=window.devicePixelRatio||1;cv.width=Math.max(1,r.width*dpr);cv.height=Math.max(1,r.height*dpr);SCF.kb={w:r.width,h:r.height,dpr:dpr};scKbDraw();}
+function scKbDraw(){var cv=$('#scKb');if(!cv||!SCF.kb)return;var g=cv.getContext('2d'),W=SCF.kb.w,H=SCF.kb.h,isB=function(m){return [1,3,6,8,10].indexOf(m%12)>=0;};g.setTransform(SCF.kb.dpr,0,0,SCF.kb.dpr,0,0);g.clearRect(0,0,W,H);
+  var whites=[];for(var m=SCF.lo;m<=SCF.hi;m++)if(!isB(m))whites.push(m);var ww=W/whites.length,xi={};
+  whites.forEach(function(m,i){xi[m]=i;var on=SCF.lit[m];g.fillStyle=on?scDegCol(m,SCF.sd):'#EDEDF2';g.fillRect(i*ww+0.5,0,ww-1,H);if(m%12===0){g.fillStyle=on?'#0B0B10':'#8A8A98';g.font='9px Space Grotesk, sans-serif';g.fillText('C'+(m/12-1),i*ww+2,H-4);}});
+  for(m=SCF.lo;m<=SCF.hi;m++){if(!isB(m)||xi[m-1]==null)continue;var x=(xi[m-1]+1)*ww-ww*0.32,on2=SCF.lit[m];g.fillStyle=on2?scDegCol(m,SCF.sd):'#1E1E28';g.fillRect(x,0,ww*0.64,H*0.6);}}
+function scStop(silent){SCF.on=false;cancelAnimationFrame(SCF.raf);if(SCF.timer){try{SCF.timer.stop();}catch(e){}SCF.timer=null;}clearTimeout(SCF.tw);
+  if(SCF.src){try{SCF.src.stop();}catch(e){}SCF.src=null;}if(SCF.startT!=null){SCF.pos=Math.min(scNow(),TRX.orig?TRX.orig.duration:0);SCF.startT=null;}
+  if(SCF.notes){try{transportStop();}catch(e){}SCF.notes=false;}var b=$('#scPP');if(b){b.textContent='▶';b.setAttribute('aria-label','Play');}if(!silent)scClear();var c=$('#scCursor');if(c&&!silent)c.hidden=true;}
+function scPlay(){if(!TRX.orig||!SCVIS||!SCVIS[0]||!ensureAudio())return;scStop(true);
+  var lat=(ctx.outputLatency||0)+(ctx.baseLatency||0),now=ctx.currentTime+0.12,off=Math.max(0,Math.min(SCF.pos,TRX.orig.duration-0.05)),t0=TRX.t0||0,sd=60/TRX.bpm/4,mode=SCF.mode;
+  if(off>=TRX.orig.duration-0.1){off=0;SCF.pos=0;}
+  if(mode!=='notes'){var s=ctx.createBufferSource(),g=ctx.createGain();g.gain.value=mode==='both'?0.7:1;s.buffer=TRX.orig;s.connect(g);g.connect(ctx.destination);s.start(now,off);SCF.src=s;s.onended=function(){if(SCF.src===s&&SCF.on)scStop();};}
+  if(mode!=='rec'){var ti=KEYSI()[0]||1;trxQuant().forEach(function(n){var at=t0+n.s*sd-off;if(at<-0.01)return;playNote(ti,n.m,n.v*0.85,now+at,Math.max(0.08,n.l*sd));});SCF.notes=true;
+    if(mode==='notes'){var endS=0;trxQuant().forEach(function(n){endS=Math.max(endS,t0+(n.s+n.l)*sd);});SCF.tw2=setTimeout(function(){if(SCF.on&&SCF.mode==='notes')scStop();},Math.max(0,(endS-off+0.8))*1000);}}
+  SCF.q=trxQuant();SCF.startT=now;SCF.on=true;var b=$('#scPP');b.textContent='❚❚';b.setAttribute('aria-label','Pause');
+  SCF.timer=new ABCJS.TimingCallbacks(SCVIS[0],{qpm:TRX.bpm,eventCallback:scEvent});
+  var scoreSec=off-t0,delay=(now-ctx.currentTime)+lat;
+  if(scoreSec>=0){SCF.tw=setTimeout(function(){if(SCF.on&&SCF.timer)SCF.timer.start(scoreSec+lat*0,'seconds');},delay*1000);}
+  else SCF.tw=setTimeout(function(){if(SCF.on&&SCF.timer)SCF.timer.start(0,'seconds');},(delay-scoreSec)*1000);
+  (function loop(){if(!SCF.on)return;if($('#scoreOv').hidden){scStop();return;}var p=scNow();$('#scSeek').value=String(p);scTime();var act=scActive(p-lat-(TRX.t0||0)),key=act.join(',');if(key!==SCF.litKey){SCF.litKey=key;var L={};act.forEach(function(m){L[m]=1;});SCF.lit=L;scKbDraw();}if(p>=TRX.orig.duration+0.3&&SCF.mode!=='notes'){scStop();return;}SCF.raf=requestAnimationFrame(loop);})();}
+function initScf(){
+  var ov=$('#scoreOv');if(!ov||$('#scPlay'))return;var d=document.createElement('div');d.id='scPlay';d.hidden=true;
+  d.innerHTML='<canvas id="scKb" aria-hidden="true"></canvas><div class="sc-row"><button id="scPP" class="sc-pp" aria-label="Play">▶</button><div class="sc-mid"><input type="range" id="scSeek" min="0" max="1" step="0.1" value="0" aria-label="Position"><div class="sc-sub"><span id="scT">0:00 / 0:00</span><div class="seg" role="group" aria-label="What to hear" id="scMode"><button data-scm="rec" aria-pressed="true">Recording</button><button data-scm="notes" aria-pressed="false">Notes</button><button data-scm="both" aria-pressed="false">Both</button></div></div></div></div>';
+  ov.appendChild(d);
+  $('#scPP').addEventListener('click',function(){if(SCF.on)scStop(true);else scPlay();});
+  $$('#scMode [data-scm]').forEach(function(b){b.addEventListener('click',function(){SCF.mode=b.getAttribute('data-scm');$$('#scMode [data-scm]').forEach(function(x){x.setAttribute('aria-pressed',x===b);});if(SCF.on)scPlay();});});
+  var sk=$('#scSeek');sk.addEventListener('input',function(){var was=SCF.on;if(was)scStop(true);SCF.pos=+sk.value;scTime();if(was)scPlay();});
+  $('#scoreClose').addEventListener('click',function(){scStop();});
+  window.addEventListener('resize',function(){if(!$('#scPlay').hidden)scKb();});
+}
+
 /* ===================== AUDIO → SHEET MUSIC =====================
    Transcribes an uploaded recording with Spotify's Basic Pitch model (runs on the phone, Apache-2.0), quantizes the notes
    to the detected tempo and hands them to the existing score, PDF, MusicXML and MIDI exporters. */
@@ -5064,7 +5128,7 @@ function trxFile(file){
   if(TRX.busy||!file)return;if(!ensureAudio())return;TRX.busy=true;TRX.cancel=false;TRX.name=(file.name||'Recording').replace(/\.[^.]+$/,'');$('#trxRes').hidden=true;
   trxOv(true,TRX.name);trxStep('Reading the file…',0.02);var orig=null,t0=performance.now();
   trxPaint().then(function(){return file.arrayBuffer();}).then(function(ab){trxStep('Decoding the audio…',0.05);return trxPaint().then(function(){return smpDecode(ab);});})
-  .then(function(b){if(TRX.cancel)throw new Error('cancel');orig=b;TRX.dur=b.duration;if(b.duration>420)throw new Error('long');TRX.bpm=Math.round(detectBpm(b)||120);trxStep('Preparing the audio…',0.08);return trxPaint().then(function(){return trxResample(b);});})
+  .then(function(b){if(TRX.cancel)throw new Error('cancel');orig=b;TRX.orig=b;TRX.dur=b.duration;if(b.duration>420)throw new Error('long');TRX.bpm=Math.round(detectBpm(b)||120);trxStep('Preparing the audio…',0.08);return trxPaint().then(function(){return trxResample(b);});})
   .then(function(r22){if(TRX.cancel)throw new Error('cancel');trxStep('Loading the note detector…',0.1);return trxLibUrl().then(function(base){return {base:base,pcm:r22.getChannelData(0).slice()};});})
   .then(function(o){return new Promise(function(res,rej){var url=URL.createObjectURL(new Blob([TRXW],{type:'text/javascript'}));try{trxWk=new Worker(url);}catch(e){rej(new Error('worker'));return;}
       trxWk.onmessage=function(e){var d=e.data;if(d.t==='be'){trxStep(d.be==='webgl'?'Listening for notes…':'Listening for notes (this phone uses the slower mode)…',0.12);}
@@ -5080,7 +5144,7 @@ function trxFile(file){
 /* one note at a time: keep the strongest note wherever notes overlap, then end each note where the next begins */
 function trxMelody(ev){var out=[];ev.forEach(function(e){var last=out[out.length-1];if(last&&e.t<last.t+last.d-0.03){if(e.a>last.a*1.15&&Math.abs(e.t-last.t)<0.08)out[out.length-1]=e;else if(e.a>last.a*1.15){last.d=Math.max(0.05,e.t-last.t);out.push(e);}return;}out.push(e);});
   for(var i=0;i<out.length-1;i++)if(out[i].t+out[i].d>out[i+1].t)out[i].d=Math.max(0.05,out[i+1].t-out[i].t);return out;}
-function trxQuant(){var ev=TRX.mode==='poly'?TRX.ev:trxMelody(TRX.ev),sd=60/TRX.bpm/4,t0=ev[0].t,seen={},q=[];
+function trxQuant(){var ev=TRX.mode==='poly'?TRX.ev:trxMelody(TRX.ev),sd=60/TRX.bpm/4,t0=ev[0].t,seen={},q=[];TRX.t0=t0;
   ev.forEach(function(e){var s=Math.max(0,Math.round((e.t-t0)/sd)),l=Math.max(1,Math.round(e.d/sd));if(TRX.mode!=='poly'){var k=s;if(seen[k])return;seen[k]=1;}else{var k2=s+':'+e.m;if(seen[k2])return;seen[k2]=1;}q.push({s:s,l:Math.min(l,64),m:Math.round(e.m),v:clamp(0.4+e.a*0.6,0.3,1)});});
   if(TRX.mode!=='poly'){for(var i=0;i<q.length-1;i++)if(q[i].s+q[i].l>q[i+1].s)q[i].l=Math.max(1,q[i+1].s-q[i].s);}
   var cap=128*16;return q.filter(function(n){return n.s<cap;});}
@@ -5824,7 +5888,7 @@ function initGarage(){
   setInterval(garTick,60);
 }
 
-buildControls();initStudio();initDaw();initJam();initPocket();initRoll2();initDrums2();initRef();initFM();initFm1();initF1();initLoopB();requestAnimationFrame(meterTick);initGarage();initTrx();
+buildControls();initStudio();initDaw();initJam();initPocket();initRoll2();initDrums2();initRef();initFM();initFm1();initF1();initLoopB();requestAnimationFrame(meterTick);initGarage();initTrx();initScf();
 $('#hitTgt').addEventListener('click',hitTarget);$$('[data-tgt]').forEach(function(b){b.addEventListener('click',function(){MT.tgt=+b.getAttribute('data-tgt');$$('[data-tgt]').forEach(function(x){x.setAttribute('aria-pressed',x===b?'true':'false');});});});initSpatial();initAmp();initScore();initPads();initAI();buildFxUI();buildDsync();updDelayTime();buildMatrix();buildKeyboard();requestAnimationFrame(loop);
 (function(){var h=(location.hash||'').slice(1);for(var k in TABH)if(TABH[k]===h){showTab(k,true);}})();
 $('#midiOn').addEventListener('click',midiConnect);
