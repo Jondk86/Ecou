@@ -1,0 +1,8 @@
+[{
+      "relation": ["delegate_permission/common.handle_all_urls"],
+      "target": {
+        "namespace": "android_app",
+        "package_name": "io.geoptimize.ecou.twa",
+        "sha256_cert_fingerprints": ["CE:1F:1E:2F:B7:F6:81:1B:68:C8:59:7F:A6:87:D2:13:4D:91:D2:30:ED:CD:09:50:19:A3:1D:E5:C5:F4:63:A3"]
+      }
+    }]
