@@ -571,6 +571,7 @@ nav button[aria-selected="true"] svg{background:color-mix(in srgb,var(--ac) 18%,
 .sc-sub .seg button{min-height:28px;padding:0 9px;font-size:12px}
 #scCursor{position:absolute;width:3px;border-radius:2px;background:rgba(11,11,16,.55);box-shadow:0 0 0 4px rgba(92,225,230,.35);pointer-events:none;transition:left .06s linear}
 #scoreInner .scf-hl,#scoreInner .scf-hl path{fill:var(--scc)!important;stroke:var(--scc)}
+#keysRow{display:grid;grid-template-columns:auto minmax(0,1fr) minmax(0,1fr);gap:8px;align-items:center}#keysRow .dsel{max-width:none;width:100%;min-width:0;text-overflow:ellipsis}#keysRow #keysBtn{min-height:40px}
 </style>
 </head>
 <body>
@@ -865,7 +866,7 @@ html.splash #splash{display:flex}
     <div class="card" style="gap:8px">
       <div class="row"><button class="mv tgl wide" id="nrBtn" aria-pressed="false">Note repeat</button><div class="seg" role="group" aria-label="Repeat rate"><button data-nr="2">1/8</button><button data-nr="4" aria-pressed="true">1/16</button><button data-nr="8">1/32</button></div></div>
       <div class="row"><span class="mu">Kit</span><div class="chips" id="kitChips" style="justify-content:flex-end"></div></div>
-      <div class="row"><button class="mv tgl wide" id="keysBtn" aria-pressed="false">Keys mode</button><select id="keysSrc" class="dsel" aria-label="What the pads play in Keys mode"></select><div class="seg" role="group" aria-label="Scale"><button data-ks="minor" aria-pressed="true">Minor</button><button data-ks="major">Major</button><button data-ks="penta">Penta</button><button data-ks="chrom">Chrom</button></div></div>
+      <div class="row" id="keysRow"><button class="mv tgl wide" id="keysBtn" aria-pressed="false">Keys mode</button><select id="keysSrc" class="dsel" aria-label="What the pads play in Keys mode"></select><select id="keysScale" class="dsel" aria-label="Scale"><option value="minor" selected>Minor</option><option value="major">Major</option><option value="penta">Penta</option><option value="chrom">Chrom</option></select></div>
     </div>
     <div id="pads" class="pads" aria-label="Drum pads"></div>
     <div class="card" style="gap:10px">
@@ -3629,7 +3630,7 @@ function initPocket(){
   $$('[data-nr]').forEach(function(b){b.addEventListener('click',function(){nrRate=+b.getAttribute('data-nr');$$('[data-nr]').forEach(function(x){x.setAttribute('aria-pressed',x===b?'true':'false');});});});
   renderKeysSrc();$('#keysSrc').addEventListener('change',function(e){keysSrc=+e.target.value;if(keysSrc>0)selectTrack(keysSrc);renderPads();toast(keysSrc>0?'Pads play '+tracks[keysSrc].name+' ('+keyScale+' scale, bottom-left = root).':'Pads play the selected pad sound at different pitches.',2000);});
   $('#keysBtn').addEventListener('click',function(){keysMode=!keysMode;renderKeysSrc();this.setAttribute('aria-pressed',keysMode);$('#pads').classList.toggle('keys',keysMode);renderPads();if(keysMode&&keysSrc>0&&tracks[keysSrc])selectTrack(keysSrc);toast(keysMode?'Keys mode: the pads play '+(keysSrc>0&&tracks[keysSrc]?tracks[keysSrc].name:pads[padSel].name)+' in '+keyScale+' — bottom-left is the root. Change the instrument next to the button.':'Pads mode.',2400);});
-  $$('[data-ks]').forEach(function(b){b.addEventListener('click',function(){keyScale=b.getAttribute('data-ks');$$('[data-ks]').forEach(function(x){x.setAttribute('aria-pressed',x===b?'true':'false');});if(keysMode)renderPads();});});
+  $('#keysScale').addEventListener('change',function(){keyScale=this.value;if(keysMode)renderPads();});
   $('#commitBtn').addEventListener('click',commitPattern);
   // step locks
   $('#lkP').addEventListener('input',updLockOut);$('#lkL').addEventListener('input',updLockOut);
