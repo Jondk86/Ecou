@@ -2067,8 +2067,9 @@ function setEngine(v){if(v!=='sampler'&&v!=='granular'&&v!=='fm')return;if(ctx)a
 var aiScope='track',TRACKP=IKEYS;
 function aiApply(ch){
   var before=aiSnapshot(),trNote=[];before.tr={i:selTrack,rev:tracks[selTrack].rev,dly:tracks[selTrack].dly};
-  if(aiScope==='track'){ /* keep the change on the sound being edited: no global timing, shared inserts or master FX */
-    var pp={},t=tracks[selTrack];Object.keys(ch.params||{}).forEach(function(k){var v=+ch.params[k];if(TRACKP.indexOf(k)>=0)pp[k]=v;
+  var autoMix=aiScope==='track'&&!Object.keys(ch.params||{}).some(function(k){return IKEYS.indexOf(k)>=0||k==='space'||k==='dmix';})&&!!(Object.keys(ch.fx||{}).length||ch.ampModel||ch.rotary);
+  if(aiScope==='track'&&!autoMix){ /* keep the change on the sound being edited: no global timing, shared inserts or master FX */
+    var pp={},t=tracks[selTrack];Object.keys(ch.params||{}).forEach(function(k){var v=+ch.params[k];if(IKEYS.indexOf(k)>=0)pp[k]=v;
       else if(k==='space'){t.rev=clamp(v,0,1);trNote.push(t.name+' reverb send → '+fPct(t.rev));}else if(k==='dmix'){t.dly=clamp(v*1.5,0,1);trNote.push(t.name+' delay send → '+fPct(t.dly));}});
     var skipped=Object.keys(ch.fx||{}).length+(ch.ampModel?1:0)+(ch.rotary?1:0);
     ch={params:pp,engine:ch.engine,summary:ch.summary};if(trNote.length){applyMix();renderMixer();}
@@ -2089,7 +2090,7 @@ function aiApply(ch){
   if(before.eng!==engine)lines.unshift('Engine: '+engine);
   if(before.ds!==dsync)lines.push('Delay sync: '+dsync);
   if(beforeAmp!==ampModel)lines.unshift('Amp model: '+AMPM[ampModel].name);
-  lines=trNote.concat(lines);if(!lines.length)lines.push('Nothing to change for this track.');
+  lines=trNote.concat(lines);if(autoMix)lines.unshift('This look comes from shared effects, so it was applied to the whole mix.');if(!lines.length)lines.push('Nothing to change for this track.');
   aiUndo=before;$('#aiUndo').hidden=false;
   return lines;
 }
