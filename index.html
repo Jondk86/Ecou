@@ -6375,7 +6375,8 @@ function garBand(){var B=GAR.band,el=$('#garInst');el.classList.remove('fret');b
     '<div class="gx-styles" id="bdGen" role="group" aria-label="Genre">'+Object.keys(BGEN).map(function(k){return '<button class="gx-sty" data-bg="'+k+'" aria-pressed="'+(B.genre===k)+'"><b>'+BGEN[k].n+'</b><small>'+BGEN[k].sub+'</small></button>';}).join('')+'</div>';
   /* harmony */
   var hb='<div class="gx-row"><span>Key</span><div style="display:flex;gap:6px"><select class="gx-pill bd-sel" id="bdKey" aria-label="Key root">'+GNOTE.map(function(n,i){return '<option value="'+i+'"'+(GAR.key===i?' selected':'')+'>'+n+'</option>';}).join('')+'</select>'+
-      bandSelect('bdMode',Object.keys(BMODE).reduce(function(a,k){a[k]=BMODE[k].n;return a;},{}),Object.keys(BMODE),B.mode,'Mode')+'</div></div>'+
+      bandSeg('bdMM','bmm',[['maj','Major'],['min','Minor']],(BMODE[B.mode]||{}).mi?'min':'maj')+'</div></div>'+
+    '<div class="gx-row"><span>Mode</span>'+bandSelect('bdMode',Object.keys(BMODE).reduce(function(a,k){a[k]=BMODE[k].n;return a;},{}),Object.keys(BMODE),B.mode,'Mode')+'</div>'+
     '<div class="gx-row"><span>Chord colour</span>'+bandSeg('bdColor','bcol',[['tri','Triads'],['7th','7ths']],B.color)+'</div>'+
     '<div class="gx-row"><span>Part '+B.edit+'</span><span class="mu">tap a bar, then a chord</span></div>'+
     '<div class="bd-bars" id="bdBars">'+prog.map(function(c,i){return '<button data-bb="'+i+'" aria-pressed="'+(B.sel===i)+'"><small>'+(i+1)+'</small>'+bandChName(c)+'</button>';}).join('')+
@@ -6436,8 +6437,8 @@ function bandBind(el){var B=GAR.band,re=function(){markDirty();garBand();},prog=
     if(/onedrop|bossa/.test(G0.d)&&garPad('rim')<0)toast('This genre sounds best with the Reggae kit (it has a rim click): pick it in the sound menu at the top.',2800);re();});
   on('details.bd-sec','toggle',function(){B.open[this.getAttribute('data-sec')]=this.open;});
   /* harmony */
-  $('#bdKey').addEventListener('change',function(){var nk=+this.value,d=nk-GAR.key;['A','B','C'].forEach(function(p){if(B.parts[p])B.parts[p]=B.parts[p].map(function(c){var o=[(c[0]+d+12)%12,c[1]];if(c[2])o.push([(c[2][0]+d+12)%12,c[2][1]]);return o;});});
-    GAR.key=nk;GAR.chords=null;var ks=$('#garKey');if(ks)ks.value=GAR.key+(GAR.minor?'m':'');re();toast('Key '+GNOTE[nk]+': your chords moved with it.',1400);});
+  $('#bdKey').addEventListener('change',function(){var ok=GAR.key,om=GAR.minor;GAR.key=+this.value;GAR.chords=null;var ks=$('#garKey');if(ks)ks.value=GAR.key+(GAR.minor?'m':'');bandKeyChanged(ok,om);if(typeof harmPaintKeys==='function')harmPaintKeys();toast('Key '+GNOTE[GAR.key]+(GAR.minor?' minor':' major')+': your chords moved with it.',1400);});
+  on('#bdMM [data-bmm]','click',function(){var mi=this.getAttribute('data-bmm')==='min';if(mi===!!BMODE[B.mode].mi)return;var om=GAR.minor;GAR.minor=mi;GAR.chords=null;var ks=$('#garKey');if(ks)ks.value=GAR.key+(mi?'m':'');B.mode=mi?'aeolian':'ionian';bandKeyChanged(GAR.key,om);toast(GNOTE[GAR.key]+(mi?' minor':' major'),1000);});
   $('#bdMode').addEventListener('change',function(){B.mode=this.value;var mi=!!BMODE[B.mode].mi;if(mi!==GAR.minor){GAR.minor=mi;GAR.chords=null;var ks=$('#garKey');if(ks)ks.value=GAR.key+(mi?'m':'');}re();});
   on('#bdColor [data-bcol]','click',function(){B.color=this.getAttribute('data-bcol');re();});
   on('#bdBars [data-bb]','click',function(){B.sel=+this.getAttribute('data-bb');B.half=false;garBand();bandAudition(bandPart(B.edit)[B.sel]);});
@@ -6484,6 +6485,11 @@ function bandBind(el){var B=GAR.band,re=function(){markDirty();garBand();},prog=
   var snd=function(id,kind){$(id).addEventListener('change',function(){var v=this.value;if(!v)return;var ti=bandTrack(kind);if(ti!==selTrack)selectTrack(ti);loadStock(v);});};snd('#bdBSnd','bass');snd('#bdKSnd','keys');
   on('[data-bsong]','click',function(){bandToSong(+this.getAttribute('data-bsong'));});}
 function bandAudition(c){if(!c||!ensureAudio()||bandRunning())return;var cc=c[2]&&GAR.band.half?c[2]:[c[0],c[1]],kt=bandTrack('keys'),bt=bandTrack('bass'),t=ctx.currentTime+0.02;bandVoice(cc).forEach(function(m){playNote(kt,m,0.6,t,0.6);});if(bt>0&&bt!==kt)playNote(bt,garBassRoot(cc,28+GAR.band.bReg*12),0.7,t,0.6);}
+function bandKeyChanged(ok,om){var B=GAR.band,d=GAR.key-ok,mi=!!(BMODE[B.mode]||{}).mi;
+  ['A','B','C'].forEach(function(p){var P0=B.parts[p];if(!P0)return;var nk=GAR.key;GAR.key=ok;var savedMode=B.mode;B.mode=om?'aeolian':'ionian';var def=JSON.stringify(bandDef(p));GAR.key=nk;B.mode=savedMode;
+    if(om!==GAR.minor&&JSON.stringify(P0)===def){B.parts[p]=null;return;}
+    B.parts[p]=P0.map(function(c){var o=[(c[0]+d+12)%12,c[1]];if(c[2])o.push([(c[2][0]+d+12)%12,c[2][1]]);return o;});});
+  if(mi!==GAR.minor)B.mode=GAR.minor?'aeolian':'ionian';markDirty();if(GAR.inst==='band'&&GAR.view==='play')garBand();}
 function bandMigrate(d){var B=GAR.band;if(!d)return;Object.keys(d).forEach(function(k){if(k in B)B[k]=d[k];});B.parts=Object.assign({A:null,B:null,C:null},d.parts||{});B.pen=Object.assign({A:0.5,B:0.7,C:0.35},d.pen||{});
   if(d.energy!=null&&!d.pen){B.pen.A=d.energy;B.pen.B=Math.min(1,d.energy+0.15);}if(d.genre&&!d.dS&&BGEN[d.genre]){var G0=BGEN[d.genre];B.meter=G0.m;B.dS=G0.d;B.bS=G0.b;B.kS=G0.k;B.feel=G0.f;B.swing=G0.sw;}
   B.groove=d.groove||{};B.gOn=Object.assign({d:false,b:false,k:false},d.gOn||{});B.open=Object.assign({harm:true},d.open||{});if(!BMET[B.meter])B.meter='4/4';if(!BMODE[B.mode])B.mode='ionian';B.keyHint=null;}
@@ -6623,7 +6629,7 @@ function garTempoSheet(){var h='<div class="gx-tempo"><button id="gtDn" aria-lab
     $('#gtHarm').addEventListener('click',function(){harmToggle(!HARM.on);this.setAttribute('aria-pressed',HARM.on);});});}
 function initGarage(){
   var ks=$('#garKey'),h='<optgroup label="Major">';for(var i=0;i<12;i++)h+='<option value="'+i+'">'+GNOTE[i]+' major</option>';h+='</optgroup><optgroup label="Minor">';for(i=0;i<12;i++)h+='<option value="'+i+'m">'+GNOTE[i]+' minor</option>';ks.innerHTML=h+'</optgroup>';ks.value='0';
-  ks.addEventListener('change',function(){GAR.minor=/m$/.test(ks.value);GAR.key=parseInt(ks.value,10);GAR.chords=null;markDirty();harmPaintKeys();HARM.cur=null;if(GAR.view==='play')garRenderPlay();garUpd();});
+  ks.addEventListener('change',function(){var ok=GAR.key,om=GAR.minor;GAR.minor=/m$/.test(ks.value);GAR.key=parseInt(ks.value,10);if(typeof bandKeyChanged==='function')bandKeyChanged(ok,om);GAR.chords=null;markDirty();harmPaintKeys();HARM.cur=null;if(GAR.view==='play')garRenderPlay();garUpd();});
   $$('#garViews [data-gv]').forEach(function(b){b.addEventListener('click',function(){var v=b.getAttribute('data-gv');if(v==='inst'&&(GAR.view==='play'||GAR.view==='sounds'))v=GAR.view==='play'?'sounds':'sounds';garView(v);});});
   $('#garBack').addEventListener('click',function(){garView('sounds');});
   $('#garPlay').addEventListener('click',garPlay);$('#garRec').addEventListener('click',garRecord);
@@ -6659,6 +6665,6 @@ $('#midiOn').addEventListener('click',midiConnect);
 $$('[data-exp]').forEach(function(b){b.addEventListener('click',function(){ensureAudio();var k=b.getAttribute('data-exp'),s=slots[k];if(!s.buf)return;saveWav(encodeWav([s.buf.getChannelData(0)],s.buf.sampleRate),'ecou-'+s.name.replace(/[^a-z0-9]+/gi,'-').toLowerCase()+'-'+nname(ftom(s.root)));});});
 })();
 </script>
-<div id="updBar" hidden><span>A new version of Ecou is ready.</span><button id="updGo">Update</button></div><style>#updBar{position:fixed;left:12px;right:12px;bottom:calc(84px + env(safe-area-inset-bottom));z-index:950;display:flex;align-items:center;gap:12px;padding:12px 12px 12px 16px;border-radius:16px;background:#1E1E28;border:1px solid #2B2B37;color:#E9E9F0;font:14px/1.4 system-ui,sans-serif;box-shadow:0 10px 30px rgba(0,0,0,.5)}#updBar[hidden]{display:none}#updBar span{flex:1}#updBar button{border:0;border-radius:999px;background:#D4FF3A;color:#0B0B10;font:700 14px system-ui,sans-serif;padding:9px 16px}</style><script>(function(){var V="01ac9334ae",busy=false,last=0;function chk(){if(busy||Date.now()-last<60000)return;busy=true;last=Date.now();fetch("version.txt?"+Date.now(),{cache:"no-store"}).then(function(r){return r.ok?r.text():"";}).then(function(t){t=(t||"").trim();if(t&&t!==V)document.getElementById("updBar").hidden=false;}).catch(function(){}).then(function(){busy=false;});}document.addEventListener("visibilitychange",function(){if(!document.hidden)chk();});setTimeout(chk,8000);document.addEventListener("click",function(e){if(e.target&&e.target.id==="updGo"){try{if(typeof saveProject==="function")saveProject(true);}catch(x){}location.reload();}});})();</script>
+<div id="updBar" hidden><span>A new version of Ecou is ready.</span><button id="updGo">Update</button></div><style>#updBar{position:fixed;left:12px;right:12px;bottom:calc(84px + env(safe-area-inset-bottom));z-index:950;display:flex;align-items:center;gap:12px;padding:12px 12px 12px 16px;border-radius:16px;background:#1E1E28;border:1px solid #2B2B37;color:#E9E9F0;font:14px/1.4 system-ui,sans-serif;box-shadow:0 10px 30px rgba(0,0,0,.5)}#updBar[hidden]{display:none}#updBar span{flex:1}#updBar button{border:0;border-radius:999px;background:#D4FF3A;color:#0B0B10;font:700 14px system-ui,sans-serif;padding:9px 16px}</style><script>(function(){var V="c5a0f67ceb",busy=false,last=0;function chk(){if(busy||Date.now()-last<60000)return;busy=true;last=Date.now();fetch("version.txt?"+Date.now(),{cache:"no-store"}).then(function(r){return r.ok?r.text():"";}).then(function(t){t=(t||"").trim();if(t&&t!==V)document.getElementById("updBar").hidden=false;}).catch(function(){}).then(function(){busy=false;});}document.addEventListener("visibilitychange",function(){if(!document.hidden)chk();});setTimeout(chk,8000);document.addEventListener("click",function(e){if(e.target&&e.target.id==="updGo"){try{if(typeof saveProject==="function")saveProject(true);}catch(x){}location.reload();}});})();</script>
 </body>
 </html>
