@@ -1059,14 +1059,15 @@ html.splash #splash{display:flex}
       <input id="projName" type="text" autocomplete="off" value="Untitled beat" style="min-height:46px;border-radius:12px;border:1px solid #3A3A48;background:var(--s2);color:var(--tx);font:inherit;font-size:16px;font-weight:600;padding:0 12px">
       <div class="btns"><button class="btn primary" id="projSave">Save</button><button class="btn" id="projOpen">Open…</button></div>
       <div id="projList" hidden style="display:flex;flex-direction:column;gap:6px"></div>
-      <div class="btns"><button class="btn" id="projNew">New</button><button class="btn" id="projExport">Export file</button></div>
-      <label class="btn" for="f-PROJ" id="projImport">Import file</label>
+      <p class="mu" id="storeUse" hidden style="margin:0;font-size:12px"></p>
+      <div class="btns"><button class="btn" id="projExport">Back up to file</button><label class="btn" for="f-PROJ" id="projImport">Restore from file</label></div>
+      <button class="btn" id="projNew">New</button>
       <div class="btns"><button class="btn" id="diagBtn">Sound diagnostics</button><button class="btn" id="diagRestart">Restart audio engine</button></div>
       <label class="chk" style="justify-content:space-between"><span>Stable playback — fixes crackling on slower phones (adds a little latency)</span><input type="checkbox" id="stableAudio"></label>
       <pre id="diagOut" hidden style="white-space:pre-wrap;font-size:12px;line-height:1.45;background:var(--s2);border-radius:12px;padding:10px;margin:0;color:var(--tx)"></pre>
-      <p class="note">Projects auto-save on this device. Export file creates a portable .zip with all samples, patterns and settings.</p>
+      <p class="note">Projects auto-save on this device. Back up to file saves a portable copy with all samples, patterns and settings; Restore from file opens one.</p>
     </div>
-    <input type="file" id="f-PROJ" accept=".zip,application/zip" class="vh">
+    <input type="file" id="f-PROJ" accept=".zip,.ecou,application/zip" class="vh">
   </section>
 
   <!-- STUDIO -->
@@ -2649,29 +2650,37 @@ function resetProject(){
 var DBP=null;
 function idb(){if(DBP)return DBP;DBP=new Promise(function(res,rej){try{var r=indexedDB.open('ecou',1);r.onupgradeneeded=function(){var db=r.result;db.createObjectStore('projects',{keyPath:'id'});db.createObjectStore('meta',{keyPath:'id'});};r.onsuccess=function(){res(r.result);};r.onerror=function(){rej(r.error);};}catch(e){rej(e);}});DBP.catch(function(){DBP=null;});return DBP;}
 function idbReq(store,mode,fn){return idb().then(function(db){return new Promise(function(res,rej){var tx=db.transaction(store,mode),st=tx.objectStore(store),r=fn(st),out;if(r)r.onsuccess=function(){out=r.result;};tx.oncomplete=function(){res(out);};tx.onerror=function(){rej(tx.error);};tx.onabort=function(){rej(tx.error);};});});}
-var saving=false,storageWarned=false;
+var saving=false,storageWarned=false,persistAsked=false,persistOK=null;
+/* ask the browser once per session to keep IndexedDB from being evicted; warn only if it says no */
+function askPersist(){if(persistAsked)return;persistAsked=true;
+  try{if(!navigator.storage||typeof navigator.storage.persist!=='function')return;
+    navigator.storage.persist().then(function(ok){persistOK=!!ok;var seen=false;try{seen=localStorage.getItem('ecou.persistWarn')==='1';if(!ok)localStorage.setItem('ecou.persistWarn','1');}catch(e){}if(!ok&&!seen)setTimeout(function(){toast('This browser may clear saved projects when space runs low. Use Back up to file regularly.',5000);},2400);}).catch(function(){});}catch(e){}}
+function fmtBytes(b){b=+b||0;if(b<1024*1024)return Math.max(0,Math.round(b/1024))+' KB';if(b<1024*1024*1024)return (b/1048576).toFixed(b<10485760?1:0)+' MB';return (b/1073741824).toFixed(1)+' GB';}
+function showStorageUse(){var el=$('#storeUse');if(!el)return;
+  try{if(!navigator.storage||typeof navigator.storage.estimate!=='function'){el.hidden=true;return;}
+    navigator.storage.estimate().then(function(e){if(!e||!e.quota){el.hidden=true;return;}el.textContent='Storage: '+fmtBytes(e.usage)+' used of '+fmtBytes(e.quota)+(persistOK===true?' · protected':'');el.hidden=false;}).catch(function(){el.hidden=true;});}catch(e){el.hidden=true;}}
 function saveProject(auto){
-  if(!ctx||saving)return Promise.resolve();saving=true;
+  if(!ctx||saving)return Promise.resolve();saving=true;askPersist();
   project.name=($('#projName').value||'').trim()||project.name||'Untitled beat';
   if(!project.id)project.id='p'+Date.now();
   var s=serialize();s.data=JSON.parse(JSON.stringify(s.data));dirty=false;var rec={id:project.id,name:project.name,updated:Date.now(),data:s.data,bufs:s.bufs},bars=song.reduce(function(a,pi){return a+patterns[pi].len/16;},0);
   return idbReq('projects','readwrite',function(st){return st.put(rec);}).then(function(){return idbReq('meta','readwrite',function(st){return st.put({id:rec.id,name:rec.name,updated:rec.updated,bars:bars,bpm:Math.round(P.bpm.v)});});})
   .then(function(){try{localStorage.setItem('ecou.last',project.id);}catch(e){}$('#saveState').textContent=(auto?'Auto-saved ':'Saved ')+new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});if(!auto)toast('Project saved on this device.');})
-  .catch(function(){dirty=true;$('#saveState').textContent='Device storage unavailable — use Export file';if(!auto||!storageWarned){storageWarned=true;toast('This view can’t save on the device. Use Export file to keep your project.',5000);}})
+  .catch(function(){dirty=true;$('#saveState').textContent='Device storage unavailable — use Back up to file';if(!auto||!storageWarned){storageWarned=true;toast('This view can’t save on the device. Use Back up to file to keep your project.',5000);}})
   .then(function(){saving=false;});
 }
 function openProject(id){
-  return idbReq('projects','readonly',function(st){return st.get(id);}).then(function(rec){if(!rec){toast('Project not found.');return;}project.id=rec.id;try{loadProjectData(rec.data,rec.bufs);}catch(e){errLog.push('load: '+e.message+' '+((e.stack||'').split('\n')[1]||''));throw e;}$('#saveState').textContent='Opened '+rec.name;try{localStorage.setItem('ecou.last',rec.id);}catch(e){}$('#projList').hidden=true;toast('Opened “'+rec.name+'”.');}).catch(function(){toast('Couldn’t open the project.');});
+  return idbReq('projects','readonly',function(st){return st.get(id);}).then(function(rec){if(!rec){toast('Project not found.');return;}project.id=rec.id;try{loadProjectData(rec.data,rec.bufs);}catch(e){errLog.push('load: '+e.message+' '+((e.stack||'').split('\n')[1]||''));throw e;}$('#saveState').textContent='Opened '+rec.name;try{localStorage.setItem('ecou.last',rec.id);}catch(e){}$('#projList').hidden=true;$('#storeUse').hidden=true;toast('Opened “'+rec.name+'”.');}).catch(function(){toast('Couldn’t open the project.');});
 }
 function listProjects(){
-  var w=$('#projList');
+  var w=$('#projList');showStorageUse();
   idbReq('meta','readonly',function(st){return st.getAll();}).then(function(list){
     list=(list||[]).sort(function(a,b){return b.updated-a.updated;});w.hidden=false;
     if(!list.length){w.innerHTML='<p class="note">No saved projects on this device yet.</p>';return;}
     w.innerHTML=list.map(function(m){return '<div class="row" style="gap:8px"><button class="btn" style="flex:1;justify-content:flex-start;text-align:left;display:flex;flex-direction:column;align-items:flex-start;padding:8px 12px" data-open="'+m.id+'"><span>'+escapeH(m.name)+'</span><small class="mu">'+new Date(m.updated).toLocaleString('en-GB',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'})+' · '+(m.bpm||'')+' BPM · '+(m.bars||0)+' bar'+(m.bars===1?'':'s')+'</small></button><button class="mv" data-del="'+m.id+'" aria-label="Delete '+escapeH(m.name)+'">×</button></div>';}).join('');
     $$('[data-open]').forEach(function(b){b.addEventListener('click',function(){var go=function(){openProject(b.getAttribute('data-open'));};if(dirty&&ctx)saveProject(true).then(go);else go();});});
     $$('[data-del]').forEach(function(b){var armed=false;b.addEventListener('click',function(){if(!armed){armed=true;b.textContent='Delete?';b.style.width='auto';b.style.padding='0 8px';b.setAttribute('aria-label','Tap again to delete');setTimeout(function(){armed=false;b.textContent='×';},3000);return;}var id=b.getAttribute('data-del');idbReq('projects','readwrite',function(st){return st.delete(id);}).then(function(){return idbReq('meta','readwrite',function(st){return st.delete(id);});}).then(function(){if(project.id===id)project.id=null;listProjects();toast('Project deleted.');});});});
-  }).catch(function(){w.hidden=false;w.innerHTML='<p class="note">Device storage isn’t available in this view. Use Export file / Import file.</p>';});
+  }).catch(function(){w.hidden=false;w.innerHTML='<p class="note">Device storage isn’t available in this view. Use Back up to file / Restore from file.</p>';});
 }
 /* project file (.zip, store) */
 function u8(s){return new TextEncoder().encode(s);}
@@ -2741,7 +2750,7 @@ function initStudio(){
   armTap($('#rollClear'),'Tap again to clear this track',function(){patterns[curPat].notes[songSel]=[];markDirty();drawRoll();renderPatSegs();toast('Track cleared in pattern '+patterns[curPat].name+'.');});
   $('#goSound').addEventListener('click',function(){$('nav button[data-tab="t-ins"]').click();});
   $('#projSave').addEventListener('click',function(){ensureAudio();saveProject(false);});
-  $('#projOpen').addEventListener('click',function(){var w=$('#projList');if(!w.hidden){w.hidden=true;return;}listProjects();});
+  $('#projOpen').addEventListener('click',function(){var w=$('#projList');if(!w.hidden){w.hidden=true;$('#storeUse').hidden=true;return;}listProjects();});
   var nArmed=false;$('#projNew').addEventListener('click',function(){var b=$('#projNew');if(!nArmed){nArmed=true;b.textContent='Tap again';setTimeout(function(){nArmed=false;b.textContent='New';},3000);return;}nArmed=false;b.textContent='New';var go=function(){resetProject();clearPatternsAll();setTimeout(histReset,0);toast('New empty project. The previous one is in Open….');};if(dirty&&ctx)saveProject(true).then(go);else go();});
   $('#projExport').addEventListener('click',exportProject);
   $('#projImport').addEventListener('click',function(){ensureAudio();});
@@ -3327,7 +3336,7 @@ function showTab(id,fromHash){var b=$('nav button[data-tab="'+id+'"]');if(!b)ret
 window.addEventListener('hashchange',function(){var h=(location.hash||'').slice(1);
   if(overlay&&h!==overlay){var o=overlay;overlay=null;hideOverlayEls(o);}
   for(var k in TABH)if(TABH[k]===h){showTab(k,true);return;}});
-document.addEventListener('keydown',function(e){if(e.key!=='Escape')return;if(overlay){closeOverlay(overlay);e.preventDefault();return;}if(!$('#projList').hidden)$('#projList').hidden=true;});
+document.addEventListener('keydown',function(e){if(e.key!=='Escape')return;if(overlay){closeOverlay(overlay);e.preventDefault();return;}if(!$('#projList').hidden){$('#projList').hidden=true;$('#storeUse').hidden=true;}});
 window.addEventListener('beforeunload',function(e){if(dirty&&ctx){try{saveProject(true);}catch(x){}e.preventDefault();e.returnValue='';}});
 $$('nav button').forEach(function(b){b.addEventListener('click',function(){showTab(b.getAttribute('data-tab'));});});
 var _unusedNav=[];[].forEach(function(b){b.addEventListener('click',function(){
