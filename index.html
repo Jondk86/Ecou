@@ -374,6 +374,8 @@ nav button{overflow:hidden;white-space:nowrap}
 .gx-mic button{width:96px;height:96px;border-radius:48px;border:6px solid color-mix(in srgb,var(--a) 30%,transparent);background:var(--a);display:grid;place-items:center;padding:0}
 .gx-mic button.on{animation:gxpulse 1s infinite}
 .gx-mic p{margin:0;font-size:14px;color:var(--gm);max-width:30ch}
+.rlvl{position:relative;height:8px;border-radius:4px;overflow:hidden;background:linear-gradient(90deg,#4ADE80 0 66%,#FACC15 66% 85%,#F43F5E 85%);width:100%}.rlvl[hidden]{display:none}.rlvl i{position:absolute;top:0;right:0;bottom:0;width:100%;background:#22222D}.rlvl.clip{box-shadow:0 0 0 2px #F43F5E}
+.gx-rw{width:100%;height:56px;display:block;border-radius:10px;background:rgba(0,0,0,.25)}.gx-rw[hidden]{display:none}
 /* live loops */
 .gx-grid{display:grid;gap:4px;overflow-x:auto;padding:2px;margin:0 -2px;grid-template-columns:58px repeat(8,minmax(30px,1fr))}
 .gx-colh{height:32px;border-radius:10px;border:0;background:transparent;color:var(--gm);font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;gap:4px;padding:0}
@@ -1113,6 +1115,7 @@ html.splash #splash{display:flex}
         <button class="btn primary" id="dawPlay" style="flex:1">▶ Play</button>
         <button class="btn rec" id="dawRec" style="flex:1">● Record</button>
       </div>
+      <div class="rlvl" id="dawLvl" hidden role="img" aria-label="Input level"><i></i></div>
       <div class="dawbar">
         <button class="mv ms tgl" id="dawLoop" aria-pressed="false" aria-label="Loop region" title="Loop the region set on the ruler">⟲ Loop</button>
         <button class="mv ms tgl" id="dawMetro" aria-pressed="false" aria-label="Metronome" title="Metronome click">♩ Click</button>
@@ -4583,6 +4586,35 @@ var IN_WORKLET="class I extends AudioWorkletProcessor{process(i){var c=i[0];if(c
 var inMod=null,inModOk=false;
 function loadInWorklet(){if(inMod)return inMod;if(!ctx.audioWorklet)return Promise.resolve(false);
   inMod=ctx.audioWorklet.addModule(URL.createObjectURL(new Blob([IN_WORKLET],{type:'application/javascript'}))).then(function(){inModOk=true;return true;},function(){return false;});return inMod;}
+/* live input meter + growing waveform while recording: peaks come from the chunks already captured (no extra audio nodes) */
+var RECBIN=512,recMet={on:false,t:0,lv:0};
+function recFeed(R,c){var l=c.l,r=c.r,n=l.length,bl=R.bL,br=R.bR,k=R.bN,ml=0,mr=0;if(R.pkF0==null)R.pkF0=c.f;
+  for(var i=0;i<n;i++){var a=l[i]<0?-l[i]:l[i],b=r[i]<0?-r[i]:r[i];if(a>bl)bl=a;if(b>br)br=b;if(a>ml)ml=a;if(b>mr)mr=b;if(++k>=RECBIN){R.pkL.push(bl);R.pkR.push(br);bl=br=0;k=0;}}
+  R.bL=bl;R.bR=br;R.bN=k;var m=Math.max(ml,mr);if(m>R.lvl)R.lvl=m;}
+function recPk(R,ch,i){return ch==='R'?R.pkR[i]:ch==='LR'?Math.max(R.pkL[i],R.pkR[i]):R.pkL[i];}
+function recMeterStart(){recMet.lv=0;['#dawLvl','#garLvl'].forEach(function(q){var e=$(q);if(e)e.hidden=false;});var gw=$('#garRecWave');if(gw)gw.hidden=false;if(!recMet.on){recMet.on=true;requestAnimationFrame(recMeterTick);}}
+function recMeterTick(ts){var R=arr.rec;
+  if(!R){recMet.on=false;['#dawLvl','#garLvl'].forEach(function(q){var e=$(q);if(e)e.hidden=true;});return;}
+  requestAnimationFrame(recMeterTick);if(ts-recMet.t<33)return;recMet.t=ts;
+  var pk=R.lvl;R.lvl=0;recMet.lv=Math.max(pk,recMet.lv*0.8);var db=recMet.lv>1e-5?20*Math.log10(recMet.lv):-100,f=clamp((db+60)/60,0,1);
+  ['#dawLvl','#garLvl'].forEach(function(q){var e=$(q);if(!e)return;e.hidden=false;e.firstChild.style.width=((1-f)*100)+'%';e.classList.toggle('clip',pk>0.98);});
+  var cv=$('#garRecWave');if(cv&&!cv.hidden&&cv.offsetWidth)recWaveDraw(cv,R);}
+/* Garage: the take so far, squeezed into the canvas (window grows from 8 s) */
+function recWaveDraw(cv,R){var dpr=window.devicePixelRatio||1,W=cv.clientWidth,H=cv.clientHeight;if(cv.width!==Math.round(W*dpr)){cv.width=Math.round(W*dpr);cv.height=Math.round(H*dpr);}
+  var g=cv.getContext('2d');g.setTransform(dpr,0,0,dpr,0,0);g.clearRect(0,0,W,H);g.fillStyle='rgba(255,255,255,.06)';g.fillRect(0,H/2,W,1);
+  var sr=ctx.sampleRate,ch=tracks[R.tracks[0]]?tracks[R.tracks[0]].inCh||'L':'L',b0=R.tStart==null||R.pkF0==null?R.pkL.length:Math.max(0,Math.floor(((R.tStart+R.lat)*sr-R.pkF0)/RECBIN)),nb=R.pkL.length-b0;if(nb<=0)return;
+  var span=Math.max(nb,Math.ceil(8*sr/RECBIN)),bpx=span/W,mid=H/2;g.fillStyle='#F43F5E';
+  for(var x=0;x*bpx<nb;x++){var i0=b0+Math.floor(x*bpx),i1=Math.max(i0+1,b0+Math.floor((x+1)*bpx)),m=0;for(var i=i0;i<i1&&i<R.pkL.length;i++){var v=recPk(R,ch,i);if(v>m)m=v;}var hh=Math.max(0.5,Math.min(1,m)*(H-4)/2);g.fillRect(x,mid-hh,1,hh*2);}}
+/* Studio: draw the clip being recorded on each armed lane (current pass only) */
+function drawRecLive(g){var R=arr.rec;if(!R||R.tStart==null||R.pkF0==null||!R.pkL.length)return;
+  var sr=ctx.sampleRate,sd=stepDur(),ppx=daw.ppx,cy=R.cyc&&R.cyc.length?R.cyc[R.cyc.length-1]:{t:R.tStart,g:R.gStart},tNow=(R.pkF0+R.pkL.length*RECBIN)/sr-R.lat;if(tNow<=cy.t)return;
+  var x0=sx2(cy.g),x1=sx2(cy.g+(tNow-cy.t)/sd);if(x1<0||x0>dW)return;
+  R.tracks.forEach(function(ti){var t=tracks[ti];if(!t)return;var ch=t.inCh||'L',y=laneY(ti)+4,h=DLH-9,mid=y+17+(h-20)/2,hh0=(h-20)/2;
+    g.fillStyle='rgba(244,63,94,.22)';rr(g,x0,y,Math.max(2,x1-x0),h,6);g.fill();g.strokeStyle='rgba(244,63,94,.9)';g.lineWidth=1;rr(g,x0+0.5,y+0.5,Math.max(2,x1-x0)-1,h-1,6);g.stroke();
+    g.save();g.beginPath();g.rect(Math.max(0,x0),y,Math.min(dW,x1)-Math.max(0,x0),h);g.clip();g.fillStyle='#FDA4AF';g.font='700 11px Space Grotesk, sans-serif';g.fillText('● Recording',Math.max(x0,0)+6,y+13);g.fillStyle='#F43F5E';
+    for(var x=Math.max(0,Math.floor(x0));x<Math.min(dW,Math.ceil(x1));x++){var ta=cy.t+(x-x0)/ppx*sd,tb=ta+sd/ppx,i0=Math.floor(((ta+R.lat)*sr-R.pkF0)/RECBIN),i1=Math.max(i0+1,Math.floor(((tb+R.lat)*sr-R.pkF0)/RECBIN)),m=0;
+      for(var i=Math.max(0,i0);i<i1&&i<R.pkL.length;i++){var v=recPk(R,ch,i);if(v>m)m=v;}var hh=Math.min(1,m)*hh0;g.fillRect(x,mid-hh,1,Math.max(1,hh*2));}
+    g.restore();});}
 function dawRecord(){
   if(seq.on&&seq.mode==='arrange'&&arr.rec){transportStop();return;}
   if(!ensureAudio())return;if(seq.bounce||stemsRunning){toast('An export is running.');return;}
@@ -4592,14 +4624,14 @@ function dawRecord(){
   var stream=null;
   navigator.mediaDevices.getUserMedia({audio:{echoCancellation:false,noiseSuppression:false,autoGainControl:false,channelCount:{ideal:2}}}).then(function(s){stream=s;return loadInWorklet();}).then(function(){
     if(seq.on)transportStop();
-    var src=ctx.createMediaStreamSource(stream),R={stream:stream,s:src,chunks:[],tracks:armed,node:null},node;
-    if(inModOk){node=new AudioWorkletNode(ctx,'ecou-in',{numberOfInputs:1,numberOfOutputs:1,channelCount:2,channelCountMode:'explicit'});node.port.onmessage=function(e){R.chunks.push(e.data);};}
-    else{node=ctx.createScriptProcessor(4096,2,2);var cnt=null;node.onaudioprocess=function(ev){var ib=ev.inputBuffer;if(cnt==null)cnt=Math.round(ctx.currentTime*ctx.sampleRate)-4096;R.chunks.push({f:cnt,l:new Float32Array(ib.getChannelData(0)),r:new Float32Array(ib.numberOfChannels>1?ib.getChannelData(1):ib.getChannelData(0))});cnt+=ib.length;};}
+    var src=ctx.createMediaStreamSource(stream),R={stream:stream,s:src,chunks:[],tracks:armed,node:null,pkL:[],pkR:[],pkF0:null,bL:0,bR:0,bN:0,lvl:0},node;
+    if(inModOk){node=new AudioWorkletNode(ctx,'ecou-in',{numberOfInputs:1,numberOfOutputs:1,channelCount:2,channelCountMode:'explicit'});node.port.onmessage=function(e){R.chunks.push(e.data);recFeed(R,e.data);};}
+    else{node=ctx.createScriptProcessor(4096,2,2);var cnt=null;node.onaudioprocess=function(ev){var ib=ev.inputBuffer;if(cnt==null)cnt=Math.round(ctx.currentTime*ctx.sampleRate)-4096;var ck={f:cnt,l:new Float32Array(ib.getChannelData(0)),r:new Float32Array(ib.numberOfChannels>1?ib.getChannelData(1):ib.getChannelData(0))};R.chunks.push(ck);recFeed(R,ck);cnt+=ib.length;};}
     var z=G(0);src.connect(node);node.connect(z);z.connect(ctx.destination);R.node=node;R.z=z;
     if(daw.mon){R.mon=G(1);src.connect(R.mon);R.mon.connect(tracks[armed[0]].n.in);}
     var lat=0;try{var st=stream.getAudioTracks()[0].getSettings();if(st&&typeof st.latency==='number')lat=st.latency;}catch(e){}
     R.lat=lat+recLatency()+daw.offMs/1000;
-    arr.rec=R;arr.pre=daw.count?16:0;transportStart('arrange');
+    arr.rec=R;arr.pre=daw.count?16:0;transportStart('arrange');recMeterStart();
     toast(daw.count?'Count-in… recording starts on bar '+(Math.floor(arr.startG/16)+1)+'.':'Recording.',1800);
   }).catch(function(){if(stream)stream.getTracks().forEach(function(t){t.stop();});micBlocked();});
 }
@@ -4726,6 +4758,7 @@ function drawDaw(pos){
     if(sel&&daw.auto==='off'){g.fillStyle='#F4F4F7';g.fillRect(x0+2,y+h/2-9,3,18);g.fillRect(x0+w-5,y+h/2-9,3,18);}
     g.globalAlpha=1;
   });
+  if(arr.rec)drawRecLive(g);
   // automation overlay
   if(daw.auto!=='off'){var k=daw.auto,A=AUTOP[k];tracks.forEach(function(t,i){var y=laneY(i),top=y+8,hh=DLH-16,col=DAWCOL[i%DAWCOL.length];function yv(v){return top+(1-(v-A.min)/(A.max-A.min))*hh;}
     g.fillStyle='rgba(11,11,16,.45)';g.fillRect(0,y,W,DLH-1);
@@ -5151,7 +5184,7 @@ function dawLoad(d,gb){
   var keepView={ppx:daw.ppx,sx:daw.sx,lane:daw.lane,auto:daw.auto,sel:daw.sel};
   daw=dawDefaults();abuf={};
   if(d){var map={};function rid(i){if(i==null)return null;if(map[i])return map[i];var b=gb(i);if(!b)return null;map[i]=abufAdd(b);return map[i];}
-    (d.clips||[]).forEach(function(c){if(!tracks[c.ti])return;if(c.type==='aud'){c.buf=rid(c.buf);c.takes=(c.takes||[]).map(rid).filter(Boolean);if(!c.buf)return;if(!c.takes.length)c.takes=[c.buf];}daw.clips.push(c);});
+    (d.clips||[]).forEach(function(c){if(!tracks[c.ti])return;if(c.type==='aud'){c.buf=rid(c.buf);c.takes=(c.takes||[]).map(rid).filter(Boolean);if(!c.buf)return;if(c.takes.indexOf(c.buf)<0)c.takes.push(c.buf);}daw.clips.push(c);});
     daw.markers=d.markers||[];daw.fx=fxMigrate(d.fx);daw.fxf=Array.isArray(d.fxf)?d.fxf:[];if(d.loop)daw.loop=d.loop;['snap','play','count','offMs','nid'].forEach(function(k){if(d[k]!=null)daw[k]=d[k];});daw.init=!!d.init;
     daw.clips.forEach(function(c){if(c.id>daw.nid)daw.nid=c.id;});}
   if(hist.lock){daw.ppx=keepView.ppx;daw.sx=keepView.sx;daw.lane=Math.min(keepView.lane,tracks.length-1);daw.auto=keepView.auto;if(clipById(keepView.sel))daw.sel=keepView.sel;}
@@ -6059,7 +6092,7 @@ function garDrummer(){var D=GAR.drum,el=$('#garInst');el.classList.remove('fret'
   garBindRegion(D,'garDr',garApplyDrummer);garBindActs('garDpv',D,garApplyDrummer);
 }
 function garAudioUI(){var el=$('#garInst');el.classList.remove('fret');var t=tracks[GAR.ti];
-  el.innerHTML='<div class="gx-mic"><button id="garMicRec" class="'+(arr.rec?'on':'')+'" aria-label="Record">'+GSVG.rec.replace('<svg','<svg style="width:34px;height:34px;fill:#F4F4F7;stroke:none"')+'</button><p>Records your microphone onto '+escapeH(t?t.name:'an audio track')+' from the playhead, with one bar to count in. Use wired headphones so the speaker does not bleed into the take.</p></div><div class="gx-sec"><div class="gx-row"><span>Hear yourself (headphones)</span><button class="gx-sw" id="garMon" aria-pressed="'+!!daw.mon+'" aria-label="Hear yourself"></button></div></div>';
+  el.innerHTML='<div class="gx-mic"><button id="garMicRec" class="'+(arr.rec?'on':'')+'" aria-label="Record">'+GSVG.rec.replace('<svg','<svg style="width:34px;height:34px;fill:#F4F4F7;stroke:none"')+'</button><div class="rlvl" id="garLvl"'+(arr.rec?'':' hidden')+' role="img" aria-label="Input level"><i></i></div><canvas class="gx-rw" id="garRecWave"'+(arr.rec?'':' hidden')+' aria-hidden="true"></canvas><p>Records your microphone onto '+escapeH(t?t.name:'an audio track')+' from the playhead, with one bar to count in. Use wired headphones so the speaker does not bleed into the take.</p></div><div class="gx-sec"><div class="gx-row"><span>Hear yourself (headphones)</span><button class="gx-sw" id="garMon" aria-pressed="'+!!daw.mon+'" aria-label="Hear yourself"></button></div></div>';
   $('#garMicRec').addEventListener('click',garRecord);$('#garMon').addEventListener('click',function(){daw.mon=!daw.mon;this.setAttribute('aria-pressed',daw.mon);var dm=$('#dawMon');if(dm)dm.checked=daw.mon;});}
 function garKeysUI(){var el=$('#garInst');el.classList.remove('fret');el.innerHTML='<div class="gx-empty" style="padding:18px"><b>Play the keys below</b><p>Slide along the keyboard to change octave, and tap the record button above to record onto '+escapeH(tracks[GAR.ti].name)+'.</p></div>';}
 
@@ -6617,7 +6650,8 @@ function garLane(l,ti,end){var cv=l.querySelector('canvas'),r=l.getBoundingClien
         for(var s=0;s<len;s++){var ps=((s+o)%pl+pl)%pl;rows.forEach(function(i,k){if(pt.drums[i][ps])g.fillRect(x0+s/end*W+1,9+k*rh,Math.max(1,W/end-0.5),Math.max(1.5,rh*0.55));});}}
       else{var ns=pt.notes[ti]||[],lo=127,hi=0;ns.forEach(function(n){lo=Math.min(lo,n.m);hi=Math.max(hi,n.m);});var span=Math.max(12,hi-lo+1);
         for(var rep=-1;rep*pl<len;rep++)ns.forEach(function(n){var s0=rep*pl+n.s-o;if(s0+n.l<0||s0>=len)return;var y=H-9-((n.m-lo+0.5)/span)*(H-18);g.fillRect(x0+s0/end*W+1,y-1.2,Math.max(1.5,n.l/end*W-0.5),2.4);});}}}
-    else if(c.buf){var d=c.buf.getChannelData(0),n=Math.max(1,Math.floor(w)),stp=Math.max(1,Math.floor(d.length/n)),mid=H/2;g.globalAlpha*=0.9;for(var x=0;x<n;x++){var m=0;for(var j=x*stp;j<Math.min(d.length,(x+1)*stp);j+=8)m=Math.max(m,Math.abs(d[j]));var hh=Math.max(1,m*(H-16)/2);g.fillRect(x0+x+1,mid-hh,1,hh*2);}}
+    else if(c.type==='aud'){var ab=abuf[c.buf];if(ab){var pk=peaksOf(ab),sr=ab.sampleRate,du=ab.duration,n=Math.max(1,Math.floor(w)),spx=c.dur/n,mid=H/2,amp=dbg(c.gain||0);g.globalAlpha*=0.9;
+      for(var x=0;x<n;x++){var a=c.off+x*spx;if(c.loop)a=((a%du)+du)%du;if(a>=du)break;var i0=Math.floor(a*sr/256),i1=Math.max(i0+1,Math.ceil((a+spx)*sr/256)),m=0;for(var j=i0;j<i1&&j<pk.length;j++)if(pk[j]>m)m=pk[j];var hh=Math.max(1,Math.min(1,m*amp)*(H-16)/2);g.fillRect(x0+x+1,mid-hh,1,hh*2);}}}
     g.restore();g.globalAlpha=1;
     if(c.name&&w>48){g.fillStyle='#F4F4F7';g.font='600 10px Space Grotesk, sans-serif';g.fillText(String(c.name).slice(0,24),x0+6,16);}});
 }
