@@ -1430,7 +1430,7 @@ function ensureAudio(){
   if(!AC){toast('Web Audio is not supported in this browser.');return false;}
   var lh='interactive';try{if(localStorage.getItem('ecou.stable')==='1')lh='playback';}catch(e){}
   try{ctx=new AC({latencyHint:lh});}catch(e){ctx=new AC();}
-  fmWorkletInit();setTimeout(hornPreload,600);buildGraph();perfInsert();meterInsert();makeDemos();demoSounds();initPatterns();makeKit();demoNotes();buildTracks();renderPatSegs();renderMixer();loadSound(selTrack);
+  fmWorkletInit();setTimeout(hornPreload,600);buildGraph();perfInsert();meterInsert();makeDemos();demoSounds();initPatterns();makeKit();KITFAC=kitSig();demoNotes();buildTracks();renderPatSegs();renderMixer();loadSound(selTrack);
   Object.keys(P).forEach(function(k){if(P[k].on)P[k].on(P[k].v);});
   setInterval(grainTick,25);
   dirty=false;$('#saveState').textContent='Not saved yet';setTimeout(histReset,0);
@@ -2049,6 +2049,7 @@ function renderPadDots(){$$('#pads .pad').forEach(function(el,i){var has=pads[i]
 function kitBuf(dur,fn){var sr=ctx.sampleRate,n=Math.floor(dur*sr),b=ctx.createBuffer(1,n,sr),d=b.getChannelData(0),st={};for(var i=0;i<n;i++)d[i]=fn(i/sr,st);normalize(d);var f=Math.floor(sr*0.003);for(var j=0;j<f;j++)d[n-1-j]*=j/f;return b;}
 function hpN(st,a){var x=Math.random()*2-1,y=a*((st.y||0)+x-(st.x||0));st.x=x;st.y=y;return y;}
 function bpN(st,a,b){var h=hpN(st,a);st.l=(st.l||0)+b*(h-(st.l||0));return st.l;}
+var KITFAC='';function kitSig(){return pads.map(function(p){return [p.name,p.cls,p.level,p.tune,p.decay,p.pan,p.choke].join(':');}).join('|');}
 function makeKit(){
   var TP=2*Math.PI,sr=ctx.sampleRate;
   var B=[
@@ -2474,7 +2475,7 @@ function transportStop(){
   if(seq.bounce){var w=wavRec;seq.bounce=false;wavRec=null;$('#bounceBtn').textContent='Export song (WAV)';toast('Export cancelled.');if(w&&w.onCancel)w.onCancel();}
   if(seq.mode==='arrange'&&ctx&&(seq.on||arr.rec))arrStopCleanup();
   if(seq.mode==='loops'&&seq.on)llStopped();
-  seq.on=false;clearInterval(seq.timer);seq.timer=null;stepQ=[];curStep=-1;try{fmKillAll();}catch(e){}
+  seq.on=false;arr.jam=false;clearInterval(seq.timer);seq.timer=null;stepQ=[];curStep=-1;try{fmKillAll();}catch(e){}
   if(ctx){var now=ctx.currentTime;svoices.forEach(function(v){if(v.t0>now){v.srcs.forEach(function(s){try{s.stop(0);}catch(e){}});try{v.env.disconnect();}catch(e){}}else if(v.t1>now)releaseVoice(v,now);});svoices=[];
     padVoices.forEach(function(v){try{v.src.stop(now+0.02);}catch(e){}});}
   recFlush();updTransportUI();paintSteps();drawRoll();
@@ -2627,7 +2628,7 @@ function serialize(){
   var params={};Object.keys(P).forEach(function(k){if(IKEYS.indexOf(k)<0&&k.indexOf('pad')!==0)params[k]=P[k].v;});
   var data={v:1,name:project.name,params:params,fxOn:fxOn,order:FXORDER.slice(),roFast:roFast,dsync:dsync,MX:MX,
     ir:{name:$('#irName').textContent,rt:$('#irRt').textContent,buf:ctx?bid(N.conv.buffer):null},
-    tracks:tracks.map(function(t){return {name:t.name,kind:t.kind,vol:t.vol,pan:t.pan,mute:t.mute,solo:t.solo,rev:t.rev,dly:t.dly,fx:t.fx,sp:t.sp,sound:sSound(t.sound),auto:t.auto||{},inCh:t.inCh,arm:!!t.arm,eq:t.eq||null,comp:t.comp||0,duck:t.duck||0,cmo:t.cmo||0,duckR:t.duckR||0.18,width:t.width==null?1:t.width,cgr:t.cgr==null?null:t.cgr,volRef:t.volRef==null?null:t.volRef,compLegacy:!!t.compLegacy,fm1ch:t.fm1ch||0,rig:t.rig||null};}),daw:dawSerialize(bid),mq:MQG.slice(),fmBank:fmBank||null,mqf:MQF.slice(),mqq:MQQ.slice(),selTrack:selTrack,spatial:{on:spatialOn},
+    tracks:tracks.map(function(t){return {name:t.name,kind:t.kind,vol:t.vol,pan:t.pan,mute:t.mute,solo:t.solo,rev:t.rev,dly:t.dly,fx:t.fx,sp:t.sp,sound:sSound(t.sound),auto:t.auto||{},inCh:t.inCh,arm:!!t.arm,eq:t.eq||null,comp:t.comp||0,duck:t.duck||0,cmo:t.cmo||0,duckR:t.duckR||0.18,width:t.width==null?1:t.width,cgr:t.cgr==null?null:t.cgr,volRef:t.volRef==null?null:t.volRef,compLegacy:!!t.compLegacy,fm1ch:t.fm1ch||0,rig:t.rig||null,own:t.own?1:0};}),daw:dawSerialize(bid),mq:MQG.slice(),fmBank:fmBank||null,mqf:MQF.slice(),mqq:MQQ.slice(),selTrack:selTrack,spatial:{on:spatialOn},
     amp:{model:ampModel,cab:cabCustom?bid(cabCustom):null,match:FX.match?FX.match.target:null,ref:matchRef},
     pads:pads.map(function(p){return {name:p.name,cls:p.cls,level:p.level,tune:p.tune,decay:p.decay,pan:p.pan,choke:p.choke,buf:bid(p.buf)};}),
     patterns:patterns.map(function(pt){return {name:pt.name,len:pt.len,drums:pt.drums.map(function(a){return a.map(function(x){return x?(typeof x==='number'?Math.round(x*100)/100:1):0;});}),notes:pt.notes,locks:pt.locks||{}};}),song:song,curPat:curPat,garage:garSave()};
@@ -2649,7 +2650,7 @@ function loadProjectData(data,bufs){
   if(data.ir&&data.ir.buf!=null&&gb(data.ir.buf)){N.conv.buffer=fitRate(gb(data.ir.buf));$('#irName').textContent=data.ir.name;$('#irRt').textContent=data.ir.rt;}
   (data.pads||[]).forEach(function(d,i){var p=pads[i];if(!p)return;['name','cls','level','tune','decay','pan','choke'].forEach(function(k){p[k]=d[k];});p.buf=gb(d.buf);});
   dropAudioTracks();(data.tracks||[]).forEach(function(d,i){if(i>=4&&tracks.length===i){if(d.kind==='audio')addAudioTrack(d.name,true);else if(d.kind==='keys')addInstTrack(d.name,true);}});
-  (data.tracks||[]).forEach(function(d,i){var t=tracks[i];if(!t)return;['name','vol','pan','mute','solo','rev','dly','fx'].forEach(function(k){t[k]=d[k];});if(d.sp)t.sp=d.sp;t.auto=d.auto&&typeof d.auto==='object'?d.auto:{};t.eq=d.eq||null;t.comp=+d.comp||0;t.duck=+d.duck||0;t.cmo=+d.cmo||0;t.fm1ch=+d.fm1ch||0;t.volRef=d.volRef==null?null:+d.volRef;t.duckR=+d.duckR||0.18;t.width=d.width==null?1:+d.width;t.cgr=d.cgr==null?null:+d.cgr;t.compLegacy=!!d.compLegacy||(+d.comp>0&&!('cgr' in d));applyStrip(t);if(t.comp&&t.cgr==null&&!t.compLegacy){(function(ti){setTimeout(function(){calibrateComp(ti);},2500+ti*400);})(i);}if(t.kind==='audio'){t.inCh=d.inCh||'L';t.arm=!!d.arm;}t.rig=d.rig&&d.rig.amp&&d.rig.ped?d.rig:null;rigRebuild(i);
+  (data.tracks||[]).forEach(function(d,i){var t=tracks[i];if(!t)return;['name','vol','pan','mute','solo','rev','dly','fx'].forEach(function(k){t[k]=d[k];});if(d.sp)t.sp=d.sp;t.auto=d.auto&&typeof d.auto==='object'?d.auto:{};t.eq=d.eq||null;t.comp=+d.comp||0;t.duck=+d.duck||0;t.cmo=+d.cmo||0;t.fm1ch=+d.fm1ch||0;t.volRef=d.volRef==null?null:+d.volRef;t.duckR=+d.duckR||0.18;t.width=d.width==null?1:+d.width;t.cgr=d.cgr==null?null:+d.cgr;t.compLegacy=!!d.compLegacy||(+d.comp>0&&!('cgr' in d));applyStrip(t);if(t.comp&&t.cgr==null&&!t.compLegacy){(function(ti){setTimeout(function(){calibrateComp(ti);},2500+ti*400);})(i);}if(t.kind==='audio'){t.inCh=d.inCh||'L';t.arm=!!d.arm;}t.rig=d.rig&&d.rig.amp&&d.rig.ped?d.rig:null;rigRebuild(i);var dst=d.sound&&d.sound.slots&&d.sound.slots.A&&d.sound.slots.A.stock;t.own=('own' in d)?(d.own?1:0):(dst&&dst!==({1:'rhodes',3:'dub'})[i]?1:0);
     if(d.sound){var S={slots:{A:dSlot(d.sound.slots.A),B:dSlot(d.sound.slots.B)},engine:d.sound.engine,loop:d.sound.loop,morphMode:d.sound.morphMode,morphBuf:null,morphRoot:0,fmP:Array.isArray(d.sound.fmP)?FMC.clamp(d.sound.fmP.slice()):null};IKEYS.forEach(function(k){S[k]=d.sound[k];});S.morphRoot=S.slots.A.root;
       if(S.morphMode!=='blend'&&S.slots.A.buf&&S.slots.B.buf)S.morphBuf=renderMorphCore(S.slots.A,S.slots.B,S.morph,S.morphMode);t.sound=S;}
     trackRoute(i);if(t.kind==='keys'&&t.sound&&t.n){t.n.f.frequency.value=normToHz(t.sound.cutoff);t.n.f.Q.value=t.sound.reso;}});
@@ -2673,7 +2674,7 @@ function resetProject(){
   N.conv.buffer=makeVerb('hall');$('#irName').textContent='Hall';$('#irRt').textContent='RT60 ≈ 2.4 s';
   dropAudioTracks();var keep=tracks.map(function(t){return t.n;});tracks=defaultTracks();tracks.forEach(function(t,i){t.n=keep[i];rigRebuild(i);});
   slots={A:{name:'Glass Tap',buf:null,root:880,det:true},B:{name:'Choir Pad',buf:null,root:261.63,det:true}};engine='sampler';loopOn=false;morphMode='blend';morphBuf=null;
-  makeDemos();demoSounds();initPatterns();makeKit();demoNotes();
+  makeDemos();demoSounds();initPatterns();makeKit();KITFAC=kitSig();demoNotes();
   tracks.forEach(function(t,i){trackRoute(i);if(t.kind==='keys'&&t.n){t.n.f.frequency.value=normToHz(t.sound.cutoff);t.n.f.Q.value=t.sound.reso;}});
   selTrack=1;songSel=1;loadSound(1);ensureSp();spatialOn=false;$('#spOn').checked=false;spRoute();renderSpUI();
   cabCustom=null;matchRef='';if(FX.match)FX.match.target=TMF.map(function(){return 0;});setAmpModel('crunch');applyMatch();
@@ -2700,7 +2701,7 @@ function saveProject(auto){
   if(!ctx||saving)return Promise.resolve();saving=true;askPersist();
   project.name=($('#projName').value||'').trim()||project.name||'Untitled beat';
   if(!project.id)project.id='p'+Date.now();
-  var s=serialize();s.data=JSON.parse(JSON.stringify(s.data));dirty=false;var rec={id:project.id,name:project.name,updated:Date.now(),data:s.data,bufs:s.bufs},bars=song.reduce(function(a,pi){return a+patterns[pi].len/16;},0);
+  var s=serialize();s.data=JSON.parse(JSON.stringify(s.data));dirty=false;var rec={id:project.id,name:project.name,updated:Date.now(),data:s.data,bufs:s.bufs},bars=Math.max(song.reduce(function(a,pi){return a+patterns[pi].len/16;},0),Math.ceil(arrEnd()/16));
   return idbReq('projects','readwrite',function(st){return st.put(rec);}).then(function(){return idbReq('meta','readwrite',function(st){return st.put({id:rec.id,name:rec.name,updated:rec.updated,bars:bars,bpm:Math.round(P.bpm.v)});});})
   .then(function(){try{localStorage.setItem('ecou.last',project.id);}catch(e){}$('#saveState').textContent=(auto?'Auto-saved ':'Saved ')+new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});if(!auto)toast('Project saved on this device.');})
   .catch(function(){dirty=true;$('#saveState').textContent='Device storage unavailable — use Back up to file';if(!auto||!storageWarned){storageWarned=true;toast('This view can’t save on the device. Use Back up to file to keep your project.',5000);}})
@@ -3340,9 +3341,18 @@ function exportSongOffline(binaural,src,btnEl){
 var hist={stack:[],idx:-1,timer:null,lock:false,last:''};
 function histCommit(){
   if(hist.lock||!ctx||offlineRender)return;
-  var sv=serialize(),key=JSON.stringify(sv.data);if(key===hist.last)return;
-  hist.stack=hist.stack.slice(0,hist.idx+1);hist.stack.push({data:JSON.parse(key),bufs:sv.bufs,key:key});
-  if(hist.stack.length>80)hist.stack.shift();hist.idx=hist.stack.length-1;hist.last=key;updUndoUI();
+  var sv=serialize(),key=JSON.stringify(sv.data),ck=histCk(key);if(ck===hist.last)return;
+  hist.stack=hist.stack.slice(0,hist.idx+1);hist.stack.push({data:JSON.parse(key),bufs:sv.bufs,key:key,ck:ck});
+  if(hist.stack.length>80)hist.stack.shift();hist.idx=hist.stack.length-1;hist.last=ck;updUndoUI();
+}
+/* comparison key: the selected track is view state, and a stock sound's root changes when its recorded samples finish loading; neither is an edit */
+function histCk(key){return key.replace(/"selTrack":\d+,?/,'').replace(/"root":[^,]+,"det":true,"buf":null,"stock"/g,'"stock"');}
+/* automatic changes (Garage preparing an instrument) are folded into the current undo entry: no new step, undo is never blocked */
+function histQuiet(fn){
+  if(hist.lock||!ctx||offlineRender||hist.idx<0)return fn();
+  clearTimeout(hist.timer);histCommit();hist.lock=true;try{fn();}finally{hist.lock=false;}
+  var sv=serialize(),key=JSON.stringify(sv.data),ck=histCk(key);if(ck===hist.last)return;
+  hist.stack[hist.idx]={data:JSON.parse(key),bufs:sv.bufs,key:key,ck:ck};hist.last=ck;
 }
 function histSchedule(){if(hist.lock)return;clearTimeout(hist.timer);hist.timer=setTimeout(histCommit,450);}
 function histReset(){hist.stack=[];hist.idx=-1;hist.last='';histCommit();}
@@ -3353,7 +3363,7 @@ function histGo(d){
   try{loadProjectData(JSON.parse(e.key),e.bufs);}finally{hist.lock=false;}
   if(patterns[kcp]&&curPat!==kcp){hist.lock=true;try{setPattern(kcp);}finally{hist.lock=false;}}if(tracks[kst]&&selTrack!==kst&&tracks[kst].kind==='keys'){hist.lock=true;try{selectTrack(kst);}finally{hist.lock=false;}}
   page=Math.min(kpg,patterns[curPat].len/16-1);selectPad(kp);if(tracks[ks])songSel=ks;renderPatSegs();renderTrackSegs();paintSteps();drawRoll();
-  project.id=pid;hist.idx=j;hist.last=e.key;dirty=true;$('#saveState').textContent='Unsaved changes';updUndoUI();
+  project.id=pid;hist.idx=j;hist.last=e.ck;dirty=true;$('#saveState').textContent='Unsaved changes';updUndoUI();
   if(wasPlaying)transportStart(mode);
   toast(d<0?'Undo':'Redo',800);
 }
@@ -3495,8 +3505,8 @@ function stockSlot(id){
   var z=stockCache[key],mid=z[Math.floor(z.length/2)];
   return {name:D.name,stock:id,zones:z,buf:mid.buf,root:mid.root,det:true};
 }
-function loadStock(id){
-  if(!ensureAudio())return;if(STOCK[id]&&STOCK[id].smp)smpEnsure(id);var D=STOCK[id],s=stockSlot(id);if(!s)return;allOff();
+function loadStock(id,auto){
+  if(!ensureAudio())return;if(!auto&&tracks[selTrack])tracks[selTrack].own=1;if(STOCK[id]&&STOCK[id].smp)smpEnsure(id);var D=STOCK[id],s=stockSlot(id);if(!s)return;allOff();
   slots.A=s;slots.B=Object.assign({},slots.B);engine='sampler';loopOn=D.loop;morphMode='blend';morphBuf=null;morphRoot=s.root;
   setParam('morph',0);Object.keys(D.p).forEach(function(k){setParam(k,D.p[k]);});
   $$('[data-engine]').forEach(function(x){x.setAttribute('aria-pressed',x.getAttribute('data-engine')==='sampler'?'true':'false');});$('#loop').checked=loopOn;
@@ -4498,14 +4508,14 @@ function arrTick(){
   while(seq.on&&arr.next<now+look){
     var g=arr.g,t=arr.next,gm=((g%16)+16)%16;
     if(g>=arr.startG)arrStep(g,t);
-    if((seq.metro||g<arr.startG)&&gm%4===0)click(t,gm===0);
+    if((seq.metro||arr.jam||g<arr.startG)&&gm%4===0)click(t,gm===0);
     var sw=P.swing.v*sd*0.5;arr.next+=sd+((((g%2)+2)%2)===0?sw:-sw);arr.g++;
     if(daw.loop.on&&arr.g>=daw.loop.b&&arr.g-1>=arr.startG){
       var tj=arr.tl0+(daw.loop.b-arr.g0)*sd;arr.next=tj;arrCutAt(tj);
       arr.g=daw.loop.a;arr.tl0=tj;arr.g0=daw.loop.a;arr.anchors.push({t:tj,g:daw.loop.a});if(arr.anchors.length>8)arr.anchors.shift();
       if(arr.rec)arr.rec.cyc.push({t:tj,g:daw.loop.a});
       schedAuto(tj,daw.loop.a,daw.loop.b,false);arrStartClipsAt(daw.loop.a,tj);fxStateAt(daw.loop.a,tj);
-    }else if(!daw.loop.on&&!arr.rec&&!seq.rec&&arr.g>=arr.end+4){var wait=Math.max(0,arr.next-now);clearInterval(seq.timer);seq.timer=null;setTimeout(function(){if(seq.mode==='arrange'&&seq.on&&!seq.timer){transportStop();daw.play=0;daw.sx=0;dawNeed=true;}},wait*1000+600);return;}
+    }else if(!daw.loop.on&&!arr.rec&&!seq.rec&&!arr.jam&&arr.g>=arr.end+4){var wait=Math.max(0,arr.next-now);clearInterval(seq.timer);seq.timer=null;setTimeout(function(){if(seq.mode==='arrange'&&seq.on&&!seq.timer){transportStop();daw.play=0;daw.sx=0;dawNeed=true;}},wait*1000+600);return;}
   }
 }
 function arrPosNow(){if(!ctx)return daw.play;var now=ctx.currentTime-(ctx.outputLatency||0),a=arr.anchors,k=a.length-1;while(k>0&&a[k].t>now)k--;return a[k].g+(now-a[k].t)/stepDur();}
@@ -5596,9 +5606,10 @@ function zoneFor(slot,freq,vel){if(!slot.zones)return slot;var best=slot.zones[0
 /* acoustic drum kit with three velocity layers per drum */
 var KITAC=[['Kick','kick'],['Snare','snare'],['Clap','snare'],['Rim','perc'],['Closed Hat','hat'],['Open Hat','hat'],['Shaker','hat'],['Cowbell','perc'],['Tom Lo','perc'],['Tom Mid','perc'],['Tom Hi','perc'],['Crash','hat'],['Pedal Hat','hat'],['Ride','hat']];
 var KITAC_LV={kick:0.95,snare:0.85,hat:0.6,perc:0.8};
-function loadAcousticKit(quiet){
+function loadAcousticKit(quiet,auto){
   if(!ensureAudio())return Promise.resolve();
-  var go=function(z){pads.forEach(function(p){p.vb=null;});KITAC.forEach(function(x,i){var p=pads[i],L=z[i];p.vb=L;p.buf=L[1];p.name=x[0];p.cls=x[1];p.tune=0;p.decay=1;p.level=KITAC_LV[x[1]];p.pan=x[1]==='hat'?0.15:(i>=8&&i<=10?[-0.3,0,0.3][i-8]:i===13?0.25:i===11?-0.2:0);p.choke=(i===4||i===5||i===12)?1:0;});
+  var go=function(z){if(auto&&(GAR.kit||kitSig()!==KITFAC))return;if(auto)histQuiet(function(){go2(z);});else go2(z);};
+  var go2=function(z){pads.forEach(function(p){p.vb=null;});KITAC.forEach(function(x,i){var p=pads[i],L=z[i];p.vb=L;p.buf=L[1];p.name=x[0];p.cls=x[1];p.tune=0;p.decay=1;p.level=KITAC_LV[x[1]];p.pan=x[1]==='hat'?0.15:(i>=8&&i<=10?[-0.3,0,0.3][i-8]:i===13?0.25:i===11?-0.2:0);p.choke=(i===4||i===5||i===12)?1:0;});
     try{renderPads();selectPad(padSel);}catch(e){}markDirty();if(!quiet)toast('Acoustic kit loaded: real drums with three dynamics each.',2000);GAR.kit='acoustic';};
   if(SMP.cache.kit)return Promise.resolve(go(SMP.cache.kit));
   if(!quiet)toast('Loading the acoustic kit…',1400);
@@ -6108,12 +6119,15 @@ function garTrackSel(){var s=$('#garTrack'),kind=(GINST[GAR.inst]||{}).track,h='
 function garOpen(inst,tiForce){
   var I=GINST[inst];if(!I)return;if(I.go){showTab(I.go);if(inst==='score')setTimeout(function(){var c=$('#trxCard');if(c)c.scrollIntoView({block:'start'});},60);return;}if(I.view){garView(I.view);return;}
   if(!ensureAudio())return;if(GAR.apOn>=0)garApStop();
-  GAR.inst=inst;var ti=tiForce!=null&&tracks[tiForce]?tiForce:garFindTrack(I.track);if(ti<0)return;GAR.ti=ti;if(tracks[ti].kind==='keys'&&ti!==selTrack)selectTrack(ti);
+  var ok=false;histQuiet(function(){
+  GAR.inst=inst;var ti=tiForce!=null&&tracks[tiForce]?tiForce:garFindTrack(I.track);if(ti<0)return;ok=true;GAR.ti=ti;if(tracks[ti].kind==='keys'&&ti!==selTrack)selectTrack(ti);
   var cs=tracks[ti].sound&&tracks[ti].sound.slots&&tracks[ti].sound.slots.A&&tracks[ti].sound.slots.A.stock;if(ti===selTrack&&slots.A)cs=slots.A.stock;
   var up={piano:'gpiano',rhodes:'epiano',egtr:'egtr2',agtr:'steel',fbass:'ebass'};
-  var fresh=!patterns.some(function(pt){return (pt.notes[ti]||[]).length;});if(inst==='bass'&&(!cs||up[cs]||(fresh&&cs!=='ebass'&&cs!=='upright')))loadStock('ebass');else if((inst==='skeys'||inst==='keys'||inst==='gtr')&&up[cs])loadStock(up[cs]);else if(cs)smpEnsure(cs,true);
+  /* Garage's default sound only replaces an untouched factory sound, never one the user chose (t.own) */
+  var fresh=!patterns.some(function(pt){return (pt.notes[ti]||[]).length;}),auto=tracks[ti].kind==='keys'&&!tracks[ti].own;if(auto&&inst==='bass'&&(!cs||up[cs]||(fresh&&cs!=='ebass'&&cs!=='upright')))loadStock('ebass',true);else if(auto&&(inst==='skeys'||inst==='keys'||inst==='gtr')&&up[cs])loadStock(up[cs],true);else if(cs)smpEnsure(cs,true);
   if(inst==='gtr'&&!tracks[ti].rig){tracks[ti].rig=rigFromPreset(0);rigRebuild(ti);}
-  if(I.track==='drums'&&!GAR.kit&&pads[0]&&pads[0].name==='Kick'&&pads[12]&&/808/.test(pads[12].name||'')){loadAcousticKit(false).then(function(){if(GAR.view==='play')garRenderPlay();});}
+  if(I.track==='drums'&&!GAR.kit&&kitSig()===KITFAC&&pads[0]&&pads[0].name==='Kick'&&pads[12]&&/808/.test(pads[12].name||'')){loadAcousticKit(false,true).then(function(){if(GAR.view==='play')garRenderPlay();});}
+  });if(!ok)return;
   GAR.amp=false;garView('play');
 }
 /* ---------- BAND: auto-accompaniment (Trio-style) ----------
@@ -6667,7 +6681,13 @@ function garView(v){if(v==='inst')v=GAR.inst&&GAR.surf?'play':'sounds';GAR.view=
 function garPlay(){
   if(bandRunning()){bandStop();garUpd();return;}if(GAR.inst==='band'&&GAR.view==='play'){bandStart();return;}
   if(GAR.view==='loops'){if(llRunning()){transportStop();}else{var L=GAR.ll,rows=llRows(),any=false;L.act={};L.q={};rows.forEach(function(ti){var p=-1;if(llHas(ti,curPat))p=curPat;else for(var k=0;k<8;k++)if(llHas(ti,k)){p=k;break;}if(p>=0){L.q[ti]=p;any=true;}});if(!any){toast('Record a loop first: tap an empty cell.',1800);return;}llStart();}garUpd();return;}
-  if(seq.on){transportStop();}else transportStart('arrange');garUpd();
+  if(seq.on){transportStop();}else{
+    if(!arrEnd()&&!arr.rec){ /* empty song: never start and silently stop */
+      var pv=GAR.view==='play'?(GAR.inst==='drummer'?$('#garDpv [data-pv="1"]'):GAR.inst==='sdrums'?$('#garSpv [data-pv="1"]'):null):null;if(pv){pv.click();return;}
+      if(GAR.view==='play'&&GINST[GAR.inst]&&GINST[GAR.inst].track){arr.jam=true;toast('Click track: play along, then press Record to capture it.',2400);}
+      else{toast('Nothing to play yet — record or add something first.',2400);return;}
+    }
+    transportStart('arrange');}garUpd();
 }
 function garRecord(){
   if(GAR.view==='loops'){if(GAR.ll.rec&&seq.rec){llRecStop();return;}toast('Tap an empty cell to record a loop into it.',2000);return;}
