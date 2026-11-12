@@ -605,6 +605,40 @@ nav button[aria-selected="true"] svg{background:color-mix(in srgb,var(--ac) 18%,
 #scCursor{position:absolute;width:3px;border-radius:2px;background:rgba(11,11,16,.55);box-shadow:0 0 0 4px rgba(92,225,230,.35);pointer-events:none;transition:left .06s linear}
 #scoreInner .scf-hl,#scoreInner .scf-hl path{fill:var(--scc)!important;stroke:var(--scc)}
 #keysRow{display:grid;grid-template-columns:auto minmax(0,1fr) minmax(0,1fr);gap:8px;align-items:center}#keysRow .dsel{max-width:none;width:100%;min-width:0;text-overflow:ellipsis}#keysRow #keysBtn{min-height:40px}
+/* W1-2: tap targets >=40px in Studio, Mix and the pattern selector (layout only; lane/ruler heights DLH=64/DRH stay JS-owned) */
+#dawLoop,#dawMetro,#dawCount{width:auto;min-width:44px;padding:0 10px;font-size:12px;white-space:nowrap}
+#t-daw .mv,#t-fx .mv{min-width:44px;min-height:44px}
+#t-daw .seg button,#t-fx .seg button{min-height:40px}
+#t-daw .chips button,#t-fx .chips button{min-height:40px}
+#t-daw .btn,#t-fx .btn,#t-daw .dsel,#t-fx .dsel,#t-daw .tin,#t-fx .tin,#t-daw input[type=number],#t-daw input[type=text]{min-height:44px!important}
+#t-daw .tbpm{height:44px}
+#t-daw input[type=range],#t-fx input[type=range]{height:40px}
+#t-daw .ctl,#t-fx .ctl{gap:0;padding-top:6px;padding-bottom:4px}
+#t-daw .chk,#t-fx .chk{min-height:40px!important}
+#t-daw input[type=checkbox]::after,#t-fx input[type=checkbox]::after{content:"";position:absolute;left:-1px;right:-1px;top:-7px;bottom:-7px}
+.patSeg{gap:4px}
+#t-fx .grid2,#t-daw .grid2{grid-template-columns:repeat(2,minmax(0,1fr))}
+#t-fx .mqsel{min-height:40px;min-width:40px;align-self:stretch}
+.patSeg button{min-width:40px;min-height:44px;padding:0 6px}
+/* Studio lane headers: rows are 64px (DLH) and 36px (DRH), so M/S/arm get 40px-tall buttons in a wider column and the name fills the rest of the header */
+#dawWrap{grid-template-columns:130px minmax(0,1fr)}
+#dawHeads .lhr{gap:4px!important;padding:0 3px}
+#dawHeads .lhr .mv{position:relative;min-width:0;min-height:0;height:32px!important;flex:1;padding:0 4px!important}
+#dawHeads .lhr .mv::after{content:"";position:absolute;left:-1px;right:-1px;top:-5px;bottom:-5px}
+.lh{position:relative;padding:1px 3px 1px 5px;gap:2px}
+.lh .ln{min-height:18px;line-height:18px;position:static}
+.lh .ln::before{content:"";position:absolute;inset:0}
+.lh .lb{position:relative;z-index:1;gap:4px;pointer-events:none}
+.lh .lb button{pointer-events:auto}
+.lh .lb button{width:36px;height:40px;font-size:12px;position:relative}
+.lh .lb button::after{content:"";position:absolute;left:-3px;right:-3px;top:-1px;bottom:-1px}
+/* header: Advanced toggle and stacked "Rec / output" label fit at 360px */
+#mPro{padding:0 8px;font-size:12px}
+#rec{display:inline-flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.05;padding:0 8px}
+#rec small{font-size:10px;font-weight:600;letter-spacing:.02em}
+@media (min-width:521px){#rec{flex-direction:row;gap:5px}#rec small{font-size:inherit;font-weight:inherit}}
+@media (max-width:400px){header .logo{font-size:15px;letter-spacing:.1em}}
+@media (max-width:370px){header{gap:6px;padding-left:10px;padding-right:10px}}
 </style>
 </head>
 <body>
@@ -672,9 +706,9 @@ html.splash #splash{display:flex}
   <canvas id="scope" aria-hidden="true"></canvas>
   <button class="hbtn" id="undoBtn" aria-label="Undo" disabled>↶</button>
   <button class="hbtn" id="redoBtn" aria-label="Redo" disabled>↷</button>
-  <button class="hbtn" id="mPro" aria-pressed="false" aria-label="Pro mode (show all controls)">Pro</button>
+  <button class="hbtn" id="mPro" aria-pressed="false" aria-label="Advanced mode (show all controls)" title="Advanced mode: show all controls">Advanced</button>
   <button id="hPlay" aria-label="Play">▶</button>
-  <button id="rec" aria-label="Record the master output to a WAV file">● REC</button>
+  <button id="rec" aria-label="Record the app's output to a WAV" title="Record the app's output to a WAV">● Rec<small>output</small></button>
 </header>
 
 <main>
@@ -869,12 +903,12 @@ html.splash #splash{display:flex}
         <div class="row"><select id="f1In" class="dsel" aria-label="Audio input"><option value="">Phone microphone (default)</option></select><button class="mv" id="f1InScan" style="width:auto;padding:0 10px">Find inputs</button></div></details>
       <p class="note">USB: Chrome on Android (USB-C/OTG) or desktop. Bluetooth: Chrome connects to the FM-1 directly, no pairing app needed. For playing FM-1 keys into Ecou without double sound, set LOCAL off on the FM-1 (MIDI ROUTING page).</p>
     </div>
-    <p class="note simple-only">Switch to <strong>Pro</strong> for sustain looping, filter resonance and full granular control.</p>
+    <p class="note simple-only">Switch to <strong>Advanced</strong> (top bar) for sustain looping, filter resonance and full granular control.</p>
   </section>
 
   <!-- MODULEAZĂ -->
   <section class="tab" id="t-mod">
-    <h2>Modulation</h2>
+    <h2>Motion &amp; modulation</h2>
     <p class="sub">Play with one hand, shape with the other. Camera and motion sources stack on top of the XY pad.</p>
     <div id="xy" aria-label="XY pad">
       <span class="xylab" style="left:10px;top:8px">Y → Cutoff</span>
@@ -903,7 +937,7 @@ html.splash #splash{display:flex}
       <div class="mx" id="mx"></div>
       <label data-p="lfo"></label>
     </div>
-    <p class="note simple-only">Routing is preset. Switch to <strong>Pro</strong> to edit the mod matrix.</p>
+    <p class="note simple-only">Routing is preset. Switch to <strong>Advanced</strong> (top bar) to edit the mod matrix.</p>
   </section>
 
   <!-- PADS -->
@@ -1051,7 +1085,7 @@ html.splash #splash{display:flex}
       <div id="songList" class="chips"></div>
       <div class="btns"><button class="btn" id="songAdd">+ Add pattern</button><button class="btn" id="songClear">Clear</button></div>
       <button class="btn primary" id="bounceBtn">Export song (WAV)</button>
-      <p class="note">Exports the patterns in this arrangement (notes and steps you programmed or recorded with Record notes). To capture something you play live without recording it, use <strong>● REC</strong> at the top.</p>
+      <p class="note">Exports the patterns in this arrangement (notes and steps you programmed or recorded with Record notes). To capture something you play live without recording it, use <strong>● Rec output</strong> at the top.</p>
     </div>
     <div class="card">
       <div class="row"><span class="kicker">Project</span><span class="mu" id="saveState">Not saved yet</span></div>
@@ -1080,9 +1114,9 @@ html.splash #splash{display:flex}
         <button class="btn rec" id="dawRec" style="flex:1">● Record</button>
       </div>
       <div class="dawbar">
-        <button class="mv ms tgl" id="dawLoop" aria-pressed="false" aria-label="Loop region">⟲</button>
-        <button class="mv ms tgl" id="dawMetro" aria-pressed="false" aria-label="Metronome">♩</button>
-        <button class="mv ms tgl" id="dawCount" aria-pressed="true" aria-label="One-bar count-in before recording" style="font-size:11px">1·2</button>
+        <button class="mv ms tgl" id="dawLoop" aria-pressed="false" aria-label="Loop region" title="Loop the region set on the ruler">⟲ Loop</button>
+        <button class="mv ms tgl" id="dawMetro" aria-pressed="false" aria-label="Metronome" title="Metronome click">♩ Click</button>
+        <button class="mv ms tgl" id="dawCount" aria-pressed="true" aria-label="One-bar count-in before recording" title="One-bar count-in before recording">Count-in</button>
         <div class="tempo" role="group" aria-label="Tempo"><button class="mv" id="dawBpmDn" aria-label="Tempo down">−</button><button class="tbpm" id="dawTap" aria-label="Tap tempo"><b id="dawBpm">120</b><small>BPM · tap</small></button><button class="mv" id="dawBpmUp" aria-label="Tempo up">+</button></div>
         <div class="seg" role="group" aria-label="Snap to grid" style="margin-left:auto"><button data-snap="16">Bar</button><button data-snap="4" aria-pressed="true">Beat</button><button data-snap="1">1/16</button><button data-snap="0">Off</button></div>
       </div>
@@ -1184,7 +1218,7 @@ html.splash #splash{display:flex}
         <p class="note" id="refNote"></p>
         <div class="btns"><button class="btn" id="refCmp" disabled>Compare</button><button class="btn primary" id="refMatch" disabled>Match EQ (70%)</button></div>
       </div>
-      <p class="note">True-peak-safe limiter: exports stay under the ceiling (−1 dBTP is the streaming standard). Every export reports integrated loudness and true peak. Tap <strong>● REC</strong> to record a live performance with punch-in FX.</p>
+      <p class="note">True-peak-safe limiter: exports stay under the ceiling (−1 dBTP is the streaming standard). Every export reports integrated loudness and true peak. Tap <strong>● Rec output</strong> (top bar) to record a live performance with punch-in FX.</p>
     </div>
   </section>
   <p class="note" style="text-align:center;margin:24px 0 8px">Ecou · <a href="help.html" target="_blank" rel="noopener" style="color:var(--tx)">Help</a> · <a href="privacy.html" target="_blank" rel="noopener" style="color:var(--tx)">Privacy</a> · <a href="samples/CREDITS.md" target="_blank" rel="noopener" style="color:var(--tx)">Credits</a></p>
@@ -1208,9 +1242,9 @@ html.splash #splash{display:flex}
   <button role="tab" aria-selected="false" data-tab="t-cap">
     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/><path d="M12 17v5"/></svg>Capture</button>
   <button role="tab" aria-selected="false" data-tab="t-ins">
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M8 4v10"/><path d="M12 4v10"/><path d="M16 4v10"/></svg><span class="lf">Instrument</span><span class="ls">Instr.</span></button>
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M8 4v10"/><path d="M12 4v10"/><path d="M16 4v10"/></svg><span class="lf">Instrument</span><span class="ls">Sound</span></button>
   <button role="tab" aria-selected="false" data-tab="t-mod">
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12c2-4 4-6 6-6s4 12 8 12 4-6 6-6"/></svg><span class="lf">Modulation</span><span class="ls">Mod</span></button>
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12c2-4 4-6 6-6s4 12 8 12 4-6 6-6"/></svg><span class="lf">Motion</span><span class="ls">Motion</span></button>
   <button role="tab" aria-selected="true" data-tab="t-pad">
     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="8" height="8" rx="1.5"/><rect x="13" y="3" width="8" height="8" rx="1.5"/><rect x="3" y="13" width="8" height="8" rx="1.5"/><rect x="13" y="13" width="8" height="8" rx="1.5"/></svg>Pads</button>
   <button role="tab" aria-selected="false" data-tab="t-song">
@@ -1218,7 +1252,7 @@ html.splash #splash{display:flex}
   <button role="tab" aria-selected="false" data-tab="t-daw">
     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="4" width="9" height="5" rx="1.5"/><rect x="8" y="11" width="12" height="5" rx="1.5"/><path d="M2 19h20"/><path d="M15 2v20"/></svg>Studio</button>
   <button role="tab" aria-selected="false" data-tab="t-fx">
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>Mix</button>
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3v18"/><path d="M12 3v18"/><path d="M18 3v18"/><path d="M4 15h4"/><path d="M10 8h4"/><path d="M16 13h4"/></svg>Mix</button>
 </nav>
 
 <div id="take" role="dialog" aria-modal="true" aria-label="Take ready">
@@ -1902,7 +1936,7 @@ var wavRec=null,lastTake=null,recTimer=null;
 function tapConnect(on){if(!N.tap||!N.clip||N.tapOn===on)return;N.tapOn=on;try{if(on)N.clip.connect(N.tap);else N.clip.disconnect(N.tap);}catch(e){}}
 function stopRec(){
   var w=wavRec;if(!w)return;wavRec=null;clearInterval(recTimer);tapConnect(false);
-  var r=$('#rec');r.classList.remove('on');r.textContent='● REC';
+  var r=$('#rec');r.classList.remove('on');r.innerHTML='● Rec<small>output</small>';
   if(!w.n){toast('Empty take.');return;}
   var L=new Float32Array(w.n),R=new Float32Array(w.n),o=0;
   for(var i=0;i<w.L.length;i++){L.set(w.L[i],o);R.set(w.R[i],o);o+=w.L[i].length;}
@@ -3347,7 +3381,7 @@ var _unusedNav=[];[].forEach(function(b){b.addEventListener('click',function(){
   if(b.getAttribute('data-tab')==='t-song'){renderSongUI();drawRoll();}
   if(b.getAttribute('data-tab')==='t-pad')paintSteps();
 });});
-function setPro(on){document.body.classList.toggle('is-pro',on);$('#mPro').setAttribute('aria-pressed',on);toast(on?'Pro mode: all controls visible.':'Basic mode: essentials only.',1400);}
+function setPro(on){document.body.classList.toggle('is-pro',on);$('#mPro').setAttribute('aria-pressed',on);toast(on?'Advanced mode: all controls visible.':'Basic mode: essentials only.',1400);}
 $('#mPro').addEventListener('click',function(){setPro(!document.body.classList.contains('is-pro'));});
 $$('[data-engine]').forEach(function(b){b.addEventListener('click',function(){
   if(ctx)allOff();engine=b.getAttribute('data-engine');
@@ -4497,7 +4531,7 @@ function addInstTrack(name,silent,stock){
   t.sound=S;tracks.push(t);var i=tracks.length-1;t.sp={az:[-50,50,-80,80][(n-3)%4],el:10,dist:1.6,orbit:0};
   patterns.forEach(function(pt){while(pt.notes.length<=i)pt.notes.push([]);});
   if(ctx){buildTrackNode(t,i);t.n.f.frequency.value=normToHz(S.cutoff);t.n.f.Q.value=S.reso;applyMix();spRoute();}
-  renderMixer();renderSpUI();renderTrackSegs();try{renderKeysSrc();}catch(e){}daw.lane=i;dawNeed=true;renderDawHeads();if(!silent){markDirty();toast(t.name+' added ('+(st?STOCK[stock||'piano'].name:'sound')+'). Pick its sound in Instr., write notes in Song.',2600);}return i;
+  renderMixer();renderSpUI();renderTrackSegs();try{renderKeysSrc();}catch(e){}daw.lane=i;dawNeed=true;renderDawHeads();if(!silent){markDirty();toast(t.name+' added ('+(st?STOCK[stock||'piano'].name:'sound')+'). Pick its sound in the Sound tab, write notes in Song.',2600);}return i;
 }
 /* bounce in place: render one instrument lane of the timeline to an audio clip, mute the source */
 function bounceLane(ti){
