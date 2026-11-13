@@ -55,7 +55,7 @@ input[type=range]{width:100%;accent-color:var(--ac);height:28px;margin:0}
 input[type=checkbox]{accent-color:var(--ac);width:22px;height:22px;margin:0}
 .wave{width:100%;height:60px;display:block;background:#101018;border-radius:10px}
 body:not(.is-pro) .pro{display:none!important}
-.vt-panel{display:flex;flex-direction:column;gap:12px;overscroll-behavior:contain}.vt-panel>*,.vt-pro>*{flex-shrink:0}#vtSheet .vt-pro{display:none}body.is-pro #vtSheet .vt-pro,#vtSheet.all .vt-pro{display:flex}.vt-g2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px}.vt-g3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.vt-g2 .btn,.vt-g3 .btn{min-height:44px;padding:0 6px;font-size:13px}.vt-take{display:flex;flex-direction:column;gap:8px;padding:12px;border-radius:18px;background:var(--gp,var(--s1));border:1px solid var(--ac);text-align:left}.vt-take canvas{width:100%;height:56px;display:block;border-radius:10px;background:#0E0E14}.vt-take .row{display:flex;justify-content:space-between;align-items:center;gap:8px}.vt-warn{font-size:13px;color:#FBBF24;line-height:1.35}.vt-now{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:8px 12px;border-radius:14px;background:#0E0E14;border:1px solid var(--ln)}.vt-now b{font-size:30px;line-height:1;display:inline-block;min-width:64px}.vt-now span{display:block;font-size:12px}.vt-cm{position:relative;flex:1;max-width:150px;height:14px;border-radius:7px;background:linear-gradient(90deg,#FB7185,#FACC15 35%,#4ADE80 45%,#4ADE80 55%,#FACC15 65%,#FB7185)}.vt-cm i{position:absolute;top:-4px;left:50%;width:3px;height:22px;margin-left:-1px;background:#fff;border-radius:2px;transition:left .06s}.vt-keys{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:6px;margin-top:6px}.vt-keys button{min-height:44px;border-radius:12px;border:1px solid var(--ln);background:var(--s1);color:var(--mu);font-weight:700;font-size:13px}.vt-keys button[aria-pressed="true"]{background:rgba(56,189,248,.18);border-color:#38BDF8;color:#E0F2FE}.vt-keys button.tonic{box-shadow:inset 0 -3px 0 var(--ac)}.vt-hv{display:flex;flex-direction:column;gap:8px;padding:10px;border-radius:14px;background:var(--s1);border:1px solid var(--ln)}.vt-hv .row{display:flex;justify-content:space-between;align-items:center;gap:8px}.vt-hv select{max-width:60%}.vt-hv label{display:flex;flex-direction:column;font-size:12px;color:var(--mu);gap:2px}.vt-hv input[type=range]{width:100%;min-height:32px}#vtCv.drag{outline:2px solid #FACC15;outline-offset:-2px}.vt-panel .seg button,.vt-panel .btn,.vt-panel select{min-height:44px}.vt-sty button{flex:1}.vt-ab{gap:8px}.vt-ab .seg{flex:1}.vt-ab .seg button{flex:1}.vt-pro{display:flex;flex-direction:column;gap:10px}.vt-ed{border:1px solid var(--ln);border-radius:12px;overflow:hidden;background:#0E0E14}#vtCv{display:block;width:100%;height:240px;touch-action:none}.vt-note{display:flex;flex-direction:column;gap:8px}.vt-chip[aria-pressed="true"]{border-color:var(--ac);color:var(--ac)}.vt-panel select{flex:1;min-width:0}.vt-pro .grid2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px}.vt-panel .btn[aria-pressed="true"]{border-color:var(--ac);color:var(--ac);background:rgba(212,255,58,.08)}
+.vt-panel{display:flex;flex-direction:column;gap:12px;overscroll-behavior:contain}#vtSheet input[type=range]{height:44px}#vtSheet select,#vtSheet .seg button,#vtSheet .btn,#vtCapBtn{min-height:44px}#vtSheet .chk{justify-content:space-between}#vtSheet .chk input{-webkit-appearance:none;appearance:none;flex:none;box-sizing:content-box;width:46px;height:28px;margin:0;border:8px solid transparent;border-radius:22px;background:#3A3A4A padding-box;position:relative;cursor:pointer;transition:background .15s}#vtSheet .chk input::before{content:"";position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:#fff;transition:transform .15s}#vtSheet .chk input:checked{background:var(--ac) padding-box}#vtSheet .chk input:checked::before{transform:translateX(18px)}#vtSheet .chk input:disabled{opacity:.45}.vt-panel>*,.vt-pro>*{flex-shrink:0}#vtSheet .vt-pro{display:none}body.is-pro #vtSheet .vt-pro,#vtSheet.all .vt-pro{display:flex}.vt-g2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px}.vt-g3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.vt-g2 .btn,.vt-g3 .btn{min-height:44px;padding:0 6px;font-size:13px}.vt-take{display:flex;flex-direction:column;gap:8px;padding:12px;border-radius:18px;background:var(--gp,var(--s1));border:1px solid var(--ac);text-align:left}.vt-take canvas{width:100%;height:56px;display:block;border-radius:10px;background:#0E0E14}.vt-take .row{display:flex;justify-content:space-between;align-items:center;gap:8px}.vt-warn{font-size:13px;color:#FBBF24;line-height:1.35}.vt-now{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:8px 12px;border-radius:14px;background:#0E0E14;border:1px solid var(--ln)}.vt-now b{font-size:30px;line-height:1;display:inline-block;min-width:64px}.vt-now span{display:block;font-size:12px}.vt-cm{position:relative;flex:1;max-width:150px;height:14px;border-radius:7px;background:linear-gradient(90deg,#FB7185,#FACC15 35%,#4ADE80 45%,#4ADE80 55%,#FACC15 65%,#FB7185)}.vt-cm i{position:absolute;top:-4px;left:50%;width:3px;height:22px;margin-left:-1px;background:#fff;border-radius:2px;transition:left .06s}.vt-keys{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:6px;margin-top:6px}.vt-keys button{min-height:44px;border-radius:12px;border:1px solid var(--ln);background:var(--s1);color:var(--mu);font-weight:700;font-size:13px}.vt-keys button[aria-pressed="true"]{background:rgba(56,189,248,.18);border-color:#38BDF8;color:#E0F2FE}.vt-keys button.tonic{box-shadow:inset 0 -3px 0 var(--ac)}.vt-hv{display:flex;flex-direction:column;gap:8px;padding:10px;border-radius:14px;background:var(--s1);border:1px solid var(--ln)}.vt-hv .row{display:flex;justify-content:space-between;align-items:center;gap:8px}.vt-hv select{max-width:60%}.vt-hv label{display:flex;flex-direction:column;font-size:12px;color:var(--mu);gap:2px}.vt-hv input[type=range]{width:100%;min-height:32px}#vtCv.drag{outline:2px solid #FACC15;outline-offset:-2px}.vt-panel .seg button,.vt-panel .btn,.vt-panel select{min-height:44px}.vt-sty button{flex:1}.vt-ab{gap:8px}.vt-ab .seg{flex:1}.vt-ab .seg button{flex:1}.vt-pro{display:flex;flex-direction:column;gap:10px}.vt-ed{border:1px solid var(--ln);border-radius:12px;overflow:hidden;background:#0E0E14}#vtCv{display:block;width:100%;height:240px;touch-action:none}.vt-note{display:flex;flex-direction:column;gap:8px}.vt-chip[aria-pressed="true"]{border-color:var(--ac);color:var(--ac)}.vt-panel select{flex:1;min-width:0}.vt-pro .grid2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px}.vt-panel .btn[aria-pressed="true"]{border-color:var(--ac);color:var(--ac);background:rgba(212,255,58,.08)}
 body.is-pro .simple-only{display:none!important}
 #xy{position:relative;height:210px;border-radius:16px;background-color:#101018;border:1px solid var(--ln);touch-action:none;background-image:linear-gradient(var(--ln) 1px,transparent 1px),linear-gradient(90deg,var(--ln) 1px,transparent 1px);background-size:25% 25%;background-position:center}
 #xydot{position:absolute;left:50%;top:50%;width:36px;height:36px;margin:-18px 0 0 -18px;border-radius:18px;border:3px solid var(--ac);pointer-events:none}
@@ -1441,7 +1441,8 @@ html.splash #splash{display:flex}
   <p class="mu" id="vtSub" style="margin:0"></p>
   <div class="vt-now" id="vtNow"><div><b id="vtNowN">–</b><span class="mu" id="vtNowS">Press Play to see your pitch live</span></div><div class="vt-cm" title="Cents from the target note"><i id="vtNowI"></i></div></div>
   <div class="vt-ed"><canvas id="vtCv" aria-label="Pitch editor: grey is what you sang, pink is the tuned pitch, blue blocks are notes; drag a note up or down to retune it"></canvas></div>
-  <div class="row" style="gap:8px"><button class="btn" id="vtUndo" disabled style="min-height:44px">↶ Undo</button><span class="mu" id="vtHint" style="font-size:12px;flex:1">Tap a blue note to select it, drag it up or down to change it.</span></div>
+  <div class="vt-warn" id="vtNone" role="status" hidden>No singing was heard in this take. Record again a little closer to the microphone, or choose another take — there is nothing to tune here.</div>
+  <div class="row" style="gap:8px"><button class="btn" id="vtUndo" disabled style="min-height:44px">↶ Undo</button><button class="btn" id="vtRedo" disabled style="min-height:44px">↷ Redo</button><span class="mu" id="vtHint" style="font-size:12px;flex:1">Tap a blue note to select it, drag it up or down to change it.</span></div>
   <div class="row vt-ab"><div class="seg" role="group" aria-label="Compare"><button id="vtA" aria-pressed="false">A · Original</button><button id="vtB" aria-pressed="true">B · Tuned</button></div></div>
   <div class="vt-g3"><button class="btn primary" id="vtPlay">▶ Play</button><button class="btn" id="vtRaw">▶ Original</button><button class="btn" id="vtLoop" aria-pressed="false">⟳ Loop</button></div>
   <div class="vt-sty seg" id="vtSty" role="group" aria-label="Tuning style"></div>
@@ -5121,7 +5122,9 @@ function arrRecFinish(tStop){
   try{R.s.disconnect();R.node.disconnect();R.z.disconnect();if(R.mon)R.mon.disconnect();vtLiveDrop(R.vox);}catch(e){}
   R.stream.getTracks().forEach(function(t){t.stop();});
   var sr=ctx.sampleRate,sd=stepDur();
-  if(!R.chunks.length||tStop<=R.tStart+0.05){toast('Nothing was recorded.');dawNeed=true;return;}
+  /* stopped during (or right after) the count-in: keep what the microphone already heard instead of throwing the take away */
+  if(R.chunks.length&&(R.tStart==null||tStop<=R.tStart+0.05)){var tA=R.chunks[0].f/sr-R.lat;if(tStop-tA>=0.3){R.tStart=tA;if(R.gStart==null)R.gStart=arr.startG||0;R.cyc=null;R.early=true;}}
+  if(!R.chunks.length||R.tStart==null||tStop<=R.tStart+0.05){toast('Nothing was recorded — the take was stopped before the microphone heard anything. Tap record and sing for at least a second.',3600);dawNeed=true;try{renderInsp();garReAud();}catch(e){}return;}
   var F0=R.chunks[0].f,last=R.chunks[R.chunks.length-1],total=last.f+last.l.length-F0,L=new Float32Array(total),Rr=new Float32Array(total);
   R.chunks.forEach(function(c){var o=c.f-F0;if(o<0||o+c.l.length>total)return;L.set(c.l,o);Rr.set(c.r,o);});
   /* build a buffer of n samples whose sample 0 is audio time t0; only audio between tMin and tMax is kept */
@@ -5143,14 +5146,14 @@ function arrRecFinish(tStop){
     }});
   if((R.vox||R.vtAfter)&&R.newc)vtAfterRec(R.newc);
   daw.play=daw.loop.on?daw.loop.a:R.gStart;
-  if(made){markDirty();toast(looped&&cyc.length>1?'Recorded '+cyc.length+' passes — switch takes in the clip panel.':'Recording added to the timeline.',2600);}
+  if(made){markDirty();toast(R.early?'Short take kept — you stopped during the count-in, so it starts where the microphone began.':looped&&cyc.length>1?'Recorded '+cyc.length+' passes — switch takes in the clip panel.':'Recording added to the timeline.',2600);}
   renderInsp();dawNeed=true;garReAud();
 }
 /* ---------- VOCAL STUDIO v1: Tune (offline pitch correction, TD-PSOLA), pitch editor, live auto-tune (ecou-vox), harmonies ----------
    Shifter choice: TD-PSOLA on pitch marks from our own YIN track. It only re-spaces glottal-period grains, so the spectral envelope
    (formants) stays put without an explicit envelope stage, it is transparent for the ±5 semitone moves vocal tuning needs, it has no
    phase-vocoder "phasiness", and it is cheap enough to re-render on every change on a phone. Unvoiced frames pass through unshifted. */
-var VTSTY={natural:{n:'Natural',amt:90,mor:25},pop:{n:'Pop',amt:100,mor:62},hard:{n:'Hard-tune',amt:100,mor:100}};
+var VTSTY={natural:{n:'Natural',amt:90,mor:25,dz:15,ctr:1},pop:{n:'Pop',amt:100,mor:62,dz:8,ctr:0.6},hard:{n:'Hard-tune',amt:100,mor:100,dz:0,ctr:0}};
 /* one Natural↔Hard morph drives retune speed and humanize (the two things that make tuning audible) */
 function vtMorph(v,m){v.mor=m;var x=m/100;v.spd=Math.round(160*(1-x)*(1-x)/5)*5;v.hum=Math.round(85*(1-x)*(1-x));}
 (function(){for(var k in VTSTY){var o={};vtMorph(o,VTSTY[k].mor);VTSTY[k].spd=o.spd;VTSTY[k].hum=o.hum;}})();
@@ -5158,33 +5161,47 @@ var VTQ={maj:[0,4,7],min:[0,3,7],dim:[0,3,6],aug:[0,4,8],sus2:[0,2,7],sus4:[0,5,
 var VT={c:null,slot:null,A:null,N:null,sel:-1,t:null,au:null,drag:null,cache:typeof WeakMap!=='undefined'?new WeakMap():null};
 function vtDef(st){var p=VTSTY[st||'pop'];return {on:true,st:st||'pop',amt:p.amt,mor:p.mor,spd:p.spd,hum:p.hum,sc:'song',k:null,band:false,ed:{},fmt:0,thr:0,vib:0,vibR:5.5,sp:[],mg:[]};}
 function vtMono(b){var n=b.length,C=b.numberOfChannels,x=new Float32Array(n);for(var c=0;c<C;c++){var d=b.getChannelData(c);for(var i=0;i<n;i++)x[i]+=d[i]/C;}return x;}
-/* YIN, 5 ms hop: coarse search at ~12 kHz, then a full-rate refinement around the found lag */
+/* pitch tracker (5 ms hop, 75–1050 Hz): YIN difference function at ~8 kHz, up to 4 candidate lags per frame (the earliest clear dips + the deepest; lags longer than the first dip that is about as deep as the best one pay a sub-harmonic penalty),
+   then one Viterbi path through candidates + an "unvoiced" state: continuity cost per semitone, octave jumps expensive, voicing decided by
+   aperiodicity + energy with hysteresis. Full-rate refinement of the chosen lag, 5-frame median, short holes bridged, blips dropped. */
 function vtAnalyse(b){
   if(VT.cache&&VT.cache.has(b))return VT.cache.get(b);
-  var x=vtMono(b),sr=b.sampleRate,D=Math.max(1,Math.round(sr/8000)),sd=sr/D,n=Math.floor(x.length/D),y=new Float32Array(n),i,k;
+  var x=vtMono(b),sr=b.sampleRate,D=Math.max(1,Math.round(sr/8000)),sd=sr/D,n=Math.floor(x.length/D),y=new Float32Array(n),i,k,t,c,j,o;
   var a1=Math.exp(-2*Math.PI*2000/sr),s1=0,s2=0;for(i=0;i<x.length;i++){s1=x[i]+(s1-x[i])*a1;s2=s1+(s2-s1)*a1;if(i%D===0&&i/D<n)y[i/D]=s2;}
-  var hop=Math.round(sr*0.005),W=Math.round(sd*0.02),maxL=Math.ceil(sd/62),minL=Math.max(2,Math.floor(sd/1100)),F=Math.ceil(x.length/hop),
-      f0=new Float32Array(F),ap=new Float32Array(F),rms=new Float32Array(F),d=new Float32Array(maxL+2),pk=0;
-  for(k=0;k<F;k++){var c=k*hop,e=0,j0=Math.max(0,c-hop),j1=Math.min(x.length,c+hop);for(i=j0;i<j1;i++)e+=x[i]*x[i];rms[k]=Math.sqrt(e/Math.max(1,j1-j0));if(rms[k]>pk)pk=rms[k];}
+  var hop=Math.round(sr*0.005),W=Math.round(sd*0.025),maxL=Math.ceil(sd/75),minL=Math.max(3,Math.floor(sd/1050)),F=Math.ceil(x.length/hop),NC=4,S=NC+1,
+      rms=new Float32Array(F),d=new Float32Array(maxL+3),cl=new Float32Array(F*NC),cd=new Float32Array(F*NC),lg=new Float32Array(F*NC),tl=new Float32Array(24),td=new Float32Array(24),pk=0;
+  for(k=0;k<F;k++){var c0=k*hop,e=0,j0=Math.max(0,c0-hop),j1=Math.min(x.length,c0+hop);for(i=j0;i<j1;i++)e+=x[i]*x[i];rms[k]=Math.sqrt(e/Math.max(1,j1-j0));if(rms[k]>pk)pk=rms[k];}
   var gate=Math.max(0.002,pk*0.03);
-  for(k=0;k<F;k++){if(rms[k]<gate){ap[k]=1;continue;}
-    var st=Math.round(k*hop/D-(W+maxL)/2);if(st<0||st+W+maxL+1>=n){ap[k]=1;continue;}
-    var cum=0,tau=-1,t,dip=-1;d[0]=1;
-    for(t=1;t<=maxL+1;t++){var s=0;for(i=0;i<W;i++){var q=y[st+i]-y[st+i+t];s+=q*q;}cum+=s;d[t]=cum>0?s*t/cum:1;
-      if(t>minL){if(dip<0&&d[t-1]<0.22)dip=t-1;if(dip>=0&&d[t]>=d[t-1]){tau=t-1;break;}}}
-    if(tau<0){var mv=9;for(t=minL;t<=Math.min(maxL,t);t++)if(d[t]<mv){mv=d[t];tau=t;}}if(tau>=maxL+1)tau=maxL;
-    ap[k]=d[tau];if(ap[k]>0.42)continue;
-    var den=d[tau-1]-2*d[tau]+d[tau+1],ft=tau+(den>0?0.5*(d[tau-1]-d[tau+1])/den:0),L0=Math.round(ft*D),Wf=Math.min(W*D,Math.max(3*L0,256)),cs=Math.round(k*hop-(Wf+L0)/2),best=-1,bv=1e30,dv=[];
-    if(cs<0||cs+Wf+L0+D+2>=x.length){f0[k]=sd/ft;continue;}
-    for(var L=L0-D-1;L<=L0+D+1;L++){var s3=0;for(i=0;i<Wf;i++){var q2=x[cs+i]-x[cs+i+L];s3+=q2*q2;}dv.push(s3);if(s3<bv){bv=s3;best=dv.length-1;}}
-    var P=L0-D-1+best;if(best>0&&best<dv.length-1){var dn=dv[best-1]-2*dv[best]+dv[best+1];if(dn>0)P+=0.5*(dv[best-1]-dv[best+1])/dn;}
+  for(k=0;k<F;k++){if(rms[k]<gate)continue;var st=Math.max(0,Math.min(n-W-maxL-3,Math.round(k*hop/D-(W+maxL)/2)));if(st<0)continue;
+    var cum=0,nc=0;d[0]=1;o=k*NC;
+    for(t=1;t<=maxL+1;t++){var s=0;for(i=0;i<W;i++){var q=y[st+i]-y[st+i+t];s+=q*q;}cum+=s;d[t]=cum>0?s*t/cum:1;}
+    var nd=0;
+    for(t=minL;t<=maxL&&nd<24;t++){if(!(d[t]<0.6&&d[t]<d[t-1]&&d[t]<=d[t+1]))continue;
+      var den=d[t-1]-2*d[t]+d[t+1],off=den>0?0.5*(d[t-1]-d[t+1])/den:0;tl[nd]=t+off;td[nd++]=Math.max(0,d[t]-0.25*(d[t-1]-d[t+1])*off);}
+    for(j=0;j<nd&&nc<3;j++)if(td[j]<0.3){cl[o+nc]=tl[j];cd[o+nc]=td[j];td[j]=9;nc++;}
+    while(nc<NC){var bj=-1,bd=0.6;for(j=0;j<nd;j++)if(td[j]<bd){bd=td[j];bj=j;}if(bj<0)break;cl[o+nc]=tl[bj];cd[o+nc]=bd;td[bj]=9;nc++;}
+    for(c=0;c<nc;c++)lg[o+c]=Math.log2(cl[o+c]);}
+  var UV=0.35,TV=0.15,cost=new Float64Array(S),nx=new Float64Array(S),bp=new Uint8Array(F*S),lag=new Float32Array(F),f0=new Float32Array(F);
+  for(c=0;c<NC;c++)cost[c]=1e12;
+  for(k=0;k<F;k++){o=k*NC;var po=o-NC,lmin=99,db=9;for(c=0;c<NC;c++)if(cl[o+c]>0&&cd[o+c]<db)db=cd[o+c];for(c=0;c<NC;c++)if(cl[o+c]>0&&cd[o+c]<db+0.04&&lg[o+c]<lmin)lmin=lg[o+c];
+    for(c=0;c<NC;c++){if(!(cl[o+c]>0)){nx[c]=1e12;continue;}var best=cost[NC]+TV,bi=NC;
+      if(k>0)for(j=0;j<NC;j++){if(cost[j]>=1e12)continue;var tc=cost[j]+Math.min(0.6,0.96*Math.abs(lg[o+c]-lg[po+j]));if(tc<best){best=tc;bi=j;}}
+      nx[c]=best+cd[o+c]+0.15*Math.max(0,lg[o+c]-lmin);bp[k*S+c]=bi;}
+    var bu=cost[NC],bui=NC;for(j=0;j<NC;j++)if(cost[j]+TV<bu){bu=cost[j]+TV;bui=j;}
+    nx[NC]=bu+(rms[k]<gate?0:UV);bp[k*S+NC]=bui;for(c=0;c<S;c++)cost[c]=nx[c];}
+  var stt=NC,bc=cost[NC];for(c=0;c<NC;c++)if(cost[c]<bc){bc=cost[c];stt=c;}
+  for(k=F-1;k>=0;k--){if(stt<NC)lag[k]=cl[k*NC+stt];stt=bp[k*S+stt];}
+  for(k=0;k<F;k++){var ft=lag[k];if(!(ft>0))continue;
+    var L0=Math.round(ft*D),Wf=Math.min(W*D,Math.max(3*L0,256)),cs=Math.round(k*hop-(Wf+L0)/2),bst=-1,bv=1e30,dv2=[];
+    if(D<2||cs<0||cs+Wf+L0+D+2>=x.length){f0[k]=sd/ft;continue;}
+    for(var L=L0-D-1;L<=L0+D+1;L++){var s3=0;for(i=0;i<Wf;i++){var q2=x[cs+i]-x[cs+i+L];s3+=q2*q2;}dv2.push(s3);if(s3<bv){bv=s3;bst=dv2.length-1;}}
+    var P=L0-D-1+bst;if(bst>0&&bst<dv2.length-1){var dn=dv2[bst-1]-2*dv2[bst]+dv2[bst+1];if(dn>0)P+=0.5*(dv2[bst-1]-dv2[bst+1])/dn;}
     f0[k]=sr/P;}
-  /* clean-up: octave glitches against the 7-frame median, and 1-frame holes */
-  var m=new Float32Array(F);for(k=0;k<F;k++)m[k]=f0[k]>0?ftom(f0[k]):NaN;
-  for(k=0;k<F;k++){if(isNaN(m[k]))continue;var w=[];for(i=Math.max(0,k-3);i<=Math.min(F-1,k+3);i++)if(!isNaN(m[i]))w.push(m[i]);w.sort(function(p,q){return p-q;});var md=w[w.length>>1];
-    if(Math.abs(m[k]-md-12)<1.2)m[k]-=12;else if(Math.abs(m[k]-md+12)<1.2)m[k]+=12;else if(Math.abs(m[k]-md)>3&&w.length>=4)m[k]=NaN;}
-  for(k=1;k<F-1;k++)if(isNaN(m[k])&&!isNaN(m[k-1])&&!isNaN(m[k+1]))m[k]=(m[k-1]+m[k+1])/2;
-  for(k=0;k<F;k++){var r0=k;while(k<F&&!isNaN(m[k]))k++;if(k-r0<6)for(i=r0;i<k;i++)m[i]=NaN;}
+  var m=new Float32Array(F),m2=new Float32Array(F),num=function(p,q){return p-q;};for(k=0;k<F;k++)m2[k]=f0[k]>0?ftom(f0[k]):NaN;
+  for(k=0;k<F;k++){if(isNaN(m2[k])){m[k]=NaN;continue;}var w=[];for(i=Math.max(0,k-2);i<=Math.min(F-1,k+2);i++)if(!isNaN(m2[i]))w.push(m2[i]);w.sort(num);m[k]=w.length>=3?w[w.length>>1]:m2[k];}
+  for(k=1;k<F;k++){if(!isNaN(m[k])||isNaN(m[k-1]))continue;var e2=k,ok=true;while(e2<F&&isNaN(m[e2])){if(rms[e2]<gate)ok=false;e2++;}
+    if(ok&&e2<F&&e2-k<=4&&Math.abs(m[e2]-m[k-1])<1)for(i=k;i<e2;i++)m[i]=m[k-1]+(m[e2]-m[k-1])*(i-k+1)/(e2-k+1);k=e2;}
+  for(k=0;k<F;k++){if(isNaN(m[k]))continue;var r0=k;while(k<F&&!isNaN(m[k]))k++;if(k-r0<8)for(i=r0;i<k;i++)m[i]=NaN;}
   var A={sr:sr,hop:hop,F:F,m:m,rms:rms,x:x};if(VT.cache)VT.cache.set(b,A);return A;}
 function vtChordPcs(c){var q=c[1]||'maj',iv=VTQ[q]||(/^dim|m7b5/.test(q)?VTQ.dim:/^aug/.test(q)?VTQ.aug:/^sus2/.test(q)?VTQ.sus2:/^sus4/.test(q)?VTQ.sus4:/^m(?!aj)/.test(q)?VTQ.min:VTQ.maj).slice();
   if(/7/.test(q))iv.push(/maj7/.test(q)?11:q==='dim7'?9:10);return iv.map(function(v){return (c[0]+v)%12;});}
@@ -5197,38 +5214,67 @@ function vtScaleName(v){var sc=v.sc||'song',k=v.k!=null?v.k:GAR.key;if(sc==='chr
 function vtPcsAt(v,c,A,k){if(!v.band||!c)return VT._sc;var sd=stepDur(),g=c.s+(k*A.hop/A.sr-(c.off||0))/sd,prog=bandPart(GAR.band.edit||'A'),bar=Math.max(0,Math.floor(g/bandN()));return vtChordPcs(prog[bar%prog.length]||prog[0]);}
 function vtSnap(m,pcs){var best=Math.round(m),bd=99;for(var t=Math.floor(m)-7;t<=Math.ceil(m)+7;t++){if(pcs.indexOf(((t%12)+12)%12)<0)continue;var dd=Math.abs(t-m);if(dd<bd){bd=dd;best=t;}}return best;}
 function vtStep(T,steps,pcs){var t=T;while(steps>0){t++;if(pcs.indexOf(((t%12)+12)%12)>=0)steps--;}while(steps<0){t--;if(pcs.indexOf(((t%12)+12)%12)>=0)steps++;}return t;}
-/* notes: voiced runs split where the 150 ms-smoothed pitch settles on another allowed note (with hysteresis), so vibrato never splits a note */
-function vtNotes(A,v,c){VT._sc=vtScale(v);var F=A.F,m=A.m,ms=new Float32Array(F),k,i,N=[];
-  for(k=0;k<F;k++){if(isNaN(m[k])){ms[k]=NaN;continue;}var s=0,n=0;for(i=Math.max(0,k-15);i<=Math.min(F-1,k+15);i++)if(!isNaN(m[i])){s+=m[i];n++;}ms[k]=s/n;}
-  for(k=0;k<F;k++){if(isNaN(m[k]))continue;var a=k,cur=vtSnap(ms[k],vtPcsAt(v,c,A,k)),cnt=0,cand=cur;
-    while(k<F&&!isNaN(m[k])){var p=vtPcsAt(v,c,A,k),t=vtSnap(ms[k],p);
-      if(t!==cur&&Math.abs(ms[k]-t)+0.15<Math.abs(ms[k]-cur)){if(t===cand)cnt++;else{cand=t;cnt=1;}if(cnt>=4){var b=k-3;if(b-a>=6){N.push({a:a,b:b});a=b;}cur=t;cnt=0;}}else cnt=0;k++;}
-    N.push({a:a,b:k});}
+/* notes: inside each voiced run the ~100 ms-smoothed pitch must leave the current note's centre by more than 0.7 semitone for 70 ms before a new
+   note starts (hysteresis: vibrato, scoops and drift never split); fragments under 80 ms and same-pitch neighbours are merged back.
+   A note's centre (med) is the median of its steady frames; a note with no steady part (glide, blip) is flagged st=false */
+function vtNotes(A,v,c){VT._sc=vtScale(v);var F=A.F,m=A.m,ms=new Float32Array(F),k,i,N=[],num=function(p,q){return p-q;};
+  function medOf(a,b){var w=[];for(var q=a;q<b;q++)if(!isNaN(m[q]))w.push(m[q]);w.sort(num);return w.length?w[w.length>>1]:NaN;}
+  for(k=0;k<F;k++){if(isNaN(m[k]))continue;var r0=k;while(k<F&&!isNaN(m[k]))k++;var r1=k,R=[];
+    for(i=r0;i<r1;i++){var s=0,n=0;for(var q=Math.max(r0,i-10);q<=Math.min(r1-1,i+10);q++){s+=m[q];n++;}ms[i]=s/n;}
+    var a=r0,cen=ms[r0],ds=-1,sg=0;
+    for(i=r0;i<r1;i++){var dv=ms[i]-cen;
+      if(Math.abs(dv)>0.7){var g=dv>0?1:-1;if(ds<0||g!==sg){ds=i;sg=g;}
+        if(i-ds>=13){var bb=ds,bj=0;for(q=Math.max(a+2,ds-10);q<=Math.min(r1-3,ds+12);q++){var jj=Math.abs(m[q+2]-m[q-2]);if(jj>bj){bj=jj;bb=q;}}
+          if(bb-a>=4){R.push({a:a,b:bb});a=bb;}cen=ms[Math.min(r1-1,i+4)];ds=-1;}}
+      else{ds=-1;cen+=(ms[i]-cen)*0.04;}}
+    R.push({a:a,b:r1});R.forEach(function(o){o.med=medOf(o.a,o.b);});
+    for(var ch=true;ch&&R.length>1;){ch=false;
+      for(i=0;i<R.length&&R.length>1;i++){var o=R[i],L=R[i-1],X=R[i+1],sh=o.b-o.a<16,dl=L?Math.abs(L.med-o.med):99,dx=X?Math.abs(X.med-o.med):99;
+        if(!sh&&dl>=0.5&&dx>=0.5)continue;var tl=sh?dl<=dx:dl<0.5&&dl<=dx;if(!sh&&!tl&&dx>=0.5)continue;
+        if(tl){L.b=o.b;L.med=medOf(L.a,L.b);}else{X.a=o.a;X.med=medOf(X.a,X.b);}R.splice(i,1);ch=true;i--;}}
+    R.forEach(function(o){N.push({a:o.a,b:o.b});});}
   if(v.sp&&v.sp.length){var N2=[];N.forEach(function(o){var a=o.a;v.sp.filter(function(f){return f>o.a+3&&f<o.b-3;}).sort(function(p,q){return p-q;}).forEach(function(f){N2.push({a:a,b:f});a=f;});N2.push({a:a,b:o.b});});N=N2;}
   if(v.mg&&v.mg.length){var N3=[];N.forEach(function(o){var L=N3[N3.length-1];if(L&&v.mg.indexOf(o.a)>=0&&o.a-L.b<40)L.b=o.b;else N3.push(o);});N=N3;}
-  N.forEach(function(o){var w=[];for(i=o.a;i<o.b;i++)if(!isNaN(m[i]))w.push(m[i]);w.sort(function(p,q){return p-q;});o.med=w[w.length>>1];var mid=(o.a+o.b)>>1;o.pcs=vtPcsAt(v,c,A,mid);o.T0=vtSnap(o.med,o.pcs);var e=v.ed&&v.ed[o.a];o.dt=e&&e.dt||0;o.flat=!!(e&&e.flat);o.tr=e&&e.tr!=null?e.tr:null;o.hum=e&&e.hum!=null?e.hum:null;o.T=o.T0+o.dt;});
+  N.forEach(function(o){o.med=medOf(o.a,o.b);var w=[],nv=0;for(i=o.a;i<o.b;i++){if(isNaN(m[i]))continue;nv++;var p=Math.max(o.a,i-3),q=Math.min(o.b-1,i+3);if(!isNaN(m[p])&&!isNaN(m[q])&&Math.abs(ms[q]-ms[p])<0.02*(q-p))w.push(ms[i]);}
+    o.st=o.b-o.a>=12&&w.length>=Math.max(6,0.3*nv);if(o.st){w.sort(num);o.med=w[w.length>>1];}var mid=(o.a+o.b)>>1;o.pcs=vtPcsAt(v,c,A,mid);o.T0=vtSnap(o.med,o.pcs);var e=v.ed&&v.ed[o.a];o.dt=e&&e.dt||0;o.flat=!!(e&&e.flat);o.tr=e&&e.tr!=null?e.tr:null;o.hum=e&&e.hum!=null?e.hum:null;o.T=o.T0+o.dt;});
   return N;}
-/* per-frame shift in semitones: Amount × (target − pitch), pitch replaced by its 120 ms trend in proportion to Humanize (keeps vibrato), smoothed by Speed */
+/* per-frame shift in semitones. Natural/Pop correct the note's CENTRE (target − note median) so the singer's own vibrato and drift survive, and leave
+   notes alone whose centre is already within the style's dead-zone, and glides/blips that have no steady centre; Hard-tune (and "flat" notes) pull every frame. Smoothed by Speed. */
 function vtHShift(T,h){return h===12||h===-12?T+h:vtStep(T,h,VT._sc);}
-function vtCurve(A,N,v,harm){var F=A.F,m=A.m,sh=new Float32Array(F),dfa=new Float32Array(F),amt=(v.amt==null?100:v.amt)/100,fr=A.hop/A.sr,vib=(v.vib||0)/100,vr=v.vibR||5.5,k,i;
-  N.forEach(function(o){var spd=o.tr!=null?o.tr:v.spd,al=spd>0?1-Math.exp(-fr/(spd/1000)):1,hum=o.flat?0:(o.hum!=null?o.hum:(v.hum||0))/100,dF=null,T=o.T,H=harm?vtHShift(T,harm)-T:0;
-    for(k=o.a;k<o.b;k++){if(isNaN(m[k])){dfa[k]=dF||0;sh[k]=0;continue;}var s=0,n=0;for(i=Math.max(o.a,k-12);i<Math.min(o.b,k+13);i++)if(!isNaN(m[i])){s+=m[i];n++;}var tr=s/n,d=T-((1-hum)*m[k]+hum*tr);
+function vtCurve(A,N,v,harm){var F=A.F,m=A.m,sh=new Float32Array(F),dfa=new Float32Array(F),amt=(v.amt==null?100:v.amt)/100,fr=A.hop/A.sr,vib=(v.vib||0)/100,vr=v.vibR||5.5,k,i,
+    SP=VTSTY[v.st]||{},dz=(v.dz!=null?v.dz:SP.dz||0)/100,ctr0=v.ctr!=null?v.ctr:SP.ctr||0;
+  N.forEach(function(o){var spd=o.tr!=null?o.tr:v.spd,al=spd>0?1-Math.exp(-fr/(spd/1000)):1,hum=o.flat?0:(o.hum!=null?o.hum:(v.hum||0))/100,dF=null,T=o.T,H=harm?vtHShift(T,harm)-T:0,
+      d0=T-o.med,ctr=o.flat?0:ctr0,rest=!o.flat&&!o.dt&&(Math.abs(d0)<dz||(ctr>0&&o.st===false));
+    for(k=o.a;k<o.b;k++){if(isNaN(m[k])){dfa[k]=dF||0;sh[k]=0;continue;}var d=0;
+      if(!rest){d=ctr*d0;if(ctr<1){var s=0,n=0;for(i=Math.max(o.a,k-12);i<Math.min(o.b,k+13);i++)if(!isNaN(m[i])){s+=m[i];n++;}var tr=s/n;d+=(1-ctr)*(Math.abs(m[k]-o.med)>5?d0:T-((1-hum)*m[k]+hum*tr));}}
       if(dF==null)dF=spd>0&&o.a>0&&!isNaN(m[o.a-1])?dfa[o.a-1]:d;dF+=(d-dF)*al;dfa[k]=dF;var vb=0;if(vib>0){var tt=(k-o.a)*fr;vb=vib*Math.min(1,Math.max(0,(tt-0.18)/0.25))*Math.sin(2*Math.PI*vr*tt);}sh[k]=amt*dF+H+vb;}});
-  var out=new Float32Array(F);for(k=0;k<F;k++){var s2=0,w2=0;for(i=Math.max(0,k-2);i<=Math.min(F-1,k+2);i++){var ww=3-Math.abs(i-k);s2+=sh[i]*ww;w2+=ww;}out[k]=s2/w2;}
+  var out=new Float32Array(F);for(k=0;k<F;k++){var s2=0,w2=0;for(i=Math.max(0,k-2);i<=Math.min(F-1,k+2);i++){var ww=3-Math.abs(i-k);s2+=sh[i]*ww;w2+=ww;}out[k]=Math.abs(s2/w2)<0.002?0:s2/w2;}
   return out;}
-/* TD-PSOLA: analysis marks one per period (aligned on waveform peaks), unvoiced marks every 5 ms; synthesis marks re-spaced by period/ratio,
-   two-period Hann grains with fractional placement, window-sum normalised (a convex mix of input samples, so it cannot blow up) */
-function vtMarks(A){var x=A.x,sr=A.sr,hop=A.hop,n=x.length,M=[],Pp=[],t=0,prevV=false,U=Math.round(sr*0.005);
-  while(t<n){var k=Math.min(A.F-1,Math.round(t/hop)),vo=!isNaN(A.m[k]),P=vo?sr/(440*Math.pow(2,(A.m[k]-69)/12)):U;
+/* TD-PSOLA: analysis marks one per period (aligned on waveform peaks), unvoiced marks every 5 ms; synthesis marks re-spaced by period/ratio.
+   Grains are asymmetric Hann halves that always reach the neighbouring mark, so voiced/unvoiced borders and period changes cross-fade without holes.
+   Where the shift is zero (unvoiced, breath, notes left alone) grains are laid back exactly on their own marks = the untouched input (bypass).
+   The window sum is normalised only down to a floor: the output is a convex mix of input samples, never louder, never a hard switch between grains. */
+function vtMarks(A){var x=A.x,sr=A.sr,hop=A.hop,n=x.length,M=[],Pp=[],Vv=[],t=0,prevV=false,U=Math.round(sr*0.005),lo=sr/1100,hi=sr/60,last=-1;
+  while(t<n){var k=Math.min(A.F-1,Math.round(t/hop)),vo=!isNaN(A.m[k]),P=vo?Math.max(lo,Math.min(hi,sr/(440*Math.pow(2,(A.m[k]-69)/12)))):U;
     if(vo){var a=Math.round(t+(prevV?-0.15*P:0)),b=Math.round(t+(prevV?0.15*P:P)),bi=Math.round(t),bv=-1e9;for(var i=Math.max(0,a);i<=Math.min(n-1,b);i++)if(x[i]>bv){bv=x[i];bi=i;}t=bi;}
-    M.push(t);Pp.push(P);prevV=vo;t=Math.round(t+P);}
-  return {M:M,P:Pp};}
-function vtPsola(src,A,sh,MK,phi){phi=phi||1;var sr=A.sr,hop=A.hop,n=src.length,acc=new Float32Array(n),ws=new Float32Array(n),M=MK.M,PP=MK.P,j=0,ts=0,i;
-  while(ts<n){var k=Math.min(A.F-1,Math.round(ts/hop)),r=Math.pow(2,sh[k]/12);while(j+1<M.length&&Math.abs(M[j+1]-ts)<=Math.abs(M[j]-ts))j++;
-    var ma=M[j],P=PP[j],L=Math.max(8,Math.round(P)),t0=Math.floor(ts),fr=ts-t0;
-    for(i=-L;i<=L;i++){var o=t0+i;if(o<0||o>=n)continue;var u=i-fr;if(u<=-L||u>=L)continue;var w=0.5+0.5*Math.cos(Math.PI*u/L),si=ma+u*phi,s0=Math.floor(si),f=si-s0,xv=(s0>=0&&s0<n?src[s0]:0)*(1-f)+(s0+1>=0&&s0+1<n?src[s0+1]:0)*f;acc[o]+=w*xv;ws[o]+=w;}
-    ts+=P/r;}
-  for(i=0;i<n;i++)acc[i]=ws[i]>1e-6?acc[i]/ws[i]:src[i];return acc;}
+    if(t<=last)t=last+1;M.push(t);Pp.push(P);Vv.push(vo);last=t;prevV=vo;t=Math.round(t+P);}
+  return {M:M,P:Pp,V:Vv};}
+function vtPsola(src,A,sh,MK,phi){phi=phi||1;var sr=A.sr,hop=A.hop,n=src.length,acc=new Float32Array(n),ws=new Float32Array(n),M=MK.M,PP=MK.P,VV=MK.V||[],nM=M.length,j=0,jp=-1,ts=0,last=-1,disp=0,inBy=false,cap=sr*0.03,i;
+  while(ts<n&&nM){var k=Math.min(A.F-1,Math.round(ts/hop)),s=sh[k],r=Math.pow(2,s/12);
+    if(s===0&&phi===1){ /* bypass: grain j goes back on mark j; a leftover offset from a shifted stretch is eased out over a few periods */
+      if(!inBy){while(j+1<nM&&Math.abs(M[j+1]-ts)<=Math.abs(M[j]-ts))j++;if(j<=jp)j=jp+1;if(j>=nM)break;disp=VV[j]?ts-M[j]:0;if(Math.abs(disp)>PP[j])disp=0;inBy=true;}
+      else{j=jp+1;if(j>=nM)break;disp*=0.6;if(Math.abs(disp)<1)disp=0;}
+      ts=M[j]+disp;}
+    else{inBy=false;while(j+1<nM&&Math.abs(M[j+1]-ts)<=Math.abs(M[j]-ts))j++;}
+    if(ts<=last)ts=last+1;
+    var ma=M[j],P=PP[j],Ll=Math.min(cap,Math.max(P,j>0?ma-M[j-1]:P)),Lr=Math.min(cap,Math.max(P,j+1<nM?M[j+1]-ma:P)),t0=Math.floor(ts),fr=ts-t0,
+        i0=j===0?-t0:-Math.ceil(Ll),i1=j===nM-1?n-1-t0:Math.ceil(Lr);
+    for(i=i0;i<=i1;i++){var o=t0+i;if(o<0||o>=n)continue;var u=i-fr,w;
+      if(u<0){if(j===0)w=1;else{if(u<=-Ll)continue;w=0.5+0.5*Math.cos(Math.PI*u/Ll);}}
+      else{if(j===nM-1)w=1;else{if(u>=Lr)continue;w=0.5+0.5*Math.cos(Math.PI*u/Lr);}}
+      var si=ma+u*phi;if(si<0)si=0;else if(si>n-1)si=n-1;var s0=Math.floor(si),f=si-s0,xv=(s0>=0&&s0<n?src[s0]:0)*(1-f)+(s0+1>=0&&s0+1<n?src[s0+1]:0)*f;acc[o]+=w*xv;ws[o]+=w;}
+    jp=j;last=ts;ts+=P/r;}
+  for(i=0;i<n;i++)acc[i]=ws[i]>0?acc[i]/Math.max(ws[i],0.6):0;return acc;}
 function vtRenderBuf(b,v,c,harm){var A=vtAnalyse(b),N=vtNotes(A,v,c),sh=vtCurve(A,N,v,harm),MK=A.mk||(A.mk=vtMarks(A)),C=b.numberOfChannels,nb=ctx.createBuffer(C,b.length,b.sampleRate);
   var phi=Math.pow(2,(v.fmt||0)/12),thr=(v.thr||0)/100;
   for(var ch=0;ch<C;ch++){var y=vtPsola(b.getChannelData(ch),A,sh,MK,phi);if(thr)vtThroat(y,b.sampleRate,thr);nb.getChannelData(ch).set(y);}return {buf:nb,N:N,sh:sh,A:A};}
@@ -5301,7 +5347,7 @@ function vtGoClip(id){var c=clipById(id);if(!c)return;vtClose();vtStopTP();daw.s
 /* ---------- sheet UI ---------- */
 function vtShow(){var sh=$('#vtSheet');sh.hidden=false;sh.classList.toggle('all',!!VT.all);$('#vtAll').setAttribute('aria-pressed',!!VT.all);$('#vtAll').textContent=VT.all?'Hide extra options':'Show all options';
   $('#vtT').textContent=VT.c?'Vocal Studio · '+clipName(VT.c):'Vocal Studio · Source '+VT.slot;$('#vtSub').textContent=VT.c?'Saved in '+vtWhere(VT.c):'Capture Source '+VT.slot+' · harmonies go into the song as new audio tracks';
-  $('#vtBand').disabled=!VT.c;$('#vtHarm').hidden=false;$('#vtRm').hidden=!VT.c;$('#vtHmsg').hidden=true;VT.undo=[];VT.loop=false;vtHarmUI();vtUI();vtNowUI(-1);}
+  $('#vtBand').disabled=!VT.c;$('#vtHarm').hidden=false;$('#vtRm').hidden=!VT.c;$('#vtHmsg').hidden=true;VT.undo=[];VT.redo=[];VT.loop=false;vtHarmUI();vtUI();vtNowUI(-1);}
 function vtUI(){var v=vtSet();if(!v)return;$$('[data-vts]').forEach(function(b){b.setAttribute('aria-pressed',b.getAttribute('data-vts')===v.st);});
   if(v.mor==null)v.mor=v.spd<=0?100:v.spd>=100?25:62;
   [['vtAmt','amt','%'],['vtSpd','spd',' ms'],['vtHum','hum','%'],['vtMor','mor',''],['vtFmt','fmt',' st'],['vtThr','thr',''],['vtVib','vib',' ct'],['vtVibR','vibR',' Hz']].forEach(function(q){var e=$('#'+q[0]);if(!e)return;var val=v[q[1]];if(val==null)val=+e.defaultValue;e.value=val;
@@ -5312,9 +5358,10 @@ function vtUI(){var v=vtSet();if(!v)return;$$('[data-vts]').forEach(function(b){
   var n=VT.N&&VT.sel>=0?VT.N[VT.sel]:null;$('#vtNote').hidden=!n;$('#vtHint').textContent=n?'Selected '+nname(n.T)+' · drag it, or use the note tools'+(VT.all||document.body.classList.contains('is-pro')?' below':' (Show all options)'):'Tap a blue note to select it, drag it up or down to change it.';
   if(n){$('#vtNl').textContent=nname(n.T)+(n.dt?' (moved '+(n.dt>0?'+':'')+n.dt+')':'')+' · sung '+nname(Math.round(n.med))+' '+(Math.round((n.med-Math.round(n.med))*100)>=0?'+':'')+Math.round((n.med-Math.round(n.med))*100)+' ct';$('#vtFlat').setAttribute('aria-pressed',n.flat);$('#vtFlat').textContent=n.flat?'Restore vibrato':'Flatten vibrato';
     $('#vtNTr').value=n.tr!=null?n.tr:v.spd;$('#vtNTrO').textContent=n.tr!=null?n.tr+' ms':'auto';$('#vtNHum').value=n.hum!=null?n.hum:v.hum;$('#vtNHumO').textContent=n.hum!=null?n.hum+'%':'auto';$('#vtMerge').disabled=VT.sel>=VT.N.length-1;}
-  $('#vtUndo').disabled=!(VT.undo&&VT.undo.length);vtInfo();}
+  $('#vtUndo').disabled=!(VT.undo&&VT.undo.length);$('#vtRedo').disabled=!(VT.redo&&VT.redo.length);
+  var none=!!(VT.N&&!VT.N.length);$('#vtNone').hidden=!none;$('#vtHint').hidden=none;vtInfo();}
 function vtInfo(){var v=vtSet(),e=$('#vtInfo');if(!v||!e)return;e.textContent=(v.band&&VT.c?'Following the band chords (part '+(GAR.band.edit||'A')+')':vtScaleName(v))+' · '+(VT.N?VT.N.length:0)+' notes'+(VT.ms?' · rendered in '+Math.round(VT.ms)+' ms':'');}
-function vtPushUndo(){var v=vtSet();if(!v)return;(VT.undo||(VT.undo=[])).push(JSON.stringify({ed:v.ed||{},sp:v.sp||[],mg:v.mg||[]}));if(VT.undo.length>50)VT.undo.shift();}
+function vtPushUndo(){var v=vtSet();if(!v)return;VT.redo=[];(VT.undo||(VT.undo=[])).push(JSON.stringify({ed:v.ed||{},sp:v.sp||[],mg:v.mg||[]}));if(VT.undo.length>50)VT.undo.shift();}
 function vtEd(n,o){var v=vtSet();v.ed=v.ed||{};var e=v.ed[n.a]||{};Object.assign(e,o);['tr','hum'].forEach(function(q){if(e[q]==null)delete e[q];});if(!e.dt&&!e.flat&&e.tr==null&&e.hum==null)delete v.ed[n.a];else v.ed[n.a]=e;vtSchedule();}
 function vtGeom(){var cv=$('#vtCv'),A=VT.A,N=VT.N||[];if(!A||!cv)return null;var lo=99,hi=0;N.forEach(function(n){lo=Math.min(lo,n.T,n.med);hi=Math.max(hi,n.T,n.med);});if(lo>hi){lo=57;hi=69;}
   lo=Math.floor(lo)-2;hi=Math.ceil(hi)+2;if(hi-lo<12){var c=(hi+lo)/2;lo=Math.floor(c-6);hi=lo+12;}
@@ -5401,7 +5448,9 @@ function initVocal2(){
   $('#vtNTr').addEventListener('input',function(e){var n=cur();if(!n)return;if(!VT.ntr){vtPushUndo();VT.ntr=1;}n.tr=+e.target.value;vtEd(n,{tr:n.tr});vtUI();});
   $('#vtNHum').addEventListener('input',function(e){var n=cur();if(!n)return;if(!VT.ntr){vtPushUndo();VT.ntr=1;}n.hum=+e.target.value;vtEd(n,{hum:n.hum});vtUI();});
   ['vtNTr','vtNHum'].forEach(function(id){$('#'+id).addEventListener('change',function(){VT.ntr=0;});});
-  $('#vtUndo').addEventListener('click',function(){var v=vtSet();if(!v||!VT.undo||!VT.undo.length)return;var o=JSON.parse(VT.undo.pop());v.ed=o.ed;v.sp=o.sp;v.mg=o.mg;clearTimeout(VT.t);vtRender();toast('Undone.',1000);});
+  function vtSnapEd(v){return JSON.stringify({ed:v.ed||{},sp:v.sp||[],mg:v.mg||[]});}
+  $('#vtUndo').addEventListener('click',function(){var v=vtSet();if(!v||!VT.undo||!VT.undo.length)return;(VT.redo||(VT.redo=[])).push(vtSnapEd(v));var o=JSON.parse(VT.undo.pop());v.ed=o.ed;v.sp=o.sp;v.mg=o.mg;clearTimeout(VT.t);vtRender();toast('Undone.',1000);});
+  $('#vtRedo').addEventListener('click',function(){var v=vtSet();if(!v||!VT.redo||!VT.redo.length)return;(VT.undo||(VT.undo=[])).push(vtSnapEd(v));var o=JSON.parse(VT.redo.pop());v.ed=o.ed;v.sp=o.sp;v.mg=o.mg;clearTimeout(VT.t);vtRender();toast('Redone.',1000);});
   /* pitch editor: pointer events work for touch, pen and mouse; touch-action:none on the canvas, capture while dragging, the sheet cannot scroll mid-drag */
   var cv=$('#vtCv');
   cv.addEventListener('pointerdown',function(e){if(e.button>0)return;var i=vtHit(e);VT.sel=i;if(i<0){vtDraw();vtUI();return;}e.preventDefault();var n=VT.N[i];vtPushUndo();VT.drag={id:e.pointerId,y:e.clientY,T:n.T};try{cv.setPointerCapture(e.pointerId);}catch(x){}cv.classList.add('drag');if(navigator.vibrate)try{navigator.vibrate(8);}catch(x){}vtDraw();vtUI();});
