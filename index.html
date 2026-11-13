@@ -35,6 +35,7 @@ main{flex:1;overflow-y:auto;padding:14px 14px 22px;-webkit-overflow-scrolling:to
 h2{margin:0;font-size:22px;letter-spacing:-.01em}
 .sub{margin:0;color:var(--mu);font-size:14px;line-height:1.45}
 .card{background:var(--s1);border:1px solid var(--ln);border-radius:18px;padding:14px;display:flex;flex-direction:column;gap:12px}
+.octRow{display:flex;align-items:center;justify-content:flex-end;gap:8px;margin-top:4px}.octRow[hidden]{display:none}.octB{min-height:34px;min-width:64px;border-radius:10px;border:1px solid #3A3A48;background:var(--s2);color:var(--tx);font-size:13px;font-weight:600}
 .kicker{font-size:12px;font-weight:600;letter-spacing:.08em;color:var(--mu);text-transform:uppercase}
 .row{display:flex;align-items:center;justify-content:space-between;gap:10px}
 .mu{color:var(--mu);font-size:13px}
@@ -780,6 +781,7 @@ html.splash #splash{display:flex}
     <p class="sub">Record or import a short source — a tapped glass, a sung note, a creaking door. Ecou maps it across the keyboard.</p>
     <div class="card">
       <div class="row"><span class="kicker">Source A</span><span class="mu" id="note-A"></span></div>
+      <div class="octRow" id="oct-A" hidden><span class="mu">Root octave</span><button class="octB" data-oct="A" data-d="-1" aria-label="Root note one octave down">Oct −</button><button class="octB" data-oct="A" data-d="1" aria-label="Root note one octave up">Oct +</button></div>
       <div class="row"><strong id="name-A">Glass Tap</strong><span class="mu" id="dur-A"></span></div>
       <canvas class="wave" id="wave-A" aria-hidden="true"></canvas>
       <div class="btns"><button class="btn rec" data-cap="A">● Record sample</button><label class="btn" for="f-A" data-up="A">Import</label></div>
@@ -787,6 +789,7 @@ html.splash #splash{display:flex}
     </div>
     <div class="card">
       <div class="row"><span class="kicker">Source B</span><span class="mu" id="note-B"></span></div>
+      <div class="octRow" id="oct-B" hidden><span class="mu">Root octave</span><button class="octB" data-oct="B" data-d="-1" aria-label="Root note one octave down">Oct −</button><button class="octB" data-oct="B" data-d="1" aria-label="Root note one octave up">Oct +</button></div>
       <div class="row"><strong id="name-B">Choir Pad</strong><span class="mu" id="dur-B"></span></div>
       <canvas class="wave" id="wave-B" aria-hidden="true"></canvas>
       <div class="btns"><button class="btn rec" data-cap="B">● Record sample</button><label class="btn" for="f-B" data-up="B">Import</label></div>
@@ -1862,6 +1865,8 @@ function upload(target,file){
   $('#f-'+k).addEventListener('change',function(e){var f=e.target.files&&e.target.files[0];e.target.value='';upload(k,f);});
 });
 $('#capIR').addEventListener('click',function(){startCapture('IR');});
+$$('[data-oct]').forEach(function(b){b.addEventListener('click',function(){var k=b.getAttribute('data-oct'),s=slots[k],d=+b.getAttribute('data-d');if(!s||!s.det||!s.buf||s.stock)return;var r=s.root*Math.pow(2,d);if(r<16||r>8000)return;
+  s.root=r;s.conf=1;if(k==='A'&&typeof morphRoot!=='undefined'&&!morphBuf)morphRoot=r;slotUI(k);updateMorph();if(typeof morphMode!=='undefined'&&morphMode!=='blend'&&slots.A.buf&&slots.B.buf)scheduleMorph();markDirty();toast('Source '+k+' now plays as '+nname(ftom(r))+' on the keys.',1800);});});
 ['BB','PAD'].forEach(function(k){$('#f-'+k).addEventListener('change',function(e){var f=e.target.files&&e.target.files[0];e.target.value='';upload(k,f);});});
 $('#bbRec').addEventListener('click',function(){startCapture('BB');});
 $('#padRec').addEventListener('click',function(){startCapture('PAD');});
@@ -1869,49 +1874,145 @@ $('#bbUp').addEventListener('click',function(){ensureAudio();});$('#padUp').addE
 $('#upIR').addEventListener('click',function(){ensureAudio();});
 $('#f-IR').addEventListener('change',function(e){var f=e.target.files&&e.target.files[0];e.target.value='';upload('IR',f);});
 
+/* ── Sound-to-Instrument analysis (capture → playable instrument) ── */
+/* DC removal + 30 Hz 2nd-order high-pass. Captured/imported sounds only. */
+function capClean(d,sr){
+  var n=d.length,i,m=0,x;for(i=0;i<n;i++){x=d[i];if(!(x>-1e9&&x<1e9)){d[i]=0;continue;}m+=x;}m/=n||1;
+  var w=2*Math.PI*30/sr,cs=Math.cos(w),al=Math.sin(w)/1.41421356,a0=1+al,b0=(1+cs)/2/a0,b1=-(1+cs)/a0,a1=-2*cs/a0,a2=(1-al)/a0,x1=0,x2=0,y1=0,y2=0,y;
+  for(i=0;i<n;i++){x=d[i]-m;y=b0*x+b1*x1+b0*x2-a1*y1-a2*y2;x2=x1;x1=x;y2=y1;y1=y;d[i]=y;}
+  return d;
+}
+/* Loudness for captured sounds: RMS of the loud part (50 ms blocks within 20 dB of the loudest) → −18 dBFS, peak never above 0.9. */
+function normCap(d,sr){
+  var n=d.length,H=Math.max(1,Math.round(sr*0.05)),nb=Math.max(1,Math.floor(n/H)),ms=new Float32Array(nb),pe=0,pk=0,i,b,s,a;
+  for(i=0;i<n;i++){a=Math.abs(d[i]);if(!(a<1e9)){d[i]=0;continue;}if(a>pk)pk=a;}
+  if(!(pk>0))return d;
+  for(b=0;b<nb;b++){s=0;var e=Math.min(n,b*H+H);for(i=b*H;i<e;i++)s+=d[i]*d[i];ms[b]=s/(e-b*H);if(ms[b]>pe)pe=ms[b];}
+  var acc=0,c=0;for(b=0;b<nb;b++)if(ms[b]>pe*0.01){acc+=ms[b];c++;}
+  var rms=Math.sqrt(c?acc/c:pe),g=rms>0?0.1259/rms:1;if(pk*g>0.9)g=0.9/pk;
+  for(i=0;i<n;i++)d[i]*=g;return d;
+}
+/* Trim: noise floor = quietest 100 ms; start = first block 12 dB over the floor, minus 5 ms; end = last 20 ms window over floor+6 dB / peak−60 dB. */
 function trim(d,sr){
-  var pk=0,i;for(i=0;i<d.length;i++){var a=Math.abs(d[i]);if(a>pk)pk=a;}
+  var n=d.length,pk=0,i,b,s;for(i=0;i<n;i++){var a=Math.abs(d[i]);if(a>pk)pk=a;}
   if(pk<0.003)return null;
-  var thr=Math.max(0.004,pk*0.04),s=0,e=d.length-1;
-  while(s<d.length&&Math.abs(d[s])<thr)s++;
-  while(e>s&&Math.abs(d[e])<thr*0.5)e--;
-  s=Math.max(0,s-Math.floor(sr*0.008));e=Math.min(d.length,e+Math.floor(sr*0.05));
-  e=Math.min(e,s+Math.floor(sr*12));
-  if(e-s<sr*0.05)return null;
-  var out=d.slice(s,e),f=Math.floor(sr*0.004);
-  for(i=0;i<f&&i<out.length;i++){out[i]*=i/f;out[out.length-1-i]*=i/f;}
+  var H=Math.max(1,Math.round(sr*0.0025)),nb=Math.floor(n/H);if(nb<20)return null;
+  var e=new Float32Array(nb),pe=0;for(b=0;b<nb;b++){s=0;for(i=b*H;i<b*H+H;i++)s+=d[i]*d[i];e[b]=s/H;if(e[b]>pe)pe=e[b];}
+  var wl=Math.min(40,nb),acc=0,fl=1e9;for(b=0;b<nb;b++){acc+=e[b];if(b>=wl)acc-=e[b-wl];if(b>=wl-1&&acc<fl)fl=acc;}
+  fl=Math.min(Math.max(fl/wl,1e-9,pe*1e-7),pe*1e-3);
+  var on=fl*16,off=Math.max(fl*4,pe*1e-6),sb=0,eb=nb-1;
+  while(sb<nb-1&&!(e[sb]>on&&(e[sb]+e[Math.min(nb-1,sb+1)]+e[Math.min(nb-1,sb+2)]+e[Math.min(nb-1,sb+3)])>on*2))sb++;
+  acc=0;var last=-1;for(b=0;b<nb;b++){acc+=e[b];if(b>=8)acc-=e[b-8];if(acc>off*8)last=b;}
+  if(last<0)return null;eb=last;
+  var s0=Math.max(0,sb*H-Math.floor(sr*0.005)),e0=Math.min(n,(eb+1)*H+Math.floor(sr*0.05));
+  e0=Math.min(e0,s0+Math.floor(sr*12));
+  if(e0-s0<sr*0.05)return null;
+  var out=d.slice(s0,e0),fi=Math.floor(sr*0.002),fo=Math.min(Math.floor(sr*0.015),out.length>>2);
+  for(i=0;i<fi&&i<out.length;i++)out[i]*=i/fi;
+  for(i=0;i<fo;i++)out[out.length-1-i]*=i/fo;
   return out;
 }
-function detectPitch(d,sr){
-  var pk=0,pi=0,lim=Math.min(d.length,sr),i;
-  for(i=0;i<lim;i++){var a=Math.abs(d[i]);if(a>pk){pk=a;pi=i;}}
-  var W=4096;if(d.length<W+16)return null;
-  var st=Math.min(pi+Math.floor(sr*0.04),d.length-W);
-  var seg=d.subarray(st,st+W),e0=0;for(i=0;i<W;i++)e0+=seg[i]*seg[i];e0/=W;
-  if(Math.sqrt(e0)<0.01)return null;
-  var minL=Math.floor(sr/1500),maxL=Math.min(Math.floor(sr/55),W>>1),corr=new Float32Array(maxL+2);
-  for(var L=minL;L<=maxL+1;L++){var s=0,n=W-L;for(i=0;i<n;i++)s+=seg[i]*seg[i+L];corr[L]=s/n;}
-  var L0=minL;while(L0<maxL&&corr[L0]>0)L0++;
-  var best=-1,bl=-1;for(L=L0;L<=maxL;L++){if(corr[L]>best){best=corr[L];bl=L;}}
-  if(bl<=minL||best/e0<0.45)return null;
-  var a1=corr[bl-1],b1=corr[bl],c1=corr[bl+1],den=a1-2*b1+c1,p=den?0.5*(a1-c1)/den:0;
-  return sr/(bl+clamp(p,-1,1));
+/* YIN cumulative-mean-normalised difference of x[o..] for lags 1..T (window W) into cm[]. */
+function yinCM(x,o,W,T,cm){
+  var t,j,s,df,run=0;cm[0]=1;
+  for(t=1;t<=T;t++){s=0;for(j=0;j<W;j++){df=x[o+j]-x[o+j+t];s+=df*df;}cm[t]=s;}
+  for(t=1;t<=T;t++){run+=cm[t];cm[t]=run>0?cm[t]*t/run:1;}
+}
+/* Pitch of a note: YIN on up to 32 frames of the sustain, two resolutions (full rate for 340–4200 Hz, ÷D for 29–1000 Hz),
+   median of the confident frames. Returns {hz,midi,cents,conf} or null when there is no clear pitch. */
+function detectPitchEx(d,sr){
+  var n=d.length,i,j,k,t;
+  var D=Math.max(1,Math.round(sr/11025)),srd=sr/D;
+  var hiMin=Math.max(2,Math.floor(sr/4200)),hiMax=Math.ceil(sr/340),WH=Math.round(sr*0.023),needH=WH+hiMax+3;
+  if(n<needH)return null;
+  var loMin=Math.max(3,Math.floor(srd/1000)),loMax=Math.ceil(srd/29);
+  loMax=Math.min(loMax,Math.floor((n/D-4)/2.3));var useLo=loMax>loMin+8,WL=Math.round(loMax*1.3),ndl=WL+loMax+3,needL=useLo?(ndl+1)*D:0;
+  var FL=Math.max(needH,needL);
+  /* sustain region: from 20 ms after the loudest 10 ms block (first second) to where the level falls 30 dB */
+  var H=Math.max(1,Math.round(sr*0.01)),nb=Math.floor(n/H),pe=0,pb=0,b,s,ev=new Float32Array(nb);
+  for(b=0;b<nb;b++){s=0;for(i=b*H;i<b*H+H;i++)s+=d[i]*d[i];ev[b]=s;if(s>pe&&b*H<sr){pe=s;pb=b;}}
+  if(pe/H<1e-6)return null;
+  var eb=pb;for(b=pb;b<nb;b++)if(ev[b]>pe*1e-3)eb=b;
+  var ra=Math.min((pb+2)*H,Math.max(0,n-FL)),rb=Math.max(ra,Math.min(n,(eb+1)*H)-FL);
+  var NF=Math.max(1,Math.min(32,Math.floor((rb-ra)/(FL/4))+1));
+  var cmH=new Float32Array(hiMax+3),cmL=useLo?new Float32Array(loMax+3):null,xd=useLo?new Float32Array(ndl):null,fs=[],nv=0,inv=1/(2*D);
+  for(var f=0;f<NF;f++){
+    var o=NF>1?Math.round(ra+(rb-ra)*f/(NF-1)):ra,cand=[],en=0;
+    for(j=0;j<WH;j+=4)en+=d[o+j]*d[o+j];if(en*4/WH<pe/H*1e-4)continue;nv++;
+    yinCM(d,o,WH,hiMax+1,cmH);
+    for(t=2;t<=hiMax;t++)if(cmH[t]<0.45&&cmH[t]<cmH[t-1]&&cmH[t]<=cmH[t+1]){var a1=cmH[t-1],b1=cmH[t],c1=cmH[t+1],den=a1-2*b1+c1,p=den?0.5*(a1-c1)/den:0;if(p>1)p=1;if(p<-1)p=-1;cand.push([(t+p)/sr,b1-0.25*(a1-c1)*p,1]);}
+    if(useLo){
+      for(k=0;k<ndl;k++){s=0;var q=o+k*D;for(j=0;j<2*D;j++)s+=d[q+j]||0;xd[k]=s*inv;}
+      yinCM(xd,0,WL,loMax+1,cmL);
+      for(t=loMin;t<=loMax;t++)if(cmL[t]<0.45&&cmL[t]<cmL[t-1]&&cmL[t]<=cmL[t+1]){a1=cmL[t-1];b1=cmL[t];c1=cmL[t+1];den=a1-2*b1+c1;p=den?0.5*(a1-c1)/den:0;if(p>1)p=1;if(p<-1)p=-1;cand.push([(t+p)/srd,b1-0.25*(a1-c1)*p,0]);}
+    }
+    if(!cand.length)continue;
+    cand.sort(function(x,y){return x[0]-y[0];});
+    var dm=1;for(k=0;k<cand.length;k++)if(cand[k][1]<dm)dm=cand[k][1];
+    var pick=null;for(k=0;k<cand.length;k++)if(cand[k][1]<=dm+0.07){pick=cand[k];break;}
+    if(!pick||pick[1]>0.3||pick[0]*sr<hiMin)continue;
+    if(!pick[2])for(k=0;k<cand.length;k++)if(cand[k][2]&&Math.abs(cand[k][0]/pick[0]-1)<0.03){pick=[cand[k][0],pick[1],1];break;}
+    fs.push([Math.log(1/pick[0]),pick[1]]);
+  }
+  if(!nv||fs.length<Math.max(1,Math.ceil(nv*0.25)))return null;
+  fs.sort(function(x,y){return x[0]-y[0];});
+  var med=fs[fs.length>>1][0],ag=0,mv=0;for(k=0;k<fs.length;k++){if(Math.abs(fs[k][0]-med)<0.035){ag++;mv+=fs[k][1];}}
+  var hz=Math.exp(med),conf=(ag/nv)*(1-mv/ag);
+  if(ag<fs.length*0.5||conf<0.2||hz<28||hz>4300)return null;
+  /* refine: mean of the agreeing frames */
+  var m2=0;for(k=0;k<fs.length;k++)if(Math.abs(fs[k][0]-med)<0.035)m2+=fs[k][0];hz=Math.exp(m2/ag);
+  var mf=69+12*Math.log(hz/440)/Math.LN2,mi=Math.round(mf);
+  return {hz:hz,midi:mi,cents:Math.round((mf-mi)*100),conf:conf>1?1:conf};
+}
+function detectPitch(d,sr){var r=detectPitchEx(d,sr);detectPitch.conf=r?r.conf:0;return r?r.hz:null;}
+/* Loop finder. Sustained sounds get a pitch-synchronous loop [ls,le,xf,r] (samples; r = similarity at the seam);
+   decaying sounds return null and play as one-shots with their natural tail. P = period in samples (0 = unpitched). */
+function findLoop(d,sr,P){
+  var n=d.length,H=Math.max(1,Math.round(sr*0.02)),nb=Math.floor(n/H),i,b,s;
+  if(n<sr*0.3||nb<12)return null;
+  var L=new Float32Array(nb),srt=[];for(b=0;b<nb;b++){s=0;for(i=b*H;i<b*H+H;i+=2)s+=d[i]*d[i];L[b]=10*Math.log(s*2/H+1e-12)/Math.LN10;srt.push(L[b]);}
+  srt.sort(function(x,y){return x-y;});var ref=srt[Math.floor(nb*0.75)]-5,best=0,ba=0,run=0;
+  for(b=0;b<nb;b++){if(L[b]>ref){run++;if(run>best){best=run;ba=b-run+1;}}else run=0;}
+  if(best*H<Math.max(sr*0.2,n*0.3))return null;
+  var a=ba+Math.max(1,Math.round(best*0.15)),z=ba+best,m=z-a,sx=0,sy=0,sxx=0,sxy=0;if(m<5)return null;
+  for(b=a;b<z;b++){sx+=b;sy+=L[b];sxx+=b*b;sxy+=b*L[b];}
+  var slope=(m*sxy-sx*sy)/(m*sxx-sx*sx||1);
+  if(-slope*m>5||L[z-1]<L[a]-7)return null;
+  var lo=ba*H+Math.max(Math.round(sr*0.1),Math.round(best*H*0.15)),hi=Math.min(n,z*H)-Math.round(sr*0.03);
+  var W=Math.round(Math.min(sr*0.04,Math.max(sr*0.008,P?2*P:sr*0.02))),W2=W>>1;
+  if(lo<W+2)lo=W+2;if(hi+W2>=n)hi=n-W2-1;
+  var span=hi-lo;if(span<Math.max(sr*0.12,P*6))return null;
+  var st=Math.max(1,Math.floor(W/384));
+  function sc(p,q){var xy=0,xx=0,yy=0,k,x,y;for(k=-W;k<W2;k+=st){x=d[p+k];y=d[q+k];xy+=x*y;xx+=x*x;yy+=y*y;}
+    if(!(xx>0&&yy>0))return [-9,0];var r=xy/Math.sqrt(xx*yy);return [r-0.035*Math.abs(10*Math.log(xx/yy)/Math.LN10),r];}
+  var bs=-9,bp=0,bq=0,br=0,NS=14,NE=56,u,v,p,q,k0,k1,r;
+  for(u=0;u<NS;u++){p=Math.round(lo+span*0.35*u/(NS-1));
+    var q0=Math.max(lo+span*0.6,p+Math.max(sr*0.1,P*4));if(q0>hi)continue;
+    for(v=0;v<NE;v++){q=q0+(hi-q0)*v/(NE-1);if(P)q=p+Math.round((q-p)/P)*P;q=Math.round(q);if(q>hi||q<q0-P)continue;
+      r=sc(p,q);var bias=r[0]+0.02*(q-p)/span;if(bias>bs){bs=bias;bp=p;bq=q;br=r[1];}}}
+  if(bs<-8)return null;
+  var R=P?Math.max(3,Math.round(P*0.08)):Math.round(sr*0.004),q1=bq;st=1;bs=-9;
+  for(q=bq-R;q<=bq+R;q++){if(q>hi+R||q+W2>=n)continue;r=sc(bp,q);if(r[0]>bs){bs=r[0];q1=q;br=r[1];}}
+  if(br<0)br=0;
+  var xf=Math.round(br>0.85?Math.min(sr*0.03,Math.max(sr*0.006,2*P)):br>0.5?sr*0.04:sr*0.1);
+  xf=Math.max(8,Math.min(xf,bp-1,(q1-bp)>>1));
+  return [bp,q1,xf,Math.round(br*1000)/1000];
 }
 function handleAudio(data,sr,target,name){
   if(target==='IR'){makeIR(data,sr,name);return;}
   if(target==='BB'){beatboxToKit(data,sr);return;}
   if(target==='CAB'){makeCabIR(data,sr);return;}
-  var tr=trim(data,sr);
+  var tr=trim(capClean(Float32Array.from(data),sr),sr);
   if(!tr){toast('Signal too quiet or too short. Move closer to the mic and try again.');return;}
-  normalize(tr);
-  var buf=ctx.createBuffer(1,tr.length,sr);buf.getChannelData(0).set(tr);
+  normCap(tr,sr);
+  var buf=ctx.createBuffer(1,tr.length,sr);buf.getChannelData(0).set(tr);buf._cap=1;
   if(target==='PAD'){var pd=pads[padSel];pd.buf=buf;pd.name=name.slice(0,14);pd.cls='other';renderPads();selectPad(padSel);toast('Loaded onto pad '+(padSel+1)+'.');return;}
-  var f=detectPitch(tr,sr);
-  setSlot(target,buf,name,f||261.63,!!f);
-  toast(f?'Got it! Your sound plays as '+nname(ftom(f))+' on the keys.':'Got it! This sound has no clear note, so it plays like percussion (C4 = original pitch).',3200);
+  var f=detectPitch(tr,sr),cf=detectPitch.conf;
+  setSlot(target,buf,name,f||261.63,!!f,cf);
+  toast(f?'Got it! Your sound plays as '+nname(ftom(f))+' on the keys.'+(cf<0.6?' Not fully sure of the octave: use Oct − / Oct + if it sounds off.':''):'Got it! This sound has no clear note, so it plays like percussion (C4 = original pitch).',3200);
 }
-function setSlot(k,buf,name,root,det){
-  var s=slots[k];var keepSrc=s.spkSrc;delete s.zones;delete s.stock;delete s.spkSrc;s.buf=buf;s.name=name;s.root=root;s.det=det;if(setSlot.keep)s.spkSrc=keepSrc;slotUI(k);updateMorph();
+function setSlot(k,buf,name,root,det,conf){
+  var s=slots[k];var keepSrc=s.spkSrc;delete s.zones;delete s.stock;delete s.spkSrc;delete s.conf;if(conf!=null)s.conf=conf;s.buf=buf;s.name=name;s.root=root;s.det=det;if(setSlot.keep)s.spkSrc=keepSrc;slotUI(k);updateMorph();
   if(typeof morphMode!=='undefined'&&morphMode!=='blend'&&slots.A.buf&&slots.B.buf)scheduleMorph();markDirty();
 }
 function drawWave(cv,d){
@@ -2304,7 +2405,7 @@ function defaultTracks(){return [defTrack('Drums','drums',{rev:0.1,vol:0.9}),def
 tracks=defaultTracks();
 function liveSound(){var s={slots:{A:slots.A,B:slots.B},engine:engine,loop:loopOn,morphMode:morphMode,morphBuf:morphBuf,morphRoot:morphRoot,fmP:fmP?fmP.slice():null};IKEYS.forEach(function(k){s[k]=P[k].v;});return s;}
 function saveSound(ti){var s=liveSound();s.slots={A:Object.assign({},slots.A),B:Object.assign({},slots.B)};tracks[ti].sound=s;}
-function slotUI(k){var s=slots[k];$('#name-'+k).textContent=s.name;$('#note-'+k).textContent=s.det?nname(ftom(s.root))+' · '+Math.round(s.root)+' Hz':'unpitched · mapped to C4';$('#dur-'+k).textContent=s.buf?dec(s.buf.duration,1)+' s':'';if(s.buf)drawWave($('#wave-'+k),s.buf.getChannelData(0));}
+function slotUI(k){var s=slots[k];$('#name-'+k).textContent=s.name;$('#note-'+k).textContent=s.det?nname(ftom(s.root))+' · '+Math.round(s.root)+' Hz'+(s.conf!=null&&s.conf<0.6?' · unsure, check octave':''):'unpitched · mapped to C4';var oc=$('#oct-'+k);if(oc)oc.hidden=!(s.det&&s.buf&&!s.stock&&!s.zones);$('#dur-'+k).textContent=s.buf?dec(s.buf.duration,1)+' s':'';if(s.buf)drawWave($('#wave-'+k),s.buf.getChannelData(0));}
 function loadSound(ti){
   var S=tracks[ti].sound;if(!S)return;loadingSound=true;
   slots={A:Object.assign({},S.slots.A),B:Object.assign({},S.slots.B)};
@@ -2361,15 +2462,18 @@ var renderOnly=null;
 function makeVoice(ti,midi,vel,t,from){
   if(renderOnly!=null&&ti!==renderOnly)return null;var S=soundOf(ti),tr=tracks[ti];if(!S||!tr.n)return null;
   if(S.engine==='fm'||fm1Out(ti))return fmMakeVoice(ti,midi,vel,t);
-  var a=Math.max(0.003,S.attack),env=ctx.createGain();env.gain.setValueAtTime(0,t);env.gain.linearRampToValueAtTime(vel,t+a);env.connect(tr.n.in);
-  var v={ti:ti,S:S,midi:midi,freq:mtof(midi),env:env,vel:vel,a:a,layers:[],srcs:[],next:t,t0:t,t1:1e9},into=env;
-  if(S.fenv>0.001){var fb=normToHz(S.cutoff),fs=Math.min(18000,fb*(1+S.fenv*24)),vf=BQ('lowpass',fs,0.9);vf.frequency.setValueAtTime(fs,t);vf.frequency.setTargetAtTime(fb,t,Math.max(0.01,(S.fdec||0.3)/3));vf.connect(env);into=vf;}
+  /* captured sounds: velocity also shapes tone (low-pass, 1.5 oct), attack and a vel^1.6 gain curve; stock sounds unchanged */
+  var cs=S.engine==='sampler'&&!(S.morphMode&&S.morphMode!=='blend'&&S.morphBuf)&&['A','B'].some(function(k){var q=S.slots[k];return q&&q.buf&&q.buf._cap&&!q.zones;}),vk=cs?Math.pow(2,-1.5*(1-clamp(vel,0,1))):1,zid=0;
+  var a=Math.max(0.003,cs?S.attack*(1-0.35*clamp(vel,0,1)):S.attack),gv=cs?Math.pow(clamp(vel,0,1),1.6):vel,env=ctx.createGain();env.gain.setValueAtTime(0,t);env.gain.linearRampToValueAtTime(gv,t+a);env.connect(tr.n.in);
+  var v={ti:ti,S:S,midi:midi,freq:mtof(midi),env:env,vel:vel,gv:gv,a:a,layers:[],srcs:[],next:t,t0:t,t1:1e9},into=env;
+  if(S.fenv>0.001){var fb=Math.max(30,normToHz(S.cutoff)*vk),fs=Math.min(18000,fb*(1+S.fenv*24)),vf=BQ('lowpass',fs,0.9);vf.frequency.setValueAtTime(fs,t);vf.frequency.setTargetAtTime(fb,t,Math.max(0.01,(S.fdec||0.3)/3));vf.connect(env);into=vf;}
+  else if(cs&&vk<0.97){var vl=BQ('lowpass',Math.max(200,16000*vk),0.707);vl.connect(env);into=vl;}
   if(S.morphMode&&S.morphMode!=='blend'&&S.morphBuf){var gm=G(1);gm.connect(into);v.layers.push({k:'M',g:gm,slot:{buf:S.morphBuf,root:S.morphRoot}});}
   else ['A','B'].forEach(function(k){var s=S.slots[k];if(!s||!s.buf)return;var lgv=lgain(k,S.morph);if(lgv<0.002&&(offlineRender||ti!==selTrack))return;var g=G(lgv);g.connect(into);v.layers.push({k:k,g:g,slot:s});});
   if(S.engine==='sampler'){
     var ps=ti===selTrack?pitchSemi:0;
     v.layers.forEach(function(L){
-      var Z=zoneFor(L.slot,v.freq,v.vel),b=ctx.createBufferSource(),lb=S.loop?loopBuf(Z.buf):null;b.buffer=lb?lb.buf:Z.buf;b._base=v.freq/Z.root;var pb=Math.pow(2,ps/12);b.playbackRate.value=b._base*pb;
+      var Z=zoneFor(L.slot,v.freq,v.vel),b=ctx.createBufferSource(),lb=S.loop?loopBuf(Z.buf,Z.det?Z.root:0):null;b.buffer=lb?lb.buf:Z.buf;b._base=v.freq/Z.root;var pb=Math.pow(2,ps/12);b.playbackRate.value=b._base*pb;
       if(from&&S.glide>0.002){b.playbackRate.setValueAtTime(b._base*pb*from/v.freq,t);b.playbackRate.setTargetAtTime(b._base*pb,t,S.glide/3);}
       if(lb){b.loop=true;b.loopStart=lb.ls;b.loopEnd=lb.le;}
       var dst=L.g;if(b._base>1.06){var aa=BQ('lowpass',Math.min(20000,0.45*Z.buf.sampleRate/b._base),0.707);aa.connect(L.g);dst=aa;}
@@ -2380,7 +2484,13 @@ function makeVoice(ti,midi,vel,t,from){
 }
 var loopCache=new WeakMap();
 /* loop region 30–75 % of the sample, with an equal-power crossfade baked in so the jump back is seamless */
-function loopBuf(src){var c=loopCache.get(src);if(c)return c;
+/* captured sounds (buf._cap): decaying → null (one-shot, natural tail); sustained → pitch-synchronous seam from findLoop */
+function loopBuf(src,root){var c=loopCache.get(src);if(c!==undefined)return c;
+  if(src._cap){var sr0=src.sampleRate,d0=src.getChannelData(0),P=root>20?sr0/root:0,lp=findLoop(d0,sr0,P);if(!lp){loopCache.set(src,null);return null;}
+    var L0=lp[0],L1=lp[1],X=lp[2],lin=lp[3]>0.85,cb=ctx.createBuffer(src.numberOfChannels,L1,sr0);
+    for(var ch0=0;ch0<src.numberOfChannels;ch0++){var q0=src.getChannelData(ch0),q1=cb.getChannelData(ch0);q1.set(q0.subarray(0,L1));
+      for(var j0=0;j0<X;j0++){var w0=(j0+0.5)/X,ga=lin?1-w0:Math.cos(w0*Math.PI/2),gb0=lin?w0:Math.sin(w0*Math.PI/2);q1[L1-X+j0]=q0[L1-X+j0]*ga+q0[L0-X+j0]*gb0;}}
+    c={buf:cb,ls:L0/sr0,le:L1/sr0};loopCache.set(src,c);return c;}
   var sr=src.sampleRate,ls=Math.floor(src.length*0.3),le=Math.floor(src.length*0.75),xf=Math.min(Math.floor(sr*0.12),ls,Math.floor((le-ls)/2));
   var b=ctx.createBuffer(src.numberOfChannels,le,sr);
   for(var ch=0;ch<src.numberOfChannels;ch++){var s0=src.getChannelData(ch),d=b.getChannelData(ch);d.set(s0.subarray(0,le));
@@ -2389,7 +2499,7 @@ function loopBuf(src){var c=loopCache.get(src);if(c)return c;
 function releaseVoice(v,t){
   if(v.fm){fmRelease(v,t);return;}
   var r=Math.max(0.02,v.S.release),g=v.env.gain;v.t1=t;
-  var cur=t>=v.t0+v.a?v.vel:v.vel*Math.max(0,(t-v.t0)/v.a);
+  var gv=v.gv!=null?v.gv:v.vel,cur=t>=v.t0+v.a?gv:gv*Math.max(0,(t-v.t0)/v.a);
   g.cancelScheduledValues(t);g.setValueAtTime(cur,t);g.linearRampToValueAtTime(0,t+r);
   v.srcs.forEach(function(s){try{s.stop(t+r+0.05);}catch(e){}});
   if(offlineRender){offNodes.push({e:t+r+0.1,n:v.env});return;}
@@ -2623,7 +2733,7 @@ function serialize(){
   if(ctx)saveSound(selTrack);
   var bufs=[],map=new Map();
   function bid(b){if(!b)return null;if(map.has(b))return map.get(b);var id=bufs.length,chs=[];map.set(b,id);for(var c=0;c<b.numberOfChannels;c++)chs.push(b.getChannelData(c));bufs.push({id:id,sr:b.sampleRate,chs:chs});return id;}
-  function sSlot(s){return s?(s.stock?{name:s.name,root:s.root,det:true,buf:null,stock:s.stock}:{name:s.name,root:s.root,det:s.det,buf:bid(s.buf)}):null;}
+  function sSlot(s){return s?(s.stock?{name:s.name,root:s.root,det:true,buf:null,stock:s.stock}:{name:s.name,root:s.root,det:s.det,buf:bid(s.buf),cap:s.buf&&s.buf._cap?1:0}):null;}
   function sSound(S){if(!S)return null;var o={slots:{A:sSlot(S.slots.A),B:sSlot(S.slots.B)},engine:S.engine,loop:!!S.loop,morphMode:S.morphMode||'blend',fmP:S.fmP||null};IKEYS.forEach(function(k){o[k]=S[k];});return o;}
   var params={};Object.keys(P).forEach(function(k){if(IKEYS.indexOf(k)<0&&k.indexOf('pad')!==0)params[k]=P[k].v;});
   var data={v:1,name:project.name,params:params,fxOn:fxOn,order:FXORDER.slice(),roFast:roFast,dsync:dsync,MX:MX,
@@ -2641,7 +2751,7 @@ function loadProjectData(data,bufs){
   if(!ensureAudio())return;transportStop();allOff();
   var B=[];bufs.forEach(function(b){try{if(!b||!b.chs||!b.chs.length||!b.chs[0].length)return;var ab=ctx.createBuffer(b.chs.length,b.chs[0].length,b.sr||ctx.sampleRate);b.chs.forEach(function(c,i){var d=ab.getChannelData(i);d.set(c);for(var k=0;k<d.length;k++){var v=d[k];if(!(v>-1e9&&v<1e9))d[k]=0;}});B[b.id]=ab;}catch(e){errLog.push('buffer '+b.id+': '+e.message);}});
   function gb(id){return id==null?null:(B[id]||null);}
-  function dSlot(s){if(s&&s.stock){var st=stockSlot(s.stock);if(st)return st;}return s?{name:s.name,root:s.root,det:s.det,buf:gb(s.buf)}:{name:'—',buf:null,root:261.63,det:false};}
+  function dSlot(s){if(s&&s.stock){var st=stockSlot(s.stock);if(st)return st;}if(!s)return {name:'—',buf:null,root:261.63,det:false};var gbuf=gb(s.buf);if(gbuf&&s.cap)gbuf._cap=1;return {name:s.name,root:s.root,det:s.det,buf:gbuf};}
   project.name=data.name||'Untitled beat';
   Object.keys(data.params||{}).forEach(function(k){if(P[k])setParam(k,data.params[k]);});
   fxOn=data.fxOn||{};var ord=(data.order||[]).filter(function(x){return FXDEF[x];});FXDEFORDER.forEach(function(x){if(ord.indexOf(x)<0)ord.push(x);});FXORDER.splice(0,FXORDER.length);ord.forEach(function(x){FXORDER.push(x);});
@@ -6765,6 +6875,6 @@ $('#midiOn').addEventListener('click',midiConnect);
 $$('[data-exp]').forEach(function(b){b.addEventListener('click',function(){ensureAudio();var k=b.getAttribute('data-exp'),s=slots[k];if(!s.buf)return;saveWav(encodeWav([s.buf.getChannelData(0)],s.buf.sampleRate),'ecou-'+s.name.replace(/[^a-z0-9]+/gi,'-').toLowerCase()+'-'+nname(ftom(s.root)));});});
 })();
 </script>
-<div id="updBar" hidden><span>A new version of Ecou is ready.</span><button id="updGo">Update</button></div><style>#updBar{position:fixed;left:12px;right:12px;bottom:calc(84px + env(safe-area-inset-bottom));z-index:950;display:flex;align-items:center;gap:12px;padding:12px 12px 12px 16px;border-radius:16px;background:#1E1E28;border:1px solid #2B2B37;color:#E9E9F0;font:14px/1.4 system-ui,sans-serif;box-shadow:0 10px 30px rgba(0,0,0,.5)}#updBar[hidden]{display:none}#updBar span{flex:1}#updBar button{border:0;border-radius:999px;background:#D4FF3A;color:#0B0B10;font:700 14px system-ui,sans-serif;padding:9px 16px}</style><script>(function(){var V="6530b4ed24",busy=false,last=0;function chk(){if(busy||Date.now()-last<60000)return;busy=true;last=Date.now();fetch("version.txt?"+Date.now(),{cache:"no-store"}).then(function(r){return r.ok?r.text():"";}).then(function(t){t=(t||"").trim();if(t&&t!==V)document.getElementById("updBar").hidden=false;}).catch(function(){}).then(function(){busy=false;});}document.addEventListener("visibilitychange",function(){if(!document.hidden)chk();});setTimeout(chk,8000);document.addEventListener("click",function(e){if(e.target&&e.target.id==="updGo"){try{if(typeof saveProject==="function")saveProject(true);}catch(x){}location.reload();}});})();</script>
+<div id="updBar" hidden><span>A new version of Ecou is ready.</span><button id="updGo">Update</button></div><style>#updBar{position:fixed;left:12px;right:12px;bottom:calc(84px + env(safe-area-inset-bottom));z-index:950;display:flex;align-items:center;gap:12px;padding:12px 12px 12px 16px;border-radius:16px;background:#1E1E28;border:1px solid #2B2B37;color:#E9E9F0;font:14px/1.4 system-ui,sans-serif;box-shadow:0 10px 30px rgba(0,0,0,.5)}#updBar[hidden]{display:none}#updBar span{flex:1}#updBar button{border:0;border-radius:999px;background:#D4FF3A;color:#0B0B10;font:700 14px system-ui,sans-serif;padding:9px 16px}</style><script>(function(){var V="4cd8f484c0",busy=false,last=0;function chk(){if(busy||Date.now()-last<60000)return;busy=true;last=Date.now();fetch("version.txt?"+Date.now(),{cache:"no-store"}).then(function(r){return r.ok?r.text():"";}).then(function(t){t=(t||"").trim();if(t&&t!==V)document.getElementById("updBar").hidden=false;}).catch(function(){}).then(function(){busy=false;});}document.addEventListener("visibilitychange",function(){if(!document.hidden)chk();});setTimeout(chk,8000);document.addEventListener("click",function(e){if(e.target&&e.target.id==="updGo"){try{if(typeof saveProject==="function")saveProject(true);}catch(x){}location.reload();}});})();</script>
 </body>
 </html>
