@@ -1,6 +1,10 @@
 # Sound credits
 
-Ecou's recorded instruments come from free sample libraries. The samples were trimmed, converted to mono MP3 and reduced to a subset of notes; nothing else was changed.
+Ecou's recorded instruments come from free sample libraries. The samples were trimmed, converted to mono MP3 and reduced to a subset of notes. They are **modified** further as follows (this applies to every set below, including the CC BY 3.0 and CC BY-SA 4.0 ones):
+
+- **Level-matched:** each note zone and each drum piece gets a gain trim (stored in Ecou's sample map, applied when the file is decoded) so neighbouring notes play at matching loudness and drum pieces sit at balanced levels. The MP3 data itself is not re-encoded.
+- **Loop-pointed:** sustained instruments (organ, harmonium, violin, cello, flute, clarinet, saxophone, trumpet, trombone, French horn, tuba) carry precomputed loop points, so held notes sustain without level pumping.
+- **Re-mapped:** two files were labelled with the wrong note and are now mapped to the pitch they actually play (`cello/71.mp3`, formerly 70; `clarinet/89.mp3`, formerly 90).
 
 | Instruments in Ecou | Source | Licence |
 |---|---|---|
