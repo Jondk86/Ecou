@@ -744,7 +744,7 @@ header .hbtn svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-wid
 .hm-act{display:grid;grid-template-columns:1.2fr 1fr 1fr;gap:8px}
 .hm-act button{min-height:52px;border-radius:var(--r-m);background:var(--s2);box-shadow:var(--e1);font-size:14px;font-weight:700;display:flex;align-items:center;justify-content:center;gap:6px;padding:0 6px}
 .hm-act .pri{background:var(--signal);color:var(--ink);box-shadow:none;font-size:16px}.hm-act svg{width:16px;height:16px;fill:currentColor}
-.hm-qs{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px}
+.hm-qs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
 .hm-qs button{min-height:76px;border-radius:var(--r-l);background:var(--s1);box-shadow:var(--e1);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:6px 2px}
 .hm-qs svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;margin-bottom:2px}
 .hm-qs b{font-size:13px;line-height:16px;font-weight:700}.hm-qs span{font-size:12px;color:var(--tx3)}
@@ -871,6 +871,7 @@ html.splash #splash{display:flex}
       <button data-qs="pads"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="7" height="7" rx="2"/><rect x="13" y="4" width="7" height="7" rx="2"/><rect x="4" y="13" width="7" height="7" rx="2"/><rect x="13" y="13" width="7" height="7" rx="2"/></svg><b>Pads</b><span>beats</span></button>
       <button data-qs="song"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="9" height="4" rx="1.5"/><rect x="8" y="10.5" width="13" height="4" rx="1.5"/><rect x="5" y="16" width="8" height="4" rx="1.5"/></svg><b>Song</b><span>build it</span></button>
       <button data-qs="sing"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0 0 14 0M12 17v4"/></svg><b>Sing</b><span>auto-tune</span></button>
+      <button data-qs="morph"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="12" r="5"/><circle cx="16" cy="12" r="5"/></svg><b>Morph</b><span>blend 2 sounds</span></button>
     </div>
     <div class="hm-h"><h3>Sounds &amp; ideas</h3><button class="hm-link" id="shelfLib">Library ›</button></div>
     <div class="hm-shelf" id="shelf" role="list" aria-label="Sounds and ideas, newest first"></div>
@@ -1012,7 +1013,7 @@ html.splash #splash{display:flex}
       <div class="btns"><button class="btn" id="fmSend" disabled>Send voice to FM-1</button><button class="btn" id="fmSendBank" disabled>Send bank to FM-1</button></div>
     </div>
     <div class="card smp-only">
-      <span class="kicker">Source morph</span>
+      <span class="kicker">Morph · blend two sounds (A ↔ B)</span>
       <div class="row" style="font-size:15px;font-weight:600"><span id="mA">Glass Tap</span><span id="mB" style="text-align:right">Choir Pad</span></div>
       <div class="seg" role="group" aria-label="Morph mode" style="align-self:flex-start;flex-wrap:wrap"><button data-mm="blend" aria-pressed="true">Crossfade</button><button data-mm="transfer" aria-pressed="false">Timbre transfer</button><button data-mm="spectral" aria-pressed="false">Spectral blend</button></div>
       <label data-p="morph"></label>
@@ -3812,7 +3813,7 @@ window.addEventListener('beforeunload',function(e){if(dirty&&ctx){try{saveProjec
 
 /* ---------- v2 navigation: 5 tabs over the 8 legacy panels (ids unchanged) ---------- */
 var NAV5={sub:{play:'inst',sound:'t-cap',song:'t-song'},
-  subs:{play:[['inst','Instruments'],['pads','Pads'],['loops','Loops']],sound:[['t-cap','Capture'],['t-ins','Library'],['t-mod','Motion']],song:[['t-song','Sections'],['tracks','Tracks'],['t-daw','Studio']]},
+  subs:{play:[['inst','Instruments'],['pads','Pads'],['loops','Loops']],sound:[['t-cap','Capture'],['t-ins','Synth+Morph'],['t-mod','Motion']],song:[['t-song','Sections'],['tracks','Tracks'],['t-daw','Studio']]},
   of:{'t-home':'home','t-cap':'sound','t-ins':'sound','t-mod':'sound','t-pad':'play','t-song':'song','t-daw':'song','t-fx':'mix'}};
 var FLOW={share:false,steps:['Capture','Transform','Play','Create','Produce','Share']};
 function navCur(){var id=showTab.cur||'t-pad';if(id==='t-gar'){var v=GAR.view;return v==='tracks'?'song':'play';}return NAV5.of[id]||'play';}
@@ -7643,7 +7644,7 @@ function initHome(){
   $('#shelf').addEventListener('click',function(e){var x=e.target.closest('[data-sh]');if(!x)return;var it=shelfGet(x.closest('[data-shid]').getAttribute('data-shid'));if(!it)return;var k=x.getAttribute('data-sh');
     if(k==='hear')hearBuf(it.buf);else if(k==='play')echoPlayIt(it);else echoSong(it);});
   $$('#t-home [data-qs]').forEach(function(q){q.addEventListener('click',function(){var k=q.getAttribute('data-qs');ensureAudio();
-    if(k==='band'){GAR.view='play';if(showTab.cur!=='t-gar')showTab('t-gar');garOpen('band');}else if(k==='inst'){GAR.view='sounds';showTab('t-gar');}else if(k==='pads')showTab('t-pad');else if(k==='sing'){GAR.view='play';if(showTab.cur!=='t-gar')showTab('t-gar');garOpen('vocal');}else navGo('song');});});
+    if(k==='band'){GAR.view='play';if(showTab.cur!=='t-gar')showTab('t-gar');garOpen('band');}else if(k==='inst'){GAR.view='sounds';showTab('t-gar');}else if(k==='pads')showTab('t-pad');else if(k==='morph'){showTab('t-ins');try{setEngine('sampler');}catch(e){}setTimeout(function(){var m=$('#morphState');if(m&&m.closest('.card'))m.closest('.card').scrollIntoView({block:'center'});},120);}else if(k==='sing'){GAR.view='play';if(showTab.cur!=='t-gar')showTab('t-gar');garOpen('vocal');}else navGo('song');});});
   $('#shelfLib').addEventListener('click',function(){showTab('t-ins');});
   $('#homeAllProj').addEventListener('click',function(){navGo('song');listProjects();setTimeout(function(){var p=$('#projList');if(p)p.scrollIntoView({block:'center'});},120);});
   renderShelf();
@@ -7654,6 +7655,6 @@ $('#midiOn').addEventListener('click',midiConnect);
 $$('[data-exp]').forEach(function(b){b.addEventListener('click',function(){ensureAudio();var k=b.getAttribute('data-exp'),s=slots[k];if(!s.buf)return;saveWav(encodeWav([s.buf.getChannelData(0)],s.buf.sampleRate),'ecou-'+s.name.replace(/[^a-z0-9]+/gi,'-').toLowerCase()+'-'+nname(ftom(s.root)));});});
 })();
 </script>
-<div id="updBar" hidden><span>A new version of Ecou is ready.</span><button id="updGo">Update</button></div><style>#updBar{position:fixed;left:12px;right:12px;bottom:calc(84px + env(safe-area-inset-bottom));z-index:950;display:flex;align-items:center;gap:12px;padding:12px 12px 12px 16px;border-radius:16px;background:#1E1E28;border:1px solid #2B2B37;color:#E9E9F0;font:14px/1.4 system-ui,sans-serif;box-shadow:0 10px 30px rgba(0,0,0,.5)}#updBar[hidden]{display:none}#updBar span{flex:1}#updBar button{border:0;border-radius:999px;background:#D4FF3A;color:#0B0B10;font:700 14px system-ui,sans-serif;padding:9px 16px}</style><script>(function(){var V="9bc92e24e9",busy=false,last=0;function chk(){if(busy||Date.now()-last<60000)return;busy=true;last=Date.now();fetch("version.txt?"+Date.now(),{cache:"no-store"}).then(function(r){return r.ok?r.text():"";}).then(function(t){t=(t||"").trim();if(t&&t!==V)document.getElementById("updBar").hidden=false;}).catch(function(){}).then(function(){busy=false;});}document.addEventListener("visibilitychange",function(){if(!document.hidden)chk();});setTimeout(chk,8000);document.addEventListener("click",function(e){if(e.target&&e.target.id==="updGo"){try{if(typeof saveProject==="function")saveProject(true);}catch(x){}location.reload();}});})();</script>
+<div id="updBar" hidden><span>A new version of Ecou is ready.</span><button id="updGo">Update</button></div><style>#updBar{position:fixed;left:12px;right:12px;bottom:calc(84px + env(safe-area-inset-bottom));z-index:950;display:flex;align-items:center;gap:12px;padding:12px 12px 12px 16px;border-radius:16px;background:#1E1E28;border:1px solid #2B2B37;color:#E9E9F0;font:14px/1.4 system-ui,sans-serif;box-shadow:0 10px 30px rgba(0,0,0,.5)}#updBar[hidden]{display:none}#updBar span{flex:1}#updBar button{border:0;border-radius:999px;background:#D4FF3A;color:#0B0B10;font:700 14px system-ui,sans-serif;padding:9px 16px}</style><script>(function(){var V="2a0f008e5d",busy=false,last=0;function chk(){if(busy||Date.now()-last<60000)return;busy=true;last=Date.now();fetch("version.txt?"+Date.now(),{cache:"no-store"}).then(function(r){return r.ok?r.text():"";}).then(function(t){t=(t||"").trim();if(t&&t!==V)document.getElementById("updBar").hidden=false;}).catch(function(){}).then(function(){busy=false;});}document.addEventListener("visibilitychange",function(){if(!document.hidden)chk();});setTimeout(chk,8000);document.addEventListener("click",function(e){if(e.target&&e.target.id==="updGo"){try{if(typeof saveProject==="function")saveProject(true);}catch(x){}location.reload();}});})();</script>
 </body>
 </html>
