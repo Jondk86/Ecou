@@ -3082,7 +3082,7 @@ function serialize(){
 function fitRate(b){if(!b||b.sampleRate===ctx.sampleRate)return b;var r=ctx.sampleRate/b.sampleRate,n=Math.max(1,Math.round(b.length*r)),o=ctx.createBuffer(b.numberOfChannels,n,ctx.sampleRate);
   for(var c=0;c<b.numberOfChannels;c++){var s0=b.getChannelData(c),d=o.getChannelData(c),L=s0.length-1;for(var i=0;i<n;i++){var x=i/r,j=Math.floor(x),f=x-j;d[i]=j>=L?s0[L]:s0[j]*(1-f)+s0[j+1]*f;}}return o;}
 function loadProjectData(data,bufs){
-  if(!ensureAudio())return;transportStop();allOff();
+  if(!ensureAudio())return;transportStop();if(!hist.keepBand)allOff();
   var B=[];bufs.forEach(function(b){try{if(!b||!b.chs||!b.chs.length||!b.chs[0].length)return;var ab=ctx.createBuffer(b.chs.length,b.chs[0].length,b.sr||ctx.sampleRate);b.chs.forEach(function(c,i){var d=ab.getChannelData(i);d.set(c);for(var k=0;k<d.length;k++){var v=d[k];if(!(v>-1e9&&v<1e9))d[k]=0;}});B[b.id]=ab;}catch(e){errLog.push('buffer '+b.id+': '+e.message);}});
   function gb(id){return id==null?null:(B[id]||null);}
   function dSlot(s){if(s&&s.stock){var st=stockSlot(s.stock);if(st)return st;}if(!s)return {name:'—',buf:null,root:261.63,det:false};var gbuf=gb(s.buf);if(gbuf&&s.cap)gbuf._cap=1;return {name:s.name,root:s.root,det:s.det,buf:gbuf};}
@@ -3804,8 +3804,12 @@ function histReset(){hist.stack=[];hist.idx=-1;hist.last='';histCommit();}
 function histGo(d){
   clearTimeout(hist.timer);histCommit();
   var j=hist.idx+d;if(j<0||j>=hist.stack.length)return;
-  var e=hist.stack[j],pid=project.id,wasPlaying=seq.on,mode=seq.mode,kp=padSel,kpg=page,ks=songSel,kcp=curPat,kst=selTrack;hist.lock=true;
-  try{loadProjectData(JSON.parse(e.key),e.bufs);}finally{hist.lock=false;}
+  var e=hist.stack[j],pid=project.id,wasPlaying=seq.on,mode=seq.mode,kp=padSel,kpg=page,ks=songSel,kcp=curPat,kst=selTrack,bw=bandRunning(),bk=GAR.key,bmi=GAR.minor,bmo=GAR.band.mode;hist.lock=true;hist.keepBand=bw;
+  try{loadProjectData(JSON.parse(e.key),e.bufs);
+    /* undo/redo while the band plays: the band keeps playing; a restored key is applied like any key change (queued to the bar line when transitions are on) */
+    if(bw&&bandRunning()){BR.bass=bandTrack('bass');BR.keys=bandTrack('keys');var k1=GAR.key,m1=GAR.minor,mo1=GAR.band.mode;
+      if((k1!==bk||mo1!==bmo)&&bandTrOn()){GAR.key=bk;GAR.minor=bmi;GAR.band.mode=bmo;GAR.chords=null;bandKeyChanged(k1,m1);bandTrSnap();bandKeyReq(k1,null,mo1);}}}
+  finally{hist.lock=false;hist.keepBand=false;}
   if(patterns[kcp]&&curPat!==kcp){hist.lock=true;try{setPattern(kcp);}finally{hist.lock=false;}}if(tracks[kst]&&selTrack!==kst&&tracks[kst].kind==='keys'){hist.lock=true;try{selectTrack(kst);}finally{hist.lock=false;}}
   page=Math.min(kpg,patterns[curPat].len/16-1);selectPad(kp);if(tracks[ks])songSel=ks;renderPatSegs();renderTrackSegs();paintSteps();drawRoll();
   project.id=pid;hist.idx=j;hist.last=e.ck;dirty=true;$('#saveState').textContent='Unsaved changes';updUndoUI();
@@ -5155,9 +5159,9 @@ function arrRecFinish(tStop){
    Shifter choice: TD-PSOLA on pitch marks from our own YIN track. It only re-spaces glottal-period grains, so the spectral envelope
    (formants) stays put without an explicit envelope stage, it is transparent for the ±5 semitone moves vocal tuning needs, it has no
    phase-vocoder "phasiness", and it is cheap enough to re-render on every change on a phone. Unvoiced frames pass through unshifted. */
-var VTSTY={natural:{n:'Natural',amt:100,mor:25,dz:8,ctr:1,tw:1.2,uf:0.3},pop:{n:'Pop',amt:100,mor:53,dz:5,ctr:1,tw:1.2,uf:0.3},hard:{n:'Hard-tune',amt:100,mor:100,dz:0,ctr:0}};
+var VTSTY={natural:{n:'Natural',amt:100,mor:25,dz:8,ctr:1,tw:1.2,uf:0.3,ns:1},pop:{n:'Pop',amt:100,mor:62,dz:6,ctr:1,tw:1.2,uf:0.3},hard:{n:'Hard-tune',amt:100,mor:100,dz:0,ctr:0}};
 /* one Natural↔Hard morph drives retune speed and humanize (the two things that make tuning audible) */
-function vtMorph(v,m){v.mor=m;var x=m/100;v.spd=Math.round(160*(1-x)*(1-x)/5)*5;v.hum=Math.round(85*(1-x)*(1-x));}
+function vtMorph(v,m){v.mor=m;var x=m/100;v.spd=Math.round(160*(1-x)*(1-x)/5)*5;v.hum=Math.round(100*(1-x));}
 (function(){for(var k in VTSTY){var o={};vtMorph(o,VTSTY[k].mor);VTSTY[k].spd=o.spd;VTSTY[k].hum=o.hum;}})();
 var VTQ={maj:[0,4,7],min:[0,3,7],dim:[0,3,6],aug:[0,4,8],sus2:[0,2,7],sus4:[0,5,7]};
 var VT={c:null,slot:null,A:null,N:null,sel:-1,t:null,au:null,drag:null,cache:typeof WeakMap!=='undefined'?new WeakMap():null};
@@ -5241,20 +5245,23 @@ function vtNotes(A,v,c){VT._sc=vtScale(v);var F=A.F,m=A.m,ms=new Float32Array(F)
     o.st=o.b-o.a>=12&&w.length>=Math.max(6,0.3*nv);if(o.st){w.sort(num);o.med=w[w.length>>1];}var mid=(o.a+o.b)>>1;o.pcs=vtPcsAt(v,c,A,mid);o.T0=vtSnap(o.med,o.pcs);var e=v.ed&&v.ed[o.a];o.dt=e&&e.dt||0;o.flat=!!(e&&e.flat);o.tr=e&&e.tr!=null?e.tr:null;o.hum=e&&e.hum!=null?e.hum:null;o.T=o.T0+o.dt;});
   return N;}
 /* per-frame shift in semitones. Natural/Pop move the note's CENTRE fully onto the target (target − note median) and take out part of the slow drift
-   inside the note (dr) and part of the faster wobble around a ~185 ms mean (vr; both follow Humanize: Natural keeps ~30 % of the vibrato depth, Pop ~10 %);
-   the centre move glides in at the retune Speed, the flattening is immediate; frames more than ~1.2 st from the centre (transitions, scoops) only get the centre offset. Left alone: a take that is already in tune (median error < 10 ct), notes whose centre is inside the style's dead-zone, and
+   inside the note (dr) and part of the 4–8 Hz wobble around a ~185 ms mean (vk; Humanize = share of vibrato kept: Natural 75 %, Pop 38 %; drift keeps half that);
+   the centre move glides in at the retune Speed, the flattening is immediate; frames more than ~1.2 st from the centre (transitions, scoops) only get the centre offset. Notes whose centre is inside the style's dead-zone (Natural 8 ct, Pop 6 ct) keep their centre but still get the modulation scaling. Left alone: speech/unpitched takes in Natural (few steady notes, pitch rarely near a note centre), and
    glides/blips with no pitch plateau. Hard-tune (and "flat" notes) pull every frame. Smoothed by Speed. */
 function vtHShift(T,h){return h===12||h===-12?T+h:vtStep(T,h,VT._sc);}
 function vtCurve(A,N,v,harm){var F=A.F,m=A.m,sh=new Float32Array(F),dfa=new Float32Array(F),amt=(v.amt==null?100:v.amt)/100,fr=A.hop/A.sr,vib=(v.vib||0)/100,vr=v.vibR||5.5,k,i,
     SP=VTSTY[v.st]||{},dz=(v.dz!=null?v.dz:SP.dz||0)/100,ctr0=v.ctr!=null?v.ctr:SP.ctr||0,inTune=false;
   if(ctr0>0){var dv=[];N.forEach(function(o){for(k=o.a;k<o.b;k++)if(!isNaN(m[k]))dv.push(Math.abs(m[k]-o.T0));});dv.sort(function(p,q){return p-q;});inTune=dv.length>0&&dv[dv.length>>1]<(SP.it!=null?SP.it:0.1);}
   VT._inTune=inTune;
+  /* Natural leaves speech / unpitched takes alone: few frames sit in steady notes */
+  var vf=0,sf=0,vn=0,vi=0;N.forEach(function(o){vf+=o.b-o.a;if(o.st)sf+=o.b-o.a;for(k=o.a;k<o.b;k++)if(!isNaN(m[k])){vn++;if(Math.abs(m[k]-o.med)<0.6)vi++;}});
+  var unp=!!SP.ns&&ctr0>0&&vf>0&&sf<0.45*vf&&vi<0.65*vn;VT._unp=unp;
   N.forEach(function(o){var spd=o.tr!=null?o.tr:v.spd,al=spd>0?1-Math.exp(-fr/(spd/1000)):1,hum=o.flat?0:(o.hum!=null?o.hum:(v.hum||0))/100,dF=null,T=o.T,H=harm?vtHShift(T,harm)-T:0,
-      d0=T-o.med,ctr=o.flat?0:ctr0,inDz=!o.flat&&!o.dt&&Math.abs(d0)<dz,rest=!o.flat&&!o.dt&&(ctr>0?inTune:inDz),dr=clamp(1.03-0.17*hum,0,1),vr=clamp(1.02-0.62*hum,0,1),tw=SP.tw||1.2;
+      d0=T-o.med,ctr=o.flat?0:ctr0,inDz=!o.flat&&!o.dt&&Math.abs(d0)<dz,rest=!o.flat&&!o.dt&&(ctr>0?unp:inDz),dr=clamp(1-0.5*hum,0,1),vk=clamp(1-hum,0,1),tw=SP.tw||1.2;
     if(!rest&&ctr>0&&o.st===false&&!o.dt){var nn=0,ni=0;for(k=o.a;k<o.b;k++)if(!isNaN(m[k])){nn++;if(Math.abs(m[k]-o.med)<0.6)ni++;}rest=o.b-o.a<(SP.ul||14)||ni<(SP.uf||0.6)*nn;}
     for(k=o.a;k<o.b;k++){if(isNaN(m[k])){dfa[k]=dF||0;sh[k]=0;continue;}var d=0,fl=0;
       if(!rest){var s=0,n=0,tr;
-        if(ctr>0){for(i=Math.max(o.a,k-18);i<Math.min(o.b,k+19);i++)if(!isNaN(m[i])){s+=m[i];n++;}tr=s/n;d=inDz?0:d0;fl=-clamp(1-(Math.abs(m[k]-o.med)-tw)/0.4,0,1)*(dr*(tr-o.med)+vr*(m[k]-tr));}
+        if(ctr>0){for(i=Math.max(o.a,k-18);i<Math.min(o.b,k+19);i++)if(!isNaN(m[i])){s+=m[i];n++;}tr=s/n;d=inDz?0:d0;fl=-clamp(1-(Math.abs(m[k]-o.med)-tw)/0.4,0,1)*(dr*(tr-o.med)+vk*(m[k]-tr));}
         else{for(i=Math.max(o.a,k-12);i<Math.min(o.b,k+13);i++)if(!isNaN(m[i])){s+=m[i];n++;}tr=s/n;d=Math.abs(m[k]-o.med)>5?d0:T-((1-hum)*m[k]+hum*tr);}}
       if(dF==null)dF=spd>0&&o.a>0&&!isNaN(m[o.a-1])?dfa[o.a-1]:d;dF+=(d-dF)*al;dfa[k]=dF;var vb=0;if(vib>0){var tt=(k-o.a)*fr;vb=vib*Math.min(1,Math.max(0,(tt-0.18)/0.25))*Math.sin(2*Math.PI*vr*tt);}sh[k]=amt*(dF+fl)+H+vb;}});
   var out=new Float32Array(F);for(k=0;k<F;k++){var s2=0,w2=0;for(i=Math.max(0,k-2);i<=Math.min(F-1,k+2);i++){var ww=3-Math.abs(i-k);s2+=sh[i]*ww;w2+=ww;}out[k]=Math.abs(s2/w2)<0.002?0:s2/w2;}
@@ -6904,7 +6911,7 @@ function llCommitPerf(gEnd){var L=GAR.ll,log=L.perfLog;L.perfLog=null;if(!log||!
   log.forEach(function(e){close(e.ti,e.g);if(e.p>=0)open[e.ti]={p:e.p,g:e.g};});Object.keys(open).forEach(function(k){close(+k,end);});
   if(made){dawNeed=true;markDirty();toast('Performance captured: '+made+' region'+(made>1?'s':'')+' from bar '+(base/16+1)+' in Tracks.',2600);}}
 function garSave(){try{bandPart('A');bandPart('B');bandPart('C');bandGroove();}catch(e){}return {key:GAR.key,minor:GAR.minor,chords:GAR.chords,ap:GAR.ap,drum:GAR.drum,smart:{pieces:GAR.smart.pieces,bars:GAR.smart.bars,pat:GAR.smart.pat},band:JSON.parse(JSON.stringify(Object.assign({},GAR.band,{keyHint:null,half:false,sel:0,open:{harm:true}})))};}
-function garLoad(d){d=d||{};if(typeof bandStop==='function')bandStop();if(d.band)bandMigrate(d.band);GAR.key=d.key|0;GAR.minor=!!d.minor;GAR.chords=Array.isArray(d.chords)&&d.chords.length===8?d.chords:null;if(d.ap)Object.assign(GAR.ap,d.ap);if(d.drum)Object.assign(GAR.drum,d.drum);if(d.smart){GAR.smart.pieces=d.smart.pieces||GAR.smart.pieces;GAR.smart.bars=d.smart.bars||2;GAR.smart.pat=d.smart.pat==null?-1:d.smart.pat;}
+function garLoad(d){d=d||{};if(typeof bandStop==='function'&&!hist.keepBand)bandStop();if(d.band)bandMigrate(d.band);GAR.key=d.key|0;GAR.minor=!!d.minor;GAR.chords=Array.isArray(d.chords)&&d.chords.length===8?d.chords:null;if(d.ap)Object.assign(GAR.ap,d.ap);if(d.drum)Object.assign(GAR.drum,d.drum);if(d.smart){GAR.smart.pieces=d.smart.pieces||GAR.smart.pieces;GAR.smart.bars=d.smart.bars||2;GAR.smart.pat=d.smart.pat==null?-1:d.smart.pat;}
   GAR.ll.act={};GAR.ll.q={};GAR.ll.rec=null;GAR.ll.sel=null;var ks=$('#garKey');if(ks)ks.value=GAR.key+(GAR.minor?'m':'');if($('#t-gar').classList.contains('active'))garView(GAR.view);}
 function llStopped(){llCommitPerf(seq.step);GAR.ll.act={};GAR.ll.q={};if(GAR.ll.rec){seq.rec=false;GAR.ll.rec=null;}seq.mode='pattern';}
 /* ---------- design tokens shared with the CSS ---------- */
@@ -7318,7 +7325,7 @@ function bandTrack(kind){var f=-1;tracks.forEach(function(t,i){if(f<0&&i>0&&t.ki
   if(f<0&&kind==='bass'){f=addInstTrack('Bass',true,'ebass');if(f>=0)toast('Added a Bass track.',1400);}return f<0?1:f;}
 function bandRunning(){return !!(BR&&BR.on);}
 function bandStart(){if(!ensureAudio())return;if(seq.on)transportStop();if(GAR.apOn>=0)garApStop();bandFix();var B=GAR.band,t0=ctx.currentTime+0.12;
-  BR={on:true,part:B.edit,pb:0,barN:0,s:0,N:bandN(),next:t0,q:null,fillReq:false,brk:false,end:false,endBar:-1,marks:[],bass:bandTrack('bass'),keys:bandTrack('keys'),prev:null,pushed:false};
+  BR={on:true,part:B.edit,pb:0,barN:0,s:0,N:bandN(),next:t0,q:null,fillReq:false,brk:false,end:false,endBar:-1,marks:[],sq:[],bass:bandTrack('bass'),keys:bandTrack('keys'),prev:null,pushed:false};
   if(B.count){var G=bandGroups(),sd=stepDur();G.forEach(function(g,i){click(t0+g.s*sd,i===0);});BR.next=t0+bandN()*sd;}BR.t0=BR.next;BR.countEnd=BR.next;
   bandTrSnap();BR.timer=setInterval(bandTick,25);bandTick();bandUI();garUpd();}
 function bandStop(){if(!BR)return;if(BR.T)bandTrFire(ctx.currentTime);clearInterval(BR.timer);BR.on=false;bandUI();garUpd();}
@@ -7326,7 +7333,7 @@ function bandToggle(){if(bandRunning())bandStop();else bandStart();}
 function bandTick(){if(!BR||!BR.on||!ctx)return;var B=GAR.band,now=ctx.currentTime,sd=stepDur();
   while(BR.on&&BR.next<now+0.15){var t=BR.next;
     if(BR.s===0){if(BR.T&&BR.barN>=BR.T.bar){bandTrFire(t);sd=stepDur();}var N=bandN();BR.N=N;var prog=bandLive();
-      if(BR.end){if(BR.endBar<0){BR.endBar=BR.barN;BR.plan=bandPlan({c:prog[BR.pb%prog.length]||prog[0],end:true,bar:BR.barN,E:B.pen[BR.part],prev:BR.prev});BR.marks.push({bar:BR.barN,t:t,part:BR.part,pb:BR.pb%prog.length,len:prog.length,c:BR.plan.c,c2:null,n:null,end:true,N:N});}
+      if(BR.end){if(BR.endBar<0){BR.endBar=BR.barN;BR.plan=bandPlan({c:prog[BR.pb%prog.length]||prog[0],end:true,bar:BR.barN,E:B.pen[BR.part],prev:BR.prev});BR.marks.push({bar:BR.barN,t:t,part:BR.part,pb:BR.pb%prog.length,len:prog.length,c:BR.plan.c,c2:null,n:null,end:true,N:N,G:bandGroups()});}
         else{BR.on=false;clearInterval(BR.timer);setTimeout(function(){bandUI();garUpd();},Math.max(0,(t-now)*1000));return;}}
       else{if(BR.pb>=prog.length){BR.pb=0;if(BR.q){BR.part=BR.q;BR.q=null;prog=bandLive();}}
         var c=prog[BR.pb],last=BR.pb===prog.length-1,tk=BR.T&&!BR.T.cut?BR.T.bar-1-BR.barN:-1,inTr=tk>=0&&BR.T.L-tk*N>0,n=tk===0?bandTrTarget():last?(BR.q?bandPart(BR.q)[0]:prog[0]):prog[BR.pb+1],fe=B.fillEvery,auto=fe>0&&B.fills>0.05&&((prog.length>=fe?(BR.pb+1)%fe===0:last)),
@@ -7334,8 +7341,9 @@ function bandTick(){if(!BR||!BR.on||!ctx)return;var B=GAR.band,now=ctx.currentTi
         BR.planO={c:c,n:n,fill:fill&&!brk&&!inTr,first:BR.pb===0,bar:BR.barN,E:B.pen[BR.part],prev:BR.prev,brk:brk,pushedIn:BR.pushed,noPush:tk===0};BR.plan=bandPlan(BR.planO);
         if(BR.accent){BR.accent=false;if(!brk){bandHit(BR.plan.d,garPad('crash'),0,0.9);var kp=garPad('kick');if(kp>=0&&!(BR.plan.d[kp]&&BR.plan.d[kp][0]))bandHit(BR.plan.d,kp,0,0.95);}}
         if(inTr&&!brk)bandTrApply(BR.plan,0);BR.prev=BR.plan.vLast||BR.plan.vo;BR.pushed=!!BR.plan.pushed;
-        BR.marks.push({bar:BR.barN,t:t,part:BR.part,pb:BR.pb,len:prog.length,c:BR.plan.c,c2:BR.plan.c2,sp:BR.plan.sp,n:n,fill:fill,brk:brk,N:N});if(BR.marks.length>8)BR.marks.shift();}}
+        BR.marks.push({bar:BR.barN,t:t,part:BR.part,pb:BR.pb,len:prog.length,c:BR.plan.c,c2:BR.plan.c2,sp:BR.plan.sp,n:n,fill:fill,brk:brk,N:N,G:bandGroups()});if(BR.marks.length>8)BR.marks.shift();}}
     if(BR.T&&BR.T.items.tempo&&!BR.T.cut){var tp=BR.T.items.tempo,lf=(BR.T.bar-BR.barN)*BR.N-BR.s,rs=Math.abs(tp.bpm-tp.b0)<3?0:bandTr().int==='subtle'?Math.max(BR.N,BR.T.L):BR.T.L;if(lf>0&&lf<rs){BR.int=true;setParam('bpm',P.bpm.v+(tp.bpm-P.bpm.v)/(lf+1));BR.int=false;sd=stepDur();}}
+    BR.sq.push([t,BR.barN,BR.s]);if(BR.sq.length>160)BR.sq.shift();
     bandPlayStep(BR.plan,BR.s,t,sd);
     BR.next+=sd;BR.s++;if(BR.s>=BR.N){BR.s=0;BR.pb++;BR.barN++;}}}
 function bandPlayStep(pl,s,t,sd){var B=GAR.band,hum=B.human,dy=0.35+0.65*B.dyn,off=bandSwingOff(s,sd),jit=function(){return (Math.random()-0.5)*0.018*hum;},vh=function(v){return clamp(v*dy*(1-hum*0.18+Math.random()*hum*0.18),0.04,1);};
@@ -7345,7 +7353,10 @@ function bandPlayStep(pl,s,t,sd){var B=GAR.band,hum=B.human,dy=0.35+0.65*B.dyn,o
 function bandSetPart(p){if(!bandRunning()){GAR.band.edit=p;garBand();return;}
   if(bandTrOn()){var qp=BR.T&&BR.T.items.part;if(qp&&(qp.p===p||BR.part===p))bandTrCancel('part');else if(BR.part!==p){bandTrQueue('part',{p:p});GAR.band.edit=p;}else GAR.band.edit=p;garBand();return;}
   BR.q=BR.part===p?null:p;GAR.band.edit=p;garBand();toast(BR.q?'Part '+p+' starts after this phrase, with a fill.':'Staying on part '+p+'.',1500);}
-function bandPos(){var sd=stepDur(),el=ctx.currentTime-(ctx.outputLatency||0)-BR.t0,N=BR.N||bandN();if(el<0)return {t:'Count in',c:true};var st=Math.floor(el/sd),bar=Math.floor(st/N),s=st%N,G=bandGroups(),b=0;G.forEach(function(g,i){if(s>=g.s)b=i;});return {t:(bar+1)+'.'+(b+1),c:false};}
+/* where the band is AUDIBLY: the last scheduled step at or before audio time `now`, with that bar's own meter groups (tempo/meter changes safe) */
+function bandAt(now){var q=BR&&BR.sq||[],e=null,i,m=null,gi=0;for(i=q.length-1;i>=0;i--)if(q[i][0]<=now+1e-4){e=q[i];break;}if(!e)return null;
+  BR.marks.forEach(function(x){if(x.bar===e[1])m=x;});var G=m&&m.G||bandGroups();G.forEach(function(g,j){if(e[2]>=g.s)gi=j;});return {bar:e[1],s:e[2],gi:gi,G:G};}
+function bandPos(){var now=ctx.currentTime-(ctx.outputLatency||0),a=now<BR.t0?null:bandAt(now);if(!a)return {t:'Count in',c:true};return {t:(a.bar+1)+'.'+(a.gi+1),c:false};}
 /* ---- smooth transitions, stage 1 (live only: bandToSong never sees them). While the band plays, a new key / tempo / meter / chord edit / part is queued
    (BR.T) to a bar line; the last T.L steps before it get lead-in material (pivot chords, bass walk, fill layer, tempo ramp). The downbeat never moves. ---- */
 var BTRL={beat:'1 beat',half:'½ bar',bar:'1 bar',two:'2 bars'};
@@ -7358,7 +7369,9 @@ function bandTrTarget(){var T=BR.T,it=T.items,p=it.part?it.part.p:BR.part,prog=b
 function bandTrQueue(type,it){var R=bandTr(),N=BR.N||bandN(),T=BR.T;
   if(!T){var L=bandTrLen(N),need=type==='tempo'&&R.int==='subtle'?Math.max(L,N):L,cur=BR.s>0?BR.barN:BR.barN-1,done=BR.s>0?BR.s:N,bar=cur+1,room;
     if(R.at==='phrase'||type==='part'){var len=bandLive().length,pbc=BR.s>0?BR.pb:BR.pb-1;bar=cur+Math.max(1,len-pbc);room=(bar-cur)*N-done;if(room<3){bar+=len;room+=len*N;}L=Math.min(L,room-1);}
-    else{room=N-done;while(room<need+1){bar++;room+=N;}}
+    /* rule: land on the NEXT bar line if at least one beat is left in this bar (the lead-in is shortened to fit); with less than a beat left, the bar
+       line after. "2 bars" keeps at least one full bar of lead-in. */
+    else{var GG=bandGroups(),bt=GG[GG.length-1].l,need0=Math.max(bt,need-N+bt);room=N-done;while(room<need0){bar++;room+=N;}L=Math.min(L,room-1);}
     T=BR.T={bar:bar,L:L,items:{},cut:false,seed:BR.trN=(BR.trN||0)+1};}
   T.items[type]=it;if(BR.s>0&&BR.plan&&!BR.end){bandTrApply(BR.plan,BR.s+1);BR.prev=BR.plan.vLast||BR.plan.vo;}bandTrCue();}
 function bandTrReplan(){if(BR.s>0&&BR.plan&&BR.plan._tr&&BR.planO){BR.plan=bandPlan(BR.planO);BR.prev=BR.plan.vLast||BR.plan.vo;}}
@@ -7380,13 +7393,14 @@ function bandTrApply(pl,from){var T=BR.T;if(!T||T.cut||!pl||pl._tr||BR.end)retur
   var lvl=R.int==='subtle'?0:R.int==='dramatic'?2:1,last=k===0,rnd=garRng(B.seed*131+T.seed*977+BR.barN*7),lo=28+B.bReg*12,G=bandGroups(),lb=G[G.length-1].s,tg=bandTrTarget(),i,
       cut=function(a,s){return a.filter(function(e){return e[0]<s;}).map(function(e){return [e[0],Math.min(e[1],s-e[0]),e[2],e[3]];});},
       prev=pl.vLast||pl.vo,segs=[],K=it.key?it.key.k:GAR.key,M=BMODE[it.key?it.key.mode:B.mode]||BMODE.ionian,mi=!!M.mi;
-  if(kind==='key'){var V=[(K+7)%12,'7'],II=[(K+2)%12,mi?'dim':'m7'];
+  /* key changes lead to the chord the band will actually land on (tg), not to the new tonic: V7/landing, or ii–V of it */
+  if(kind==='key'){var tmi=/^(min|m7|m$|dim)/.test(tg[1]||''),V=[(tg[0]+7)%12,'7'],II=[(tg[0]+2)%12,tmi?'dim':'m7'];
     if(lvl===0){if(last)segs=[[Math.max(ws,lb),V]];}
     else{var sm=T.L>=4?Math.round((N+k*N-T.L/2)/2)*2:-1;if(sm>ws&&sm<N)segs=[[ws,II],[sm,V]];else if(sm>=N)segs=[[ws,II]];else segs=[[ws,V]];
-      if(lvl===2&&last){var vs=segs[segs.length-1][0],hm=Math.round((vs+N)/4)*2;if(N-vs>=8&&hm>vs&&hm<N){segs[segs.length-1][1]=[(K+7)%12,'sus4'];segs.push([hm,V]);}}}}
+      if(lvl===2&&last){var vs=segs[segs.length-1][0],hm=Math.round((vs+N)/4)*2;if(N-vs>=8&&hm>vs&&hm<N){segs[segs.length-1][1]=[(tg[0]+7)%12,'sus4'];segs.push([hm,V]);}}}}
   else if(lvl>0&&last&&lb>=ws){var v=Math.floor(rnd()*3);if(v===BR.trCh)v=(v+1)%3;BR.trCh=v;var t0=tg[0];
     if(lvl===2&&G.length>2&&G[G.length-2].s>=ws)segs.push([G[G.length-2].s,[(t0+2)%12,'m7']]);
-    segs.push([lb,v===0?[(t0+7)%12,'7']:v===1?[(t0+5)%12,'maj']:[(t0+1)%12,'7']]);}
+    segs.push([lb,v===0?[(t0+7)%12,'7']:v===1?[(t0+11)%12,'dim']:[(t0+1)%12,'7']]);}
   if(R.k&&!B.gOn.k&&B.kS!=='off'&&segs.length){pl.k=cut(pl.k,segs[0][0]);
     segs.forEach(function(sg,j){var e=j+1<segs.length?segs[j+1][0]:N,vo=bandVoice(sg[1],prev);prev=vo;pl.k.push([sg[0],e-sg[0],vo,[0.5,0.66,0.82][lvl]]);
       if(lvl===2)G.forEach(function(g){if(g.s>sg[0]&&g.s<e)pl.k.push([g.s,Math.min(g.l,e-g.s),vo,0.7]);});});pl.vLast=prev;pl.pushed=false;}
@@ -7421,10 +7435,10 @@ function bandTrLabel(T){var it=T.items,a=[];if(it.part)a.push('Part '+it.part.p)
   if(it.meter)a.push(BMETN[it.meter.m]||it.meter.m);if(it.tempo)a.push(Math.round(it.tempo.bpm)+' BPM');if(it.prog&&!it.part)a.push('new chords');return '→ '+a.join(' · ');}
 function bandTrCue(){var e=$('#bdTr');if(!e)return;var T=bandRunning()&&BR.T,R=bandTr(),txt,cb=e.querySelector('[data-trx="cut"]'),cc=e.querySelector('[data-trx="cancel"]');
   if(!T)txt=R.on?'Smooth transitions on · changes wait for the '+(R.at==='phrase'?'phrase end':'bar line'):'Smooth transitions off · changes apply at once';
-  else{var now=ctx.currentTime,m=null,G=bandGroups(),N=BR.N||bandN(),left;BR.marks.forEach(function(x){if(x.t<=now+0.02)m=x;});
-    if(!m)left=(T.bar+(GAR.band.count?1:0))*G.length;else{var st=clamp(Math.floor((now-m.t)/stepDur()),0,N-1),gi=0;G.forEach(function(g,j){if(st>=g.s)gi=j;});left=Math.max(1,(T.bar-m.bar)*G.length-gi);}
+  else{var G=bandGroups(),left,au=bandAt(ctx.currentTime-(ctx.outputLatency||0));
+    if(!au)left=(T.bar+(GAR.band.count?1:0))*G.length;else{G=au.G;left=Math.max(1,(T.bar-au.bar)*G.length-au.gi);}
     var bars=left/G.length;txt=bandTrLabel(T)+' in '+(left%G.length===0?bars+(bars===1?' bar':' bars'):left+(left===1?' beat':' beats'))+(T.cut?' · cut':'');}
-  if(e._s!==txt){e._s=txt;$('#bdTrT').textContent=txt;e.classList.toggle('q',!!T);cc.hidden=!T;cb.hidden=!T||!!T.cut;}}
+  if(e._s!==txt){e._s=txt;$('#bdTrT').textContent=txt;e.title='A change lands on the next bar line; with less than a beat left in the bar it lands on the one after, and the lead-in is shortened to fit.';e.classList.toggle('q',!!T);cc.hidden=!T;cb.hidden=!T||!!T.cut;}}
 /* ---- learn chords from the mic ---- */
 var BTPL={maj:[0,4,7],min:[0,3,7],'7':[0,4,7,10],m7:[0,3,7,10]};
 function bandChroma(x,sr,a,b){var F=8192,FF=fftInit(F),win=new Float64Array(F),S=new Float64Array(128),n=0,i;for(i=0;i<F;i++)win[i]=0.5-0.5*Math.cos(2*Math.PI*i/F);
