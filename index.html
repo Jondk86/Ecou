@@ -2959,7 +2959,9 @@ function transportStop(){
     padVoices.forEach(function(v){try{v.src.stop(now+0.02);}catch(e){}});}
   recFlush();updTransportUI();paintSteps();drawRoll();
 }
-function transportToggle(mode){if(!mode&&$('#t-gar').classList.contains('active')){garPlay();return;}if(seq.on){transportStop();return;}if(!mode){var st=document.getElementById('t-daw');if(st&&st.classList.contains('active'))mode='arrange';else if(seq.src==='arrange')mode='arrange';else if(seq.mode==='arrange')mode='pattern';}transportStart(mode);}
+function prevPlaying(){try{return !!((typeof VT!=='undefined')&&(VT.au||VT.tp));}catch(e){return false;}}
+function prevStopAll(){try{if(VT.au){vtStopAu();vtUI();vtNowUI(-1);if(typeof vmUI==='function')vmUI();}if(VT.tp)vtStopTP();}catch(e){}}
+function transportToggle(mode){if(!mode&&prevPlaying()&&!seq.on&&!bandRunning()){prevStopAll();return;}if(prevPlaying())prevStopAll();if(!mode&&$('#t-gar').classList.contains('active')){garPlay();return;}if(seq.on){transportStop();return;}if(!mode){var st=document.getElementById('t-daw');if(st&&st.classList.contains('active'))mode='arrange';else if(seq.src==='arrange')mode='arrange';else if(seq.mode==='arrange')mode='pattern';}transportStart(mode);}
 function seqTick(){
   if(seq.mode==='arrange'){arrTick();return;}
   if(seq.mode==='loops'){llTick();return;}
@@ -8107,7 +8109,7 @@ function lcdTick(){var p=lcdPos(),e;
   var key=GNOTE[GAR.key||0]+(GAR.minor?' min':' maj')+' · '+((GAR.band&&GAR.band.meter)||'4/4');if(key!==LCD.key){LCD.key=key;$('#lcdKey').textContent=key;}
   var n=Math.max(2,Math.min(7,p.n||4));if(n!==LCD.n){LCD.n=n;var h='';for(var i=0;i<n;i++)h+='<i></i>';$('#lcdBeat').innerHTML=h;LCD.b=-2;}
   if(p.b!==LCD.b){LCD.b=p.b;$$('#lcdBeat i').forEach(function(x,i){x.className=i===p.b?(i===0?'on':'on dn'):'';});}
-  var on=!!(seq.on||bandRunning()||(typeof llRunning==='function'&&llRunning()));if(on!==LCD.play){LCD.play=on;var hp=$('#hPlay');hp.textContent=on?'■':'▶';hp.setAttribute('aria-label',on?'Stop':'Play');hp.classList.toggle('on',on);}
+  var on=!!(seq.on||bandRunning()||(typeof llRunning==='function'&&llRunning())||prevPlaying());if(on!==LCD.play){LCD.play=on;var hp=$('#hPlay');hp.textContent=on?'■':'▶';hp.setAttribute('aria-label',on?'Stop':'Play');hp.classList.toggle('on',on);}
   var rc=!!((seq.on&&seq.rec)||arr.rec||wavRec||capture||ECHO.rec);if(rc!==LCD.rec){LCD.rec=rc;var r=$('#tRec');r.classList.toggle('on',rc);r.setAttribute('aria-label',rc?'Stop recording':'Record');r.setAttribute('aria-pressed',rc);}}
 function tRecGo(){var id=showTab.cur;
   if(ECHO.rec){echoStop();return;}if(capture){stopCapture();return;}
