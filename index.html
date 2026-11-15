@@ -33,7 +33,7 @@ main{flex:1;overflow-y:auto;padding:14px 14px 22px;-webkit-overflow-scrolling:to
 h2{margin:0;font-size:22px;letter-spacing:-.01em}
 .sub{margin:0;color:var(--mu);font-size:14px;line-height:1.45}
 .card{background:var(--s1);border:1px solid var(--ln);border-radius:18px;padding:14px;display:flex;flex-direction:column;gap:12px}
-.octRow{display:flex;align-items:center;justify-content:flex-end;gap:8px;margin-top:4px}.octRow[hidden]{display:none}.octB{min-height:34px;min-width:64px;border-radius:10px;border:1px solid #3A3A48;background:var(--s2);color:var(--tx);font-size:13px;font-weight:600}
+.octRow{display:flex;align-items:center;justify-content:flex-end;flex-wrap:wrap;gap:8px;margin:4px 0;position:relative;z-index:0}[data-slice]{position:relative;z-index:1;margin-top:8px}.octRow[hidden]{display:none}.octB{min-height:34px;min-width:64px;border-radius:10px;border:1px solid #3A3A48;background:var(--s2);color:var(--tx);font-size:13px;font-weight:600}
 .kicker{font-size:12px;font-weight:600;letter-spacing:.08em;color:var(--mu);text-transform:uppercase}
 .row{display:flex;align-items:center;justify-content:space-between;gap:10px}
 .mu{color:var(--mu);font-size:13px}
@@ -8496,8 +8496,12 @@ function echoOct(d){var it=ECHO.item;if(!it||!it.det)return;var r=it.root*Math.p
   if(ctx&&slots.A&&slots.A.buf===it.buf){var b=60+(GAR.key||0);if(b>66)b-=12;playNote(selTrack,b,0.8,ctx.currentTime+0.02,0.45);}
   toast('“'+it.name+'” now plays as '+itNote(it)+' on the keys.',1800);}
 function echoPlayIt(it){if(!it||!ensureAudio())return;
-  if(it.perc){var pd=pads[padSel];pd.buf=it.buf;pd.name=it.name.slice(0,14);pd.cls='other';renderPads();selectPad(padSel);markDirty();showTab('t-pad');toast('“'+it.name+'” is on pad '+(padSel+1)+'. Tap it, or put it in the steps.',2600);return;}
+  if(it.perc){var pi=echoPadFor(it);if(pi!==padSel)selectPad(pi);var pd=pads[padSel];pd.buf=it.buf;pd.name=it.name.slice(0,14);pd.cls='other';renderPads();selectPad(padSel);markDirty();showTab('t-pad');toast('“'+it.name+'” is on pad '+(padSel+1)+'. Tap it, or put it in the steps.',2600);return;}
   var ti=echoAsKeys(it);GAR.view='play';if(showTab.cur!=='t-gar')showTab('t-gar');garOpen('keys',ti);toast('Play “'+it.name+'” on the keys.',2000);}
+/* a percussive Echo goes to a free/user pad, never onto a kit pad (kick/snare/hat) that lessons and grooves rely on */
+function echoPadFor(it){var i,kit=function(p){return p&&!!p.buf&&p.cls!=='other'&&!slUser(p);};for(i=0;i<pads.length;i++)if(pads[i].buf===it.buf)return i;
+  if(pads[padSel]&&!kit(pads[padSel]))return padSel;for(i=0;i<pads.length;i++)if(!pads[i].buf)return i;for(i=pads.length-1;i>=0;i--)if(!kit(pads[i]))return i;
+  for(i=pads.length-1;i>=0;i--)if(['kick','snare','hat'].indexOf(pads[i].cls)<0)return i;return pads.length-1;}
 function echoTransform(it){if(!it||!ensureAudio())return;echoAsKeys(it);showTab('t-cap');setTimeout(function(){slOpen('A');},40);}
 function echoSong(it){if(!it)return;shelfAdd(it);echoAsKeys(it);markDirty();navGo('song');toast('“'+it.name+'” is on '+tracks[ECHO.ti].name+'. Record a part, or add it to a section.',2600);}
 function agoTxt(t){var m=Math.round((Date.now()-t)/60000);return m<1?'just now':m<60?m+' min ago':m<1440?Math.round(m/60)+' h ago':Math.round(m/1440)+' d ago';}
@@ -8566,28 +8570,39 @@ function lnOp(op,resume){var k=op.op,i;if(resume&&k!=='go'&&k!=='reveal')return;
 function lnNotes(ti,list,bpm){if(!ensureAudio())return;var sd=60/(bpm||100)/4,t0=ctx.currentTime+0.08;list.forEach(function(n){playNote(ti,n[1],0.8,t0+n[0]*sd,sd*1.8);});}
 function lnBeat(map,bpm,bars){if(!ensureAudio())return;var sd=60/(bpm||P.bpm.v)/4,t0=ctx.currentTime+0.08;for(var b=0;b<(bars||2);b++)map.forEach(function(m){if(m[0]<0||!pads[m[0]])return;m[1].forEach(function(s){trigPad(m[0],0.9,t0+(b*16+s)*sd);});});}
 var KB='#kb .wk,#kb .bk';
+/* step dependencies: need() says a step can be done; fix() makes it so (used when an earlier step was skipped). No fix → the step is skipped, never left impassable. */
+function lnHasKit(){return LH.pad('kick')>=0&&LH.pad('snare')>=0;}
+function lnFixKit(){if(!lnHasKit()){var b=$('#kitChips [data-kit="acoustic"]')||$('#kitChips button');if(b)b.click();}LNR['play/pads']();}
+function lnSel(r){return function(){return lnHasKit()&&padSel===LH.pad(r);};}
+function lnSelFix(r){return function(){lnFixKit();setTimeout(function(){var i=LH.pad(r);if(i>=0)selectPad(i);},250);};}
+function lnSlOpen(){return !$('#slSheet').hidden;}
+function lnSlFix(){if(slots.A&&slots.A.buf){showTab('t-cap');slOpen('A');}}
+function lnDrumV(){return showTab.cur==='t-gar'&&GAR.inst==='drummer'&&GAR.view==='play';}
+function lnDrumFix(){GAR.view='play';if(showTab.cur!=='t-gar')showTab('t-gar');garOpen('drummer');}
 function lnKit(){return {id:'kit',at:'play/pads',hl:['#kitChips'],say:'This part needs a kick and a snare, and your pads now hold your own sounds. Pick a kit here; Undo brings your sounds back.',pred:function(){return LH.pad('kick')>=0&&LH.pad('snare')>=0;}};}
 var LNL={
 u1l1:{id:'u1l1',u:'u1',t:'Catch a sound',min:3,flow:'Capture',badge:'First Echo',
   concept:'Every sound has a story. A tapped mug, a hum, a knock on the door: Ecou listens to one short sound, finds its note and puts it on the keys. No music words needed. If you can make a noise, you can make an instrument.',
   setup:[{op:'stop'},{op:'go',to:'home'}],
-  win:'You turned a real sound into an instrument. It is saved under Sounds & ideas.',ch:'Catch a very different sound, like a breath or a hum, and compare the two.',
+  made:'an instrument made from your own sound',win:'You turned a real sound into an instrument. It is saved under Sounds & ideas.',ch:'Catch a very different sound, like a breath or a hum, and compare the two.',
   steps:[{id:'find',say:'Look around. Pick something that makes a short, clear sound: a mug, a door, or your voice saying “ahh”.',cont:'I have one'},
    {id:'drop',at:'home',hl:['#echoBtn'],say:'Hold the big mic button, make your sound, then let go. Ecou keeps it.',base:function(){return {it:ECHO.item};},pred:function(B){return !ECHO.rec&&!!ECHO.item&&ECHO.item!==B.it;},
     hints:[[8,'If the phone asks for the microphone, tap Allow. Nothing leaves your phone.'],[18,'You can also tap once to start and tap again to stop.']]},
-   {id:'hear',at:'home',hl:['#echoPlay'],say:'Hear it sing back? That tune is made from your sound. Tap Play it.',ex:function(){if(ECHO.item)echoSing(ECHO.item);},exL:'Hear it again',
+   {id:'hear',at:'home',hl:['#echoPlay'],need:function(){return !!ECHO.item;},say:'Hear it sing back? That tune is made from your sound. Tap Play it.',ex:function(){if(ECHO.item)echoSing(ECHO.item);},exL:'Hear it again',
     pred:function(){return showTab.cur==='t-pad'||(showTab.cur==='t-gar'&&GAR.inst==='keys'&&GAR.view==='play');}},
-   {id:'keys',hl:function(){return LH.perc()?['#pads .pad.sel']:['#kb'];},say:function(){return LH.perc()?'Your sound is on this pad. Tap it five times, fast and slow.':'That is your sound on every key. Tap five keys, low and high.';},
+   {id:'keys',need:function(){return showTab.cur==='t-pad'||(showTab.cur==='t-gar'&&GAR.inst==='keys'&&GAR.view==='play');},
+    fix:function(){if(ECHO.item){echoPlayIt(ECHO.item);return;}GAR.view='play';if(showTab.cur!=='t-gar')showTab('t-gar');garOpen('keys');},hl:function(){return LH.perc()?['#pads .pad.sel']:['#kb'];},say:function(){return LH.perc()?'Your sound is on this pad. Tap it five times, fast and slow.':'That is your sound on every key. Tap five keys, low and high.';},
     ev:{type:'pointerdown',sel:KB+',#pads .pad',n:5},hints:[[12,'Low keys on the left sound deep. High keys on the right sound bright.']]},
    {id:'tune',say:'Listen: a little tune played with what you just caught.',cont:'Done',exL:'Hear an idea',
     ex:function(){if(LH.perc())lnBeat([[padSel,[0,3,6,8,11,14]]],100,2);else lnNotes(ECHO.ti!=null?ECHO.ti:keysTi(),[[0,60],[2,64],[4,67],[6,72],[8,67],[10,64],[12,60]],100);}}]},
 u1l2:{id:'u1l2',u:'u1',t:'Bend it',min:4,flow:'Transform',badge:'Shape Shifter',
   concept:'One recording can become many instruments. Granular chops your sound into tiny grains and scatters them, like light through frosted glass. There is no right setting: move a control, listen, keep what you like.',
   setup:[{op:'stop'},{op:'go',to:'sound/shape'},{op:'reveal',sel:'#granCard'},{op:'param',k:'gspray',v:0.1}],
-  win:'You transformed a sound by ear. That is sound design.',ch:'Make your sound unrecognisable in three moves, then tap Sampler to compare.',
+  made:'a new instrument: your sound bent into grains',win:'You transformed a sound by ear. That is sound design.',ch:'Make your sound unrecognisable in three moves, then tap Sampler to compare.',
   steps:[{id:'before',at:'sound/shape',hl:['#kb'],say:'Tap a key and listen. This is your sound as you caught it.',ev:{type:'pointerdown',sel:KB,n:1}},
    {id:'engine',at:'sound/shape',hl:['[data-engine="granular"]'],say:'Tap Granular. Your sound is now cut into tiny grains.',pred:function(){return engine==='granular';}},
-   {id:'size',at:'sound/shape',hl:['[data-p="gsize"]'],say:'Drag Grain size, then play a key. Stop when it sounds good to you.',base:function(){return {g:P.gsize.v};},pred:function(B){return Math.abs(P.gsize.v-B.g)/B.g>0.25;},
+   {id:'size',at:'sound/shape',say:'Drag Grain size, then play a key. Stop when it sounds good to you.',base:function(){return {g:P.gsize.v};},pred:function(B){return Math.abs(P.gsize.v-B.g)/B.g>0.25;},
+    hl:function(R){return R.pok?['#kb']:['[data-p="gsize"]'];},ev:{type:'pointerdown',sel:KB,n:1},after:'Now play a key to hear it.',
     hints:[[10,'Drag further. Left is smooth and glassy, right is choppy.']]},
    {id:'spray',at:'sound/shape',hl:['[data-p="gspray"]'],say:'Now push Spray past the middle. Hear the grains scatter into a cloud?',pred:function(){return P.gspray.v>=0.5;}},
    {id:'ab',at:'sound/shape',hl:function(R){return [R.seq?'[data-engine="granular"]':'[data-engine="sampler"]'];},say:'Tap Sampler to hear the original, then Granular again. Same recording, two instruments.',
@@ -8596,7 +8611,7 @@ u1l2:{id:'u1l2',u:'u1',t:'Bend it',min:4,flow:'Transform',badge:'Shape Shifter',
 u1l3:{id:'u1l3',u:'u1',t:'Make it groove',min:5,flow:'Play',badge:'First Loop',
   concept:'A loop is a short pattern that repeats. The row of 16 lights is one trip around the loop; a lit light means “play the sound here”. The numbered lights are the pulse you tap your foot to.',
   setup:[{op:'stop'},{op:'go',to:'play/pads'},{op:'freePattern'},{op:'param',k:'bpm',v:96},{op:'param',k:'swing',v:0},{op:'selectPad',pad:function(){return LH.freePad();}}],
-  win:'Your first loop, built on a sound nobody else has.',ch:'Add Closed Hat on every second light, then take away one kick. Does it still feel good?',
+  made:'a loop with your own sound and a kick on the beat',win:'Your first loop, built on a sound nobody else has.',ch:'Add Closed Hat on every second light, then take away one kick. Does it still feel good?',
   steps:[{id:'pad',at:'play/pads',hl:['#padRec'],say:'This pad is yours. Tap Record to pad, make a short sound (a knock, a clap, a “tss”), then tap Stop.',
     base:function(){return {i:padSel,buf:pads[padSel].buf};},pred:function(B){var p=pads[B.i];return !capture&&p.buf!==B.buf&&p.cls==='other';},hints:[[8,'Tap once to start, make the sound, tap again to stop. No mic? Skip step.']]},
    {id:'hit',at:'play/pads',hl:['#pads .pad.sel'],say:'Tap your pad three times and listen.',ev:{type:'pointerdown',sel:'#pads .pad.sel',n:3}},
@@ -8604,37 +8619,37 @@ u1l3:{id:'u1l3',u:'u1',t:'Make it groove',min:5,flow:'Play',badge:'First Loop',
     ex:function(){lnBeat([[LH.pad('kick'),[0,8]],[padSel,[4,10,12]]],96,2);},hints:[[12,'Tap a light once to turn it on, again to turn it off.']]},
    {id:'play',at:'play/pads',hl:['#seqPlay'],say:'Press Play. Your sound is now a rhythm.',pred:function(){return seq.on&&seq.mode==='pattern';}},
    lnKit(),
-   {id:'kpad',at:'play/pads',hl:function(){return ['#pads .pad[data-pad="'+LH.pad('kick')+'"]'];},say:'Keep it playing. Tap the Kick pad: the lights now show the kick.',pred:function(){return padSel===LH.pad('kick');}},
-   {id:'kick',at:'play/pads',hl:['#steps'],say:'Light number 1 and number 3. Boom on the beat.',pred:function(){return LH.on('kick',[0,8]);},hints:[[12,'The lights marked 1 and 3. If the wrong pad is lit, tap Kick first.']]},
+   {id:'kpad',at:'play/pads',need:lnHasKit,fix:lnFixKit,hl:function(){return ['#pads .pad[data-pad="'+LH.pad('kick')+'"]'];},say:'Keep it playing. Tap the Kick pad: the lights now show the kick.',pred:function(){return padSel===LH.pad('kick');}},
+   {id:'kick',at:'play/pads',need:lnSel('kick'),fix:lnSelFix('kick'),hl:['#steps'],say:'Light number 1 and number 3. Boom on the beat.',pred:function(){return LH.on('kick',[0,8]);},hints:[[12,'The lights marked 1 and 3. If the wrong pad is lit, tap Kick first.']]},
    {id:'listen',say:'Let it go round twice. Move a light if you want a different feel.',hold:{pred:function(){return seq.on;},s:function(){return LH.bars(2);}},hints:[[2,'If it stopped, press Play again.']]}]},
 u1l4:{id:'u1l4',u:'u1',t:'Beatbox flip',min:4,flow:'Capture → Transform',badge:'Beatbox Flip',
   concept:'Your mouth is a drum kit. Boom, tss, ka: beatbox a few seconds and the Smart Slicer cuts every hit into its own pad. One recording becomes an instrument you can drum on.',
   setup:[{op:'stop'},{op:'go',to:'sound/capture'}],
-  win:'You flipped your voice into a drum kit.',ch:'Try the AI Beatbox card on Pads: it also writes the pattern for you.',
+  made:'a drum kit cut from your own beatbox',win:'You flipped your voice into a drum kit.',ch:'Try the AI Beatbox card on Pads: it also writes the pattern for you.',
   steps:[{id:'rec',at:'sound/capture',hl:['[data-cap="A"]'],say:'Tap Record sample and beatbox for a few seconds: “boom, tss, ka, tss”. Tap Stop when you are done.',
     base:function(){return {buf:slots.A&&slots.A.buf};},pred:function(B){return !capture&&!!slots.A&&!!slots.A.buf&&slots.A.buf!==B.buf;},hints:[[10,'Tap the same button again to stop. It also stops by itself after 10 seconds.']]},
-   {id:'slice',at:'sound/capture',hl:['[data-slice="A"]'],say:'Now tap Slice to pads. The Smart Slicer finds every hit.',pred:function(){return !$('#slSheet').hidden&&SL.from==='A';}},
-   {id:'hear',hl:['#slChips'],say:'Each chip is one hit. Tap three of them to hear the pieces.',ev:{type:'click',sel:'#slChips [data-sli]',n:3}},
-   {id:'send',hl:['#slSend'],say:'Tap Send to pads.',base:function(){return {b:pads.map(function(p){return p.buf;})};},
+   {id:'slice',at:'sound/capture',need:function(){return !!(slots.A&&slots.A.buf);},hl:['[data-slice="A"]'],say:'Now tap Slice to pads. The Smart Slicer finds every hit.',pred:function(){return !$('#slSheet').hidden&&SL.from==='A';}},
+   {id:'hear',need:lnSlOpen,fix:lnSlFix,hl:['#slChips'],say:'Each chip is one hit. Tap three of them to hear the pieces.',ev:{type:'click',sel:'#slChips [data-sli]',n:3}},
+   {id:'send',need:lnSlOpen,fix:lnSlFix,hl:['#slSend'],say:'Tap Send to pads.',base:function(){return {b:pads.map(function(p){return p.buf;})};},
     pred:function(B){var n=0;pads.forEach(function(p,i){if(p.buf&&p.buf._slc&&p.buf!==B.b[i])n++;});return n>=2;},hints:[[6,'If it asks to replace pads, tap again to confirm. Undo brings the old pads back.']]},
-   {id:'drum',at:'play/pads',hl:['#pads'],say:'Your beatbox is now a kit. Drum on the slice pads.',ev:{type:'pointerdown',sel:'#pads .pad',n:6}},
+   {id:'drum',at:'play/pads',need:function(){return $('#slSheet').hidden&&showTab.cur==='t-pad';},fix:function(){slClose();LNR['play/pads']();},hl:['#pads'],say:'Your beatbox is now a kit. Drum on the slice pads.',ev:{type:'pointerdown',sel:'#pads .pad',n:6}},
    {id:'idea',say:'Hear an idea: your own slices played as a groove. You can light them up in the steps any time.',cont:'Done',exL:'Hear an idea',
     ex:function(){var s=SL.start||0;lnBeat([[s,[0,8]],[s+1,[4,12]],[s+2,[2,6,10,14]]],96,2);}}]},
 u2l1:{id:'u2l1',u:'u2',t:'Boom and tap',min:4,flow:'Play',badge:'Backbeat',
   concept:'Most songs you know stand on two sounds: a deep boom (the kick) and a sharp tap (the snare). Boom on 1 and 3, tap on 2 and 4. That is the backbeat, and your body already knows it.',
   setup:[{op:'stop'},{op:'go',to:'play/pads'},{op:'freePattern'},{op:'param',k:'swing',v:0},{op:'selectPad',pad:'kick'}],
-  win:'That is the backbeat: the heart of pop, rock and hip-hop.',ch:'Swap the snare for a pad you recorded yourself.',
-  steps:[lnKit(),{id:'kpad',at:'play/pads',hl:function(){return ['#pads .pad[data-pad="'+LH.pad('kick')+'"]'];},say:'Tap the Kick pad: the deep boom.',pred:function(){return padSel===LH.pad('kick');}},
-   {id:'kick',at:'play/pads',hl:['#steps'],say:'Now light number 1 and number 3.',pred:function(){return LH.on('kick',[0,8]);},hints:[[12,'If other lights show, tap the Kick pad first.']]},
-   {id:'spad',at:'play/pads',hl:function(){return ['#pads .pad[data-pad="'+LH.pad('snare')+'"]'];},say:'Now tap the Snare pad.',pred:function(){return padSel===LH.pad('snare');}},
-   {id:'snare',at:'play/pads',hl:['#steps'],say:'Light number 2 and number 4.',pred:function(){return LH.on('snare',[4,12]);}},
+  made:'a backbeat: boom on 1 and 3, tap on 2 and 4',win:'That is the backbeat: the heart of pop, rock and hip-hop.',ch:'Swap the snare for a pad you recorded yourself.',
+  steps:[lnKit(),{id:'kpad',at:'play/pads',need:lnHasKit,fix:lnFixKit,hl:function(){return ['#pads .pad[data-pad="'+LH.pad('kick')+'"]'];},say:'Tap the Kick pad: the deep boom.',pred:function(){return padSel===LH.pad('kick');}},
+   {id:'kick',at:'play/pads',need:lnSel('kick'),fix:lnSelFix('kick'),hl:['#steps'],say:'Now light number 1 and number 3.',pred:function(){return LH.on('kick',[0,8]);},hints:[[12,'If other lights show, tap the Kick pad first.']]},
+   {id:'spad',at:'play/pads',need:lnHasKit,fix:lnFixKit,hl:function(){return ['#pads .pad[data-pad="'+LH.pad('snare')+'"]'];},say:'Now tap the Snare pad.',pred:function(){return padSel===LH.pad('snare');}},
+   {id:'snare',at:'play/pads',need:lnSel('snare'),fix:lnSelFix('snare'),hl:['#steps'],say:'Light number 2 and number 4.',pred:function(){return LH.on('snare',[4,12]);}},
    {id:'play',at:'play/pads',hl:['#seqPlay'],say:'Press Play.',pred:function(){return seq.on;}},
    {id:'groove',say:'Boom, tap, boom, tap. Nod along while it goes round twice.',hold:{pred:function(){return seq.on;},s:function(){return LH.bars(2);}},exL:'Hear an idea',
     ex:function(){lnBeat([[LH.pad('kick'),[0,8,10]],[LH.pad('snare'),[4,12]]],P.bpm.v,1);}}]},
 u2l2:{id:'u2l2',u:'u2',t:'Fast, slow, bouncy',min:3,flow:'Play',badge:'Groove Feel',
   concept:'Tempo is how fast the beat goes; Swing is how bouncy it feels. Slow feels heavy, fast feels urgent, swing makes it strut. Trust your ears: there are no wrong numbers.',
   setup:[{op:'stop'},{op:'go',to:'play/pads'},{op:'freePattern',keep:true,fill:true},{op:'param',k:'swing',v:0}],
-  win:'You changed the feel without changing a single note.',ch:'Walk around the room, then set the tempo to match your steps.',
+  made:'the same beat with your own tempo and swing',win:'You changed the feel without changing a single note.',ch:'Walk around the room, then set the tempo to match your steps.',
   steps:[{id:'play',at:'play/pads',hl:['#seqPlay'],say:'Press Play to start the beat.',pred:function(){return seq.on;}},
    {id:'tempo',at:'play/pads',hl:['#t-pad [data-p="bpm"]'],say:'Drag Tempo until it feels like walking, or like running. Listen while you drag.',base:function(){return {b:P.bpm.v};},pred:function(B){return Math.abs(P.bpm.v-B.b)>=10;}},
    {id:'swing',at:'play/pads',hl:['#t-pad [data-p="swing"]'],say:'Now push Swing to the right. The in-between hits arrive late: bouncy.',pred:function(){return P.swing.v>=0.2;}},
@@ -8642,13 +8657,15 @@ u2l2:{id:'u2l2',u:'u2',t:'Fast, slow, bouncy',min:3,flow:'Play',badge:'Groove Fe
 u2l3:{id:'u2l3',u:'u2',t:'A drummer for you',min:4,flow:'Play',badge:'Bandleader',
   concept:'You do not have to place every hit. The Drummer plays a real-feeling part for you. Drag one dot: right plays busier, up plays harder. You stay the boss; it follows.',
   setup:[{op:'stop'},{op:'go',to:'play/sounds'}],
-  win:'You have a drummer that plays what you ask for.',ch:'Try three styles and keep the one that makes you move.',
+  made:'a drummer part, placed in your song',win:'You have a drummer that plays what you ask for.',ch:'Try three styles and keep the one that makes you move.',
   steps:[{id:'pick',at:'play/sounds',hl:['[data-gi="drummer"]'],say:'Tap Drummer.',pred:function(){return showTab.cur==='t-gar'&&GAR.inst==='drummer'&&GAR.view==='play';}},
-   {id:'prev',hl:['#garDpv [data-pv="1"]'],say:'Tap Preview to hear your drummer.',pred:function(){return seq.on;}},
-   {id:'dot',hl:['#garDxy'],say:'Drag the dot. Right plays busier, up plays harder. Changes come in on the next loop.',base:function(){return {x:GAR.drum.cx,y:GAR.drum.ly};},
+   {id:'prev',need:lnDrumV,fix:lnDrumFix,hl:['#garDpv [data-pv="1"]'],say:'Tap Preview to hear your drummer.',pred:function(){return seq.on;}},
+   {id:'dot',need:lnDrumV,fix:lnDrumFix,hl:['#garDxy'],say:'Drag the dot. Right plays busier, up plays harder. Changes come in on the next loop.',base:function(){return {x:GAR.drum.cx,y:GAR.drum.ly};},
     pred:function(B){return Math.abs(GAR.drum.cx-B.x)>0.15||Math.abs(GAR.drum.ly-B.y)>0.15;},hints:[[10,'Put your finger on the dot and slide it to another corner.']]},
-   {id:'style',hl:['#garDst'],say:'Pick another style from this row and listen.',base:function(){return {s:GAR.drum.style};},pred:function(B){return GAR.drum.style!==B.s;}},
-   {id:'keep',say:'Like it? Add to song places this part in your song. Come back any time.',cont:'Done'}]}};
+   {id:'style',need:lnDrumV,fix:lnDrumFix,hl:['#garDst'],say:'Pick another style from this row and listen.',base:function(){return {s:GAR.drum.style};},pred:function(B){return GAR.drum.style!==B.s;}},
+   {id:'add',need:lnDrumV,fix:lnDrumFix,hl:['#garDpv [data-pv="2"]'],say:'Like it? Tap Add to song to place this part in your song.',
+    base:function(){return {c:daw.clips.slice()};},pred:function(B){return daw.clips.some(function(c){return c.ti===0&&c.type==='pat'&&B.c.indexOf(c)<0;});}},
+   {id:'keep',say:'It is in your song now. Open Song any time to hear it, or come back and change the style.',cont:'Done'}]}};
 var LNU=[['u1','Catch a sound','Capture → Transform → Play',['u1l1','u1l2','u1l3','u1l4']],['u2','Feel the beat','Play',['u2l1','u2l2','u2l3','u2l4','u2l5']],
   ['u3','Notes that belong together','Play → Create',['u3l1','u3l2','u3l3','u3l4','u3l5','u3l6']],['u4','From loop to song','Create',['u4l1','u4l2','u4l3','u4l4']],['u5','Record and mix','Produce',['u5l1','u5l2','u5l3','u5l4']],['u6','Finish and share','Share',['u6l1','u6l2','u6l3']]];
 var LNS={u2l4:['Play it live','Record a pad performance into the grid.'],u2l5:['Three, not four','Feel a waltz with the Backing Band.'],u3l1:['Tunes that cannot go wrong','Keys mode: pads play only notes that fit.'],
@@ -8664,31 +8681,57 @@ function lnVis(s){try{var a=document.querySelectorAll(s);for(var i=0;i<a.length;
 function lnHl(R,st){var h=typeof st.hl==='function'?st.hl(R):st.hl;return h||[];}
 function lnTarget(R,st){var h=lnHl(R,st);for(var i=0;i<h.length;i++){var e=lnVis(h[i]);if(e)return e;}return null;}
 function lnTry(f,B){try{return !!f(B);}catch(e){return false;}}
-function lnPlace(){var R=LN.run;if(!R)return;var st=R.steps[R.i],hole=$('#lnHole'),bub=$('#lnBub'),e=R.fin?null:lnTarget(R,st);
-  if(e){var r=e.getBoundingClientRect(),p=6,vh=window.innerHeight;hole.hidden=false;hole.style.left=(r.left-p)+'px';hole.style.top=(r.top-p)+'px';hole.style.width=(r.width+2*p)+'px';hole.style.height=(r.height+2*p)+'px';
-    var bh=bub.offsetHeight||150,top=r.top+r.height/2>vh*0.5;if(!top&&r.bottom>vh-bh-70&&r.top>bh+20)top=true;bub.classList.toggle('top',top);}
-  else{hole.hidden=true;bub.classList.remove('top');}
-  $('#lnShow').hidden=!!e||R.fin||!st.at||!lnHl(R,st).length;}
-function lnScroll(){var R=LN.run;if(!R)return;var e=lnTarget(R,R.steps[R.i]);if(!e)return;var r=e.getBoundingClientRect();if(r.top<70||r.bottom>window.innerHeight-200){try{e.scrollIntoView({block:'center',behavior:RMOT()?'auto':'smooth'});}catch(x){}}lnPlace();}
+/* fixed bottom nav: the bubble and the spotlight stay above it (portrait and landscape) */
+function lnNavTop(){var vh=window.innerHeight,n=LN.nav;if(!n||!n.isConnected){var x=document.querySelector('nav [data-nav]');n=LN.nav=x?x.closest('nav'):null;}
+  if(!n)return vh;var r=n.getBoundingClientRect();return r.height>0&&r.top>vh*0.4&&r.top<vh?r.top:vh;}
+/* a target inside a fixed overlay (sheet, dialog) sits above the nav, so the nav band does not apply to it */
+function lnNT(e){var p=e;while(p&&p!==document.body){if(getComputedStyle(p).position==='fixed')return window.innerHeight;p=p.parentElement;}return lnNavTop();}
+function lnSide(){return window.innerWidth>window.innerHeight&&window.innerWidth>=560;}
+function lnPlace(){var R=LN.run;if(!R)return;var st=R.steps[R.i],hole=$('#lnHole'),bub=$('#lnBub'),bs=bub.style,e=R.fin?null:lnTarget(R,st),vh=window.innerHeight,vw=window.innerWidth,nt=e?lnNT(e):lnNavTop(),side=lnSide(),inV=false;
+  bs.top='';bs.left='';bs.right='';bs.width='';bs.margin='';var nb=lnNavTop();bs.bottom=(vh-nb+8)+'px';bs.maxHeight=Math.max(120,nb-16)+'px';bs.overflowY='auto';bub.classList.remove('top');
+  if(e){var r=e.getBoundingClientRect(),p=6;inV=r.bottom>4&&r.top<nt-4&&r.right>0&&r.left<vw;
+    if(side){var w=Math.min(340,Math.round(vw*0.44));bs.width=w+'px';bs.margin='0';bs.top='8px';bs.bottom='auto';if(r.left+r.width/2<vw/2){bs.right='10px';bs.left='auto';}else{bs.left='10px';bs.right='auto';}}
+    else{var bh=bub.offsetHeight||150,lowHit=r.bottom>nt-8-bh,topHit=r.top<8+bh;if(lowHit&&(!topHit||r.top+r.height/2>nt*0.5)){bs.bottom='auto';bub.classList.add('top');}}
+    hole.hidden=!inV;var t=Math.max(r.top-p,0),btm=Math.min(r.bottom+p,nt);hole.style.left=(r.left-p)+'px';hole.style.top=t+'px';hole.style.width=(r.width+2*p)+'px';hole.style.height=Math.max(0,btm-t)+'px';
+    /* covered target (B2): ask the browser what a tap at its centre would hit; if it is not the target, move it out from under the cover */
+    if(inV&&!R.busy){var cx=Math.min(Math.max(r.left+r.width/2,1),vw-1),cy=Math.min(Math.max(r.top+r.height/2,1),nt-1),h=document.elementFromPoint(cx,cy);
+      if(h&&h!==e&&!e.contains(h)&&!h.contains(e)&&(R.cov||0)<4){R.cov=(R.cov||0)+1;var hr=h.getBoundingClientRect(),sc=lnScroller(e),d=hr.top+hr.height/2>cy?(r.bottom-hr.top+12):-(hr.bottom-r.top+12);
+        if(bub.contains(h)){lnScroll(true);}else{lnNudge(e,d);}R.covBy=(h.id||String(h.className||h.tagName)).slice(0,40);}}}
+  else hole.hidden=true;
+  R.vis=inV;$('#lnShow').hidden=inV||!!R.fin||!lnHl(R,st).length||!(st.at||e);}
+/* scroll by d px using every scrollable ancestor in turn (sheet, page), so sticky bars and nested scrollers are handled */
+function lnNudge(e,d){var p=e.parentElement;while(p&&p!==document.body&&p!==document.documentElement&&Math.abs(d)>=2){var cs=getComputedStyle(p);if(/(auto|scroll)/.test(cs.overflowY)&&p.scrollHeight>p.clientHeight+1){var b0=p.scrollTop;p.scrollTop+=d;d-=p.scrollTop-b0;}p=p.parentElement;}if(Math.abs(d)>=2){try{window.scrollBy(0,d);}catch(x){}}}
+function lnScroller(e){var p=e.parentElement;while(p&&p!==document.body&&p!==document.documentElement){var cs=getComputedStyle(p);if(/(auto|scroll)/.test(cs.overflowY)&&p.scrollHeight>p.clientHeight+1)return p;p=p.parentElement;}return document.scrollingElement||document.documentElement;}
+/* scroll the target into the free band (between the top and the bubble, above the bottom nav), then re-measure */
+function lnScroll(inner){var R=LN.run;if(!R||R.fin)return;var e=lnTarget(R,R.steps[R.i]);if(!e)return;
+  try{e.scrollIntoView({block:'nearest',inline:'nearest',behavior:'auto'});}catch(x){}
+  var r=e.getBoundingClientRect(),nt=lnNT(e),bh=$('#lnBub').offsetHeight||150,side=lnSide(),lo=8,hi=side?nt-8:nt-bh-16;
+  if(!side&&r.height>hi-lo){lo=bh+16;hi=nt-8;}
+  if(r.top<lo||r.bottom>hi){var want=r.height>hi-lo?lo:(lo+hi)/2-r.height/2,d=r.top-want;lnNudge(e,d);}
+  if(!inner)lnPlace();}
 function lnSay(st){return typeof st.say==='function'?st.say():st.say;}
 function lnRender(){var R=LN.run,st=R.steps[R.i];$('#lnBub').hidden=false;$('#lnBub').classList.remove('ok');$('#lnTtl').textContent=R.L.t+' · step '+(R.i+1)+' of '+R.steps.length;
-  $('#lnSay').textContent=lnSay(st);$('#lnHint').hidden=true;$('#lnProg').textContent=st.ev?'0 / '+st.ev.n:'';
+  $('#lnSay').textContent=lnSay(st);$('#lnHint').hidden=true;$('#lnProg').textContent=st.ev&&!st.pred?'0 / '+st.ev.n:'';
   $('#lnDots').innerHTML=R.steps.map(function(s,k){return '<i class="'+(k<R.i?'d':k===R.i?'c':'')+'"></i>';}).join('');
   $('#lnEx').hidden=!st.ex;$('#lnEx').textContent=st.exL||'Hear an idea';$('#lnGo').hidden=!st.cont;$('#lnGo').textContent=st.cont||'Next';
   $('#lnSkip').hidden=!!st.cont;$('#lnSkip').textContent='Skip step';$('#lnX').textContent='Exit';lnPlace();}
 function lnEvOff(){if(LN.ev){document.removeEventListener(LN.ev.type,LN.ev.fn,true);LN.ev=null;}}
-function lnEvOn(ev){var R=LN.run;LN.ev={type:ev.type,fn:function(e){var t=e.target;if(LN.run!==R||R.busy||!t||!t.closest||t.closest('#lnBub'))return;if(!t.closest(ev.sel))return;
-  R.cnt++;$('#lnProg').textContent=Math.min(R.cnt,ev.n)+' / '+ev.n;if(R.cnt>=ev.n)lnDone();}};document.addEventListener(ev.type,LN.ev.fn,true);}
-function lnEnter(i){var R=LN.run;if(!R)return;if(i>=R.steps.length){lnFinish();return;}
-  var st=R.steps[i];R.i=i;R.t0=R.tl=performance.now();R.cnt=0;R.seq=0;R.hold=0;R.hint=-1;R.busy=false;R.B=st.base?st.base():{};
-  var o=lnLoad();o.cur={l:R.L.id,s:i};lnSave(o);lnEvOff();if(st.ev)lnEvOn(st.ev);lnRender();setTimeout(lnScroll,60);
+function lnEvOn(ev,st){var R=LN.run;LN.ev={type:ev.type,fn:function(e){var t=e.target;if(LN.run!==R||R.busy||!t||!t.closest||t.closest('#lnBub'))return;if(!t.closest(ev.sel))return;
+  if(st&&st.pred){if(!R.pok)return;R.cnt++;return;}R.cnt++;$('#lnProg').textContent=Math.min(R.cnt,ev.n)+' / '+ev.n;if(R.cnt>=ev.n)lnDone();}};document.addEventListener(ev.type,LN.ev.fn,true);}
+function lnEnter(i,fx){var R=LN.run;if(!R)return;if(i>=R.steps.length){lnFinish();return;}
+  var st=R.steps[i];
+  /* B3: a step whose precondition is missing (an earlier step was skipped) gets a minimal make-it-so setup, or is skipped itself */
+  if(st.need&&!lnTry(st.need,{})){if(st.fix&&!fx){R.busy=true;lnEvOff();try{st.fix();}catch(e){errLog.push('lesson fix: '+e.message);}setTimeout(function(){if(LN.run===R)lnEnter(i,1);},450);return;}lnEnter(i+1);return;}
+  R.i=i;R.t0=R.tl=performance.now();R.cnt=0;R.seq=0;R.hold=0;R.hint=-1;R.busy=false;R.pok=false;R.cov=0;R.scN=0;R.scT=0;R.B=st.base?st.base():{};
+  var o=lnLoad();o.cur={l:R.L.id,s:i};lnSave(o);lnEvOff();if(st.ev)lnEvOn(st.ev,st);lnRender();lnScroll();setTimeout(lnScroll,60);setTimeout(function(){if(LN.run===R&&R.i===i)lnScroll();},400);
   if(st.pred&&!st.base&&lnTry(st.pred,R.B))lnDone(true);}
 function lnTick(){var R=LN.run;if(!R||R.fin)return;var st=R.steps[R.i],now=performance.now(),el=(now-R.t0)/1000,dt=(now-R.tl)/1000;R.tl=now;lnPlace();
+  if(!R.vis&&!R.busy&&R.scN<3&&now-R.scT>700&&lnTarget(R,st)){R.scN++;R.scT=now;lnScroll();}
   if(st.hints){var h=-1;st.hints.forEach(function(x,k){if(el>=x[0])h=k;});if(h!==R.hint){R.hint=h;if(h>=0){$('#lnHint').hidden=false;$('#lnHint').textContent=st.hints[h][1];}}}
   if(R.busy)return;var ok=false;
   if(st.seq){if(lnTry(st.seq[R.seq],R.B)){R.seq++;if(R.seq<st.seq.length){$('#lnProg').textContent=R.seq+' / '+st.seq.length;lnPlace();}}ok=R.seq>=st.seq.length;}
   else if(st.hold){if(lnTry(st.hold.pred,R.B))R.hold+=dt;var need=st.hold.s();$('#lnProg').textContent=Math.min(100,Math.round(R.hold/need*100))+'%';ok=R.hold>=need;}
-  else if(st.pred)ok=lnTry(st.pred,R.B);
+  else if(st.pred){var pk=lnTry(st.pred,R.B);if(st.ev){if(pk&&!R.pok){R.pok=true;$('#lnProg').textContent=st.after||'';lnScroll();}ok=pk&&R.cnt>=st.ev.n;}else ok=pk;}
   if(ok)lnDone();}
 function lnDone(already){var R=LN.run;if(!R||R.busy)return;var st=R.steps[R.i];R.busy=true;lnEvOff();if(!st.cont)lnMade();
   $('#lnBub').classList.add('ok');$('#lnProg').textContent=already?'Already done ✓':'Nice ✓';try{if(!st.cont&&navigator.vibrate)navigator.vibrate(12);}catch(e){}
@@ -8705,12 +8748,13 @@ function lnStop(keep){var R=LN.run;lnEvOff();lnOff();LN.run=null;$('#lnBub').hid
 function lnFinish(){var R=LN.run,L=R.L,o=lnLoad(),n=(o.reps[L.id]||0)+1;lnEvOff();lnOff();R.fin=true;
   o.done[L.id]=o.done[L.id]||Date.now();o.reps[L.id]=n;o.rev[L.id]=Date.now()+[1,4,10,30][Math.min(n-1,3)]*864e5;o.cur=null;lnSave(o);lnMade();
   var nx=lnNextId();$('#lnBub').hidden=false;$('#lnBub').classList.add('ok');$('#lnBub').classList.remove('top');$('#lnTtl').textContent=L.t+' · done · '+L.badge;
-  $('#lnSay').textContent=L.win;$('#lnHint').hidden=false;$('#lnHint').textContent='Try next: '+L.ch;$('#lnProg').textContent='';$('#lnDots').innerHTML='';
-  $('#lnEx').hidden=true;$('#lnShow').hidden=true;$('#lnSkip').hidden=false;$('#lnSkip').textContent='All lessons';$('#lnGo').hidden=!nx;$('#lnGo').textContent=nx?'Next: '+LNL[nx].t:'';$('#lnX').textContent='Close';
+  $('#lnSay').textContent='Done! What you made: '+(L.made||L.win)+'.';$('#lnHint').hidden=false;$('#lnHint').textContent=L.win+' Try next: '+L.ch;$('#lnProg').textContent='';$('#lnDots').innerHTML='';
+  $('#lnEx').hidden=true;$('#lnShow').hidden=true;$('#lnSkip').hidden=false;$('#lnSkip').textContent='Back to map';$('#lnGo').hidden=!nx;$('#lnGo').textContent='Next lesson';if(nx)$('#lnGo').setAttribute('aria-label','Next lesson: '+LNL[nx].t);$('#lnX').textContent='Close';
+  lnPlace();lnQSync();
   try{if(navigator.vibrate)navigator.vibrate([12,40,24]);}catch(e){}}
 /* entry points: Home card, course map, "?" in the sub-header */
 function lnCardUI(){var s=$('#lnCardS');if(!s||!LNORD)return;var o=lnLoad(),d=LNORD.filter(function(k){return o.done[k];}).length,nx=lnNextId(o),st=lnStreak(o);
-  s.textContent=d?(nx?'Next: '+LNL[nx].t+' · '+d+' of '+LNORD.length+' done':'All '+LNORD.length+' lessons done')+(st?' · '+st+'-day streak':''):'3–5 min lessons · start with your first sound';}
+  if(o.cur&&LNL[o.cur.l]){s.textContent='Resume: '+LNL[o.cur.l].t+' · step '+(o.cur.s+1)+(d?' · '+d+' of '+LNORD.length+' done':'');return;}s.textContent=d?(nx?'Next: '+LNL[nx].t+' · '+d+' of '+LNORD.length+' done':'All '+LNORD.length+' lessons done')+(st?' · '+st+'-day streak':''):'3–5 min lessons · start with your first sound';}
 function lnMapOpen(){var o=lnLoad(),nx=lnNextId(o),now=Date.now(),st=lnStreak(o),cur=o.cur&&LNL[o.cur.l]?o.cur.l:null;
   $('#lnMapS').textContent=LNORD.filter(function(k){return o.done[k];}).length+' of '+LNORD.length+' lessons done'+(st?' · '+st+'-day streak':'')+' · each takes 3–5 minutes';
   $('#lnUnits').innerHTML=LNU.map(function(u,ui){return '<section class="ln-u"><h4>Unit '+(ui+1)+' · '+u[1]+'</h4><span class="mu">'+u[2]+'</span><div class="ln-ls">'+u[3].map(function(k,li){var L=LNL[k];
@@ -8723,16 +8767,16 @@ function lnEsc(e){if(e.key==='Escape')lnMapClose();}
 function lnMapClose(){var m=$('#lnMap');if(m)m.hidden=true;document.removeEventListener('keydown',lnEsc);}
 var LNQ={'t-cap':['u1l4'],'t-ins':['u1l2'],'t-pad':['u1l3','u2l1','u2l2'],'t-gar':['u2l3']};
 function lnQSync(){var q=$('#lnQ');if(!q||!LNQ)return;var c=showTab.cur,L=LNQ[c];if(c==='t-gar'&&GAR.view!=='sounds'&&GAR.inst!=='drummer')L=null;
-  var o=lnLoad(),k=L?(L.filter(function(x){return !o.done[x];})[0]||L[0]):null,on=!!k&&!LN.run&&!$('#subnav').hidden;q.hidden=!on;document.body.classList.toggle('ln-qon',on);
+  var o=lnLoad(),k=L?(L.filter(function(x){return !o.done[x];})[0]||L[0]):null,on=!!k&&(!LN.run||!!LN.run.fin)&&!$('#subnav').hidden;q.hidden=!on;document.body.classList.toggle('ln-qon',on);
   if(k){q.setAttribute('data-ln',k);q.setAttribute('aria-label','Lesson: '+LNL[k].t);q.title='Lesson: '+LNL[k].t;}}
 function initLearn(){
   $('#lnCard').addEventListener('click',lnMapOpen);$('#lnMapX').addEventListener('click',lnMapClose);$('#lnMap').addEventListener('click',function(e){if(e.target.getAttribute('data-lnclose'))lnMapClose();});
   $('#lnQ').addEventListener('click',function(){var k=this.getAttribute('data-ln');if(k)lnStart(k);});
-  $('#lnX').addEventListener('click',function(){lnStop(false);});
+  $('#lnX').addEventListener('click',function(){lnStop(true);});/* Exit keeps progress, exactly like a reload: the map offers Resume */
   $('#lnSkip').addEventListener('click',function(){var R=LN.run;if(!R)return;if(R.fin){lnStop(true);lnMapOpen();return;}if(!R.busy)lnEnter(R.i+1);});
   $('#lnGo').addEventListener('click',function(){var R=LN.run;if(!R)return;if(R.fin){var nx=lnNextId();lnStop(true);if(nx)lnStart(nx);return;}lnDone();});
   $('#lnEx').addEventListener('click',function(){var R=LN.run;if(R&&R.steps[R.i].ex){try{R.steps[R.i].ex();}catch(e){}}});
-  $('#lnShow').addEventListener('click',function(){var R=LN.run;if(!R)return;var st=R.steps[R.i];if(st.at&&LNR[st.at])LNR[st.at]();setTimeout(lnScroll,80);});
+  $('#lnShow').addEventListener('click',function(){var R=LN.run;if(!R)return;var st=R.steps[R.i];if(st.need&&!lnTry(st.need,{})&&st.fix){try{st.fix();}catch(e){}}else if(st.at&&LNR[st.at])LNR[st.at]();R.scN=0;R.cov=0;setTimeout(lnScroll,80);setTimeout(lnScroll,400);});
   var c=lnLoad().cur;if(c&&LNL[c.l]){var go=function(){setTimeout(function(){if(!LN.run)lnStart(c.l,c.s,true);},450);};['#startBtn','#startFresh'].forEach(function(s){var b=$(s);if(b)b.addEventListener('click',go,{once:true});});}
   lnCardUI();lnQSync();}
 try{initLearn();}catch(e){errLog.push('learn: '+e.message);}
@@ -8741,6 +8785,6 @@ $('#midiOn').addEventListener('click',midiConnect);
 $$('[data-exp]').forEach(function(b){b.addEventListener('click',function(){ensureAudio();var k=b.getAttribute('data-exp'),s=slots[k];if(!s.buf)return;saveWav(encodeWav([s.buf.getChannelData(0)],s.buf.sampleRate),'ecou-'+s.name.replace(/[^a-z0-9]+/gi,'-').toLowerCase()+'-'+nname(ftom(s.root)));});});
 })();
 </script>
-<div id="updBar" hidden><span>A new version of Ecou is ready.</span><button id="updGo">Update</button></div><style>#updBar{position:fixed;left:12px;right:12px;bottom:calc(84px + env(safe-area-inset-bottom));z-index:950;display:flex;align-items:center;gap:12px;padding:12px 12px 12px 16px;border-radius:16px;background:#1E1E28;border:1px solid #2B2B37;color:#E9E9F0;font:14px/1.4 system-ui,sans-serif;box-shadow:0 10px 30px rgba(0,0,0,.5)}#updBar[hidden]{display:none}#updBar span{flex:1}#updBar button{border:0;border-radius:999px;background:#D4FF3A;color:#0B0B10;font:700 14px system-ui,sans-serif;padding:9px 16px}</style><script>(function(){var V="81d80f1090",busy=false,last=0;function chk(){if(busy||Date.now()-last<60000)return;busy=true;last=Date.now();fetch("version.txt?"+Date.now(),{cache:"no-store"}).then(function(r){return r.ok?r.text():"";}).then(function(t){t=(t||"").trim();if(t&&t!==V)document.getElementById("updBar").hidden=false;}).catch(function(){}).then(function(){busy=false;});}document.addEventListener("visibilitychange",function(){if(!document.hidden)chk();});setTimeout(chk,8000);document.addEventListener("click",function(e){if(e.target&&e.target.id==="updGo"){try{if(typeof saveProject==="function")saveProject(true);}catch(x){}location.reload();}});})();</script>
+<div id="updBar" hidden><span>A new version of Ecou is ready.</span><button id="updGo">Update</button></div><style>#updBar{position:fixed;left:12px;right:12px;bottom:calc(84px + env(safe-area-inset-bottom));z-index:950;display:flex;align-items:center;gap:12px;padding:12px 12px 12px 16px;border-radius:16px;background:#1E1E28;border:1px solid #2B2B37;color:#E9E9F0;font:14px/1.4 system-ui,sans-serif;box-shadow:0 10px 30px rgba(0,0,0,.5)}#updBar[hidden]{display:none}#updBar span{flex:1}#updBar button{border:0;border-radius:999px;background:#D4FF3A;color:#0B0B10;font:700 14px system-ui,sans-serif;padding:9px 16px}</style><script>(function(){var V="e3c7bcf550",busy=false,last=0;function chk(){if(busy||Date.now()-last<60000)return;busy=true;last=Date.now();fetch("version.txt?"+Date.now(),{cache:"no-store"}).then(function(r){return r.ok?r.text():"";}).then(function(t){t=(t||"").trim();if(t&&t!==V)document.getElementById("updBar").hidden=false;}).catch(function(){}).then(function(){busy=false;});}document.addEventListener("visibilitychange",function(){if(!document.hidden)chk();});setTimeout(chk,8000);document.addEventListener("click",function(e){if(e.target&&e.target.id==="updGo"){try{if(typeof saveProject==="function")saveProject(true);}catch(x){}location.reload();}});})();</script>
 </body>
 </html>
