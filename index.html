@@ -796,6 +796,31 @@ header .hbtn svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-wid
 .hm-proj .ic svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.9}
 .hm-proj .tx{flex:1;min-width:0;display:flex;flex-direction:column}.hm-proj .tx b{font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.hm-proj .tx span{font-size:13px;color:var(--tx2)}
 @media (prefers-reduced-motion:reduce){.hm-rip i{animation:none;opacity:0}.hm-rip.static i:first-child{opacity:.8;transform:scale(1.25)}#echoBtn,#mPro i::after,.hm-sw::after{transition:none}#tRec.on i{animation:none}}
+/* Learn: interactive course */
+.hm-learn{display:flex;align-items:center;gap:12px;width:100%;min-height:64px;margin-top:10px;padding:10px 14px;border-radius:var(--r-l);background:linear-gradient(135deg,rgba(212,255,58,.14),rgba(124,242,154,.06));box-shadow:var(--e1);border:1px solid rgba(212,255,58,.28);text-align:left;color:var(--tx)}
+.hm-learn .ic{flex:none;width:40px;height:40px;border-radius:12px;display:grid;place-items:center;background:var(--ac);color:#0B0B10;font-weight:800;font-size:18px}
+.hm-learn .tx{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}.hm-learn .tx span{font-size:13px;color:var(--mu)}.hm-learn .go{font-size:22px;color:var(--mu)}
+#lnQ{display:block;position:relative;z-index:3;margin:-44px 14px 0 auto;width:44px;height:44px;border-radius:12px;border:1px solid var(--ln);background:var(--s1);color:var(--ac);font-weight:800;font-size:17px}
+#lnQ[hidden]{display:none}body.ln-qon #subnav{margin-right:64px}
+#lnHole{position:fixed;z-index:9000;pointer-events:none;border-radius:14px;box-shadow:0 0 0 2px var(--ac),0 0 0 200vmax rgba(6,6,12,.58);transition:left .18s,top .18s,width .18s,height .18s}
+#lnHole[hidden]{display:none}
+#lnBub{position:fixed;z-index:9001;left:10px;right:10px;bottom:calc(62px + env(safe-area-inset-bottom));max-width:520px;margin:0 auto;background:#16161F;border:1px solid rgba(212,255,58,.35);border-radius:18px;box-shadow:0 12px 36px rgba(0,0,0,.55);padding:12px 14px;display:flex;flex-direction:column;gap:8px;color:var(--tx)}
+#lnBub.top{bottom:auto;top:calc(8px + env(safe-area-inset-top))}#lnBub[hidden]{display:none}
+#lnBub .ln-top{display:flex;align-items:center;justify-content:space-between;gap:8px}#lnTtl{font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--ac)}
+#lnSay{margin:0;font-size:16px;line-height:1.4}#lnHint{margin:0;font-size:14px;color:var(--mu)}#lnHint[hidden]{display:none}
+#lnBub .ln-row{display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:14px}#lnProg{font-size:13px;font-weight:700;color:var(--ac)}
+#lnDots{display:flex;gap:5px;flex-wrap:wrap}#lnDots i{width:8px;height:8px;border-radius:50%;background:#3A3A48}#lnDots i.d{background:var(--ac)}#lnDots i.c{background:#F4F4F7}
+#lnBub .ln-btns{display:flex;gap:8px;flex-wrap:wrap}#lnBub button{min-height:44px;min-width:44px;padding:0 14px;border-radius:12px;border:1px solid var(--ln);background:var(--s2,#202030);color:var(--tx);font-size:14px;font-weight:600}
+#lnBub button.pri{background:var(--ac);color:#0B0B10;border-color:var(--ac)}#lnBub button[hidden]{display:none}#lnX{background:transparent!important}
+#lnBub.ok{border-color:var(--ac)}
+#lnUnits{display:flex;flex-direction:column;gap:14px}.ln-u h4{margin:0 0 2px;font-size:15px}.ln-u .mu{font-size:12px}
+.ln-ls{display:flex;flex-direction:column;gap:6px;margin-top:6px}
+.ln-l{display:flex;align-items:center;gap:10px;min-height:52px;width:100%;padding:8px 12px;border-radius:14px;background:var(--s1);border:1px solid var(--ln);color:var(--tx);text-align:left}
+.ln-l .n{flex:none;width:30px;height:30px;border-radius:50%;display:grid;place-items:center;background:#2A2A38;font-weight:700;font-size:13px}
+.ln-l .tx{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px}.ln-l small{color:var(--mu);font-size:12px}.ln-l .st{font-size:12px;font-weight:700;color:var(--mu)}
+.ln-l.done .n{background:var(--ac);color:#0B0B10}.ln-l.next{border-color:var(--ac);box-shadow:0 0 0 1px var(--ac) inset}.ln-l.next .st{color:var(--ac)}.ln-l.soon{opacity:.6}
+body:not(.is-pro) .card.pro.ln-rev{display:flex!important}
+@media (prefers-reduced-motion:reduce){#lnHole{transition:none}}
 </style>
 </head>
 <body>
@@ -869,6 +894,7 @@ html.splash #splash{display:flex}
 </header>
 <div class="flowrow"><div id="flow" class="flow" role="navigation" aria-label="Flow: capture to share"></div><button id="mPro" aria-pressed="false" aria-label="Advanced mode (show all controls)" title="Advanced mode: show all controls"><i aria-hidden="true"></i>Pro</button></div>
 <div id="subnav" class="seg5" role="tablist" hidden></div>
+<button id="lnQ" hidden aria-label="Lesson">?</button>
 
 <main>
   <!-- HOME: Idea capture, Echo Drop, sounds & ideas, quick start, projects -->
@@ -903,6 +929,7 @@ html.splash #splash{display:flex}
       <button data-qs="sing"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0 0 14 0M12 17v4"/></svg><b>Sing</b><span>auto-tune</span></button>
       <button data-qs="morph"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="12" r="5"/><circle cx="16" cy="12" r="5"/></svg><b>Morph</b><span>blend 2 sounds</span></button>
     </div>
+    <button class="hm-learn" id="lnCard" aria-describedby="lnCardS"><span class="ic" aria-hidden="true">?</span><span class="tx"><b>Learn to make music</b><span id="lnCardS">3–5 min lessons</span></span><span class="go" aria-hidden="true">›</span></button>
     <div class="hm-h"><h3>Sounds &amp; ideas</h3><button class="hm-link" id="shelfLib">Library ›</button></div>
     <div class="hm-shelf" id="shelf" role="list" aria-label="Sounds and ideas, newest first"></div>
     <div class="hm-h"><h3>Projects</h3><button class="hm-link" id="homeAllProj">All ›</button></div>
@@ -1065,7 +1092,7 @@ html.splash #splash{display:flex}
       <label class="chk"><span>Sustain loop</span><input type="checkbox" id="loop"></label>
       <label data-p="reso"></label>
     </div>
-    <div class="card pro">
+    <div class="card pro" id="granCard">
       <span class="kicker">Granular</span>
       <div class="grid2">
         <label data-p="gpos"></label>
@@ -1548,6 +1575,9 @@ html.splash #splash{display:flex}
   <button class="btn primary" id="slSend">Send to pads</button>
   <button class="btn pro" id="slPat">Make a pattern from the groove</button>
 </div></div>
+<div id="lnHole" hidden></div>
+<div id="lnBub" role="dialog" aria-label="Lesson" hidden><div class="ln-top"><span id="lnTtl"></span><button id="lnX" aria-label="Exit lesson">Exit</button></div><p id="lnSay" aria-live="polite"></p><p id="lnHint" aria-live="polite" hidden></p><div class="ln-row"><div id="lnDots" aria-hidden="true"></div><span id="lnProg" aria-live="polite"></span></div><div class="ln-btns"><button id="lnEx">Hear an idea</button><button id="lnShow" hidden>Show me where</button><button id="lnSkip">Skip step</button><button id="lnGo" class="pri">Next</button></div></div>
+<div class="gx-sheet" id="lnMap" hidden><div class="gx-scrim" data-lnclose="1"></div><div class="gx-panel" role="dialog" aria-modal="true" aria-labelledby="lnMapT" style="max-height:92vh;overflow-y:auto"><div class="gx-grab"></div><div class="row"><div><span class="kicker" style="color:var(--ac)">Learn</span><h3 id="lnMapT">Learn to make music</h3></div><button class="mv" id="lnMapX" style="width:auto;padding:0 12px;min-height:44px">Close</button></div><p class="mu" id="lnMapS" style="margin:0"></p><div id="lnUnits"></div></div></div>
 <div id="toast" role="status" aria-live="polite"></div>
 
 <script>
@@ -3137,7 +3167,7 @@ function serialize(){
     amp:{model:ampModel,cab:cabCustom?bid(cabCustom):null,match:FX.match?FX.match.target:null,ref:matchRef},
     pads:pads.map(function(p){return {name:p.name,cls:p.cls,level:p.level,tune:p.tune,decay:p.decay,pan:p.pan,choke:p.choke,buf:bid(p.buf),cap:p.buf&&(p.buf._cap||p.buf._slc)?1:0};}),
     patterns:patterns.map(function(pt){return {name:pt.name,len:pt.len,drums:pt.drums.map(function(a){return a.map(function(x){return x?(typeof x==='number'?Math.round(x*100)/100:1):0;});}),notes:pt.notes,locks:pt.locks||{}};}),song:song,curPat:curPat,garage:garSave()};
-  data.shelf=shelfSave(bid);data.vmLib=VM.lib.slice();
+  data.shelf=shelfSave(bid);data.vmLib=VM.lib.slice();try{data.course=lnLoad();}catch(e){}
   return {data:data,bufs:bufs};
 }
 /* convolvers need buffers at the context's sample rate; phones switch rate (speaker 48 kHz, Bluetooth 44.1/16 kHz) between sessions */
@@ -3170,6 +3200,7 @@ function loadProjectData(data,bufs){
   dawLoad(data.daw,gb);fmBank=Array.isArray(data.fmBank)?data.fmBank.map(function(p){return FMC.clamp(p.slice());}):null;renderFm1Routes();mqReset();if(Array.isArray(data.mq)&&data.mq.length===6)MQG=data.mq.map(Number);if(Array.isArray(data.mqf)&&data.mqf.length===6)MQF=data.mqf.map(Number);if(Array.isArray(data.mqq)&&data.mqq.length===6)MQQ=data.mqq.map(Number);applyMasterEq();renderMqUI();
   try{garLoad(data.garage);}catch(e){}
   try{shelfLoad(data.shelf,gb);}catch(e){errLog.push('shelf: '+e.message);}
+  try{if(data.course)lnMerge(data.course);}catch(e){}
   applyMix();buildFxUI();routeFX();renderPads();selectPad(0);renderPatSegs();renderTrackSegs();renderMixer();paintSteps();drawRoll();updTransportUI();updDelayTime();autoPreview();
   $('#projName').value=project.name;dirty=false;if(!hist.lock)setTimeout(histReset,0);
 }
@@ -4179,7 +4210,7 @@ function navSync(){var n=navCur(),k=subCur(),sn=$('#subnav');
       sn.innerHTML=L.map(function(e){return '<button role="tab" data-sub="'+e[0]+'">'+e[1]+'</button>';}).join('');
       $$('#subnav button').forEach(function(b){b.addEventListener('click',function(){subGo(b.getAttribute('data-sub'));});});}
     $$('#subnav button').forEach(function(b){b.setAttribute('aria-selected',b.getAttribute('data-sub')===k?'true':'false');});}
-  sn.hidden=!L;document.body.setAttribute('data-nav',n);flowSync();}
+  sn.hidden=!L;document.body.setAttribute('data-nav',n);flowSync();if(typeof lnQSync==='function')lnQSync();}
 $$('nav button[data-nav]').forEach(function(b){b.addEventListener('click',function(){navGo(b.getAttribute('data-nav'));});});
 try{var _fo=new MutationObserver(function(){flowSync();});_fo.observe($('#take'),{attributes:true,attributeFilter:['class']});_fo.observe($('#scoreOv'),{attributes:true,attributeFilter:['hidden']});}catch(e){}
 navSync();
@@ -8476,7 +8507,7 @@ function homeProj(){var w=$('#homeProj');if(!w)return;
     w.innerHTML=list.map(function(m){return '<button data-hp="'+escapeH(m.id)+'" aria-label="Open project '+escapeH(m.name)+'"><span class="ic">'+SHI.song+'</span><span class="tx"><b>'+escapeH(m.name)+'</b><span>'+(m.bars||0)+' bar'+(m.bars===1?'':'s')+' · '+(m.bpm||'')+' BPM · '+agoTxt(m.updated)+'</span></span></button>';}).join('');
     $$('#homeProj [data-hp]').forEach(function(b){b.addEventListener('click',function(){var id=b.getAttribute('data-hp'),go=function(){openProject(id).then(function(){if(showTab.cur==='t-home')homeShown();});};if(dirty&&ctx)saveProject(true).then(go);else go();});});
   }).catch(function(){w.innerHTML='<p class="hm-empty">Device storage isn’t available in this view.</p>';});}
-function homeShown(){renderShelf();homeProj();}
+function homeShown(){renderShelf();homeProj();lnCardUI();}
 function initHome(){
   document.body.appendChild($('#garSheet'));
   $('#lcd').addEventListener('click',garTempoSheet);$('#tRec').addEventListener('click',tRecGo);setInterval(lcdTick,60);lcdTick();
@@ -8503,6 +8534,208 @@ function initHome(){
   renderShelf();
 }
 initHome();
+/* ---------- Learn: interactive beginner course v1. Idle unless a lesson runs: no timers, no document listeners. ---------- */
+var LN={run:null,iv:0,ev:null,on:false},LNK='ecou.course';
+function lnLoad(){var o=null;try{o=JSON.parse(localStorage.getItem(LNK)||'null');}catch(e){}if(!o||typeof o!=='object')o={};if(!o.done||typeof o.done!=='object')o.done={};if(!Array.isArray(o.days))o.days=[];if(!o.rev||typeof o.rev!=='object')o.rev={};if(!o.reps||typeof o.reps!=='object')o.reps={};if(!o.cur||typeof o.cur!=='object')o.cur=null;o.v=1;return o;}
+function lnSave(o){try{localStorage.setItem(LNK,JSON.stringify(o));}catch(e){}}
+function lnDay(t){t=t||new Date();return t.getFullYear()+'-'+('0'+(t.getMonth()+1)).slice(-2)+'-'+('0'+t.getDate()).slice(-2);}
+function lnMade(){var o=lnLoad(),d=lnDay();if(o.days.indexOf(d)<0){o.days.push(d);if(o.days.length>90)o.days=o.days.slice(-90);lnSave(o);}}
+function lnStreak(o){var s={},n=0,t=new Date();o.days.forEach(function(d){s[d]=1;});if(!s[lnDay(t)])t.setDate(t.getDate()-1);while(s[lnDay(t)]){n++;t.setDate(t.getDate()-1);}return n;}
+function lnMerge(c){if(!c||typeof c!=='object')return;var o=lnLoad(),k;if(c.done&&typeof c.done==='object')for(k in c.done)if(LNL[k]&&!o.done[k])o.done[k]=+c.done[k]||Date.now();
+  if(Array.isArray(c.days))c.days.forEach(function(d){if(typeof d==='string'&&/^\d{4}-\d\d-\d\d$/.test(d)&&o.days.indexOf(d)<0)o.days.push(d);});o.days.sort();lnSave(o);lnCardUI();}
+/* live-state helpers for predicates */
+var LH={pad:function(q){if(typeof q==='number')return q;var i,s=String(q).toLowerCase();for(i=0;i<pads.length;i++)if(pads[i].name.toLowerCase()===s)return i;for(i=0;i<pads.length;i++)if(pads[i].cls===s)return i;return -1;},
+  hits:function(q){var i=LH.pad(q),o=[],p=pads[i];if(!p||!p.pat)return o;var L=patterns[curPat].len;for(var s=0;s<L;s++)if(p.pat[s])o.push(s);return o;},
+  on:function(q,st){var h=LH.hits(q);return st.every(function(s){return h.indexOf(s)>=0;});},
+  bars:function(n){return n*240/P.bpm.v;},perc:function(){return !!(ECHO.item&&ECHO.item.perc);},
+  freePad:function(){for(var i=pads.length-1;i>=0;i--){var p=pads[i];if(!slUser(p)&&p.cls!=='kick'&&p.cls!=='snare')return i;}return pads.length-1;}};
+var LNR={home:function(){showTab('t-home');},'sound/capture':function(){showTab('t-cap');},'sound/shape':function(){showTab('t-ins');},'play/pads':function(){showTab('t-pad');},
+  'play/sounds':function(){GAR.view='sounds';if(showTab.cur==='t-gar')garView('sounds');else showTab('t-gar');},song:function(){navGo('song');},mix:function(){navGo('mix');}};
+/* setup ops: a short whitelist. freePattern only ever moves to an EMPTY pattern; fill writes only into an empty one. */
+function lnOp(op,resume){var k=op.op,i;if(resume&&k!=='go'&&k!=='reveal')return;
+  if(k==='stop'){if(seq.on)transportStop();if(capture)stopCapture();}
+  else if(k==='go'){if(LNR[op.to])LNR[op.to]();}
+  else if(k==='param')setParam(op.k,op.v);
+  else if(k==='reveal'){var e=$(op.sel);if(e)e.classList.add('ln-rev');}
+  else if(k==='selectPad'){i=typeof op.pad==='function'?op.pad():LH.pad(op.pad);if(i>=0)selectPad(i);}
+  else if(k==='freePattern'){if(!(op.keep&&patHas(patterns[curPat]))&&patHas(patterns[curPat])){var f=-1;for(i=0;i<patterns.length;i++)if(!patHas(patterns[i])){f=i;break;}
+      if(f>=0)setPattern(f);else if(!op.keep)toast('All 8 patterns hold music, so this lesson uses the current one. Nothing is deleted.',3200);}
+    if(op.fill&&!patHas(patterns[curPat])){var kk=LH.pad('kick'),sn=LH.pad('snare'),hh=LH.pad('closed hat');if(hh<0)hh=LH.pad('hat');
+      [[kk,[0,8]],[sn,[4,12]],[hh,[0,2,4,6,8,10,12,14]]].forEach(function(m){if(m[0]>=0)m[1].forEach(function(s){pads[m[0]].pat[s]=true;});});markDirty();paintSteps();renderPadDots();renderPatSegs();}}}
+/* examples: the app's own voices */
+function lnNotes(ti,list,bpm){if(!ensureAudio())return;var sd=60/(bpm||100)/4,t0=ctx.currentTime+0.08;list.forEach(function(n){playNote(ti,n[1],0.8,t0+n[0]*sd,sd*1.8);});}
+function lnBeat(map,bpm,bars){if(!ensureAudio())return;var sd=60/(bpm||P.bpm.v)/4,t0=ctx.currentTime+0.08;for(var b=0;b<(bars||2);b++)map.forEach(function(m){if(m[0]<0||!pads[m[0]])return;m[1].forEach(function(s){trigPad(m[0],0.9,t0+(b*16+s)*sd);});});}
+var KB='#kb .wk,#kb .bk';
+function lnKit(){return {id:'kit',at:'play/pads',hl:['#kitChips'],say:'This part needs a kick and a snare, and your pads now hold your own sounds. Pick a kit here; Undo brings your sounds back.',pred:function(){return LH.pad('kick')>=0&&LH.pad('snare')>=0;}};}
+var LNL={
+u1l1:{id:'u1l1',u:'u1',t:'Catch a sound',min:3,flow:'Capture',badge:'First Echo',
+  concept:'Every sound has a story. A tapped mug, a hum, a knock on the door: Ecou listens to one short sound, finds its note and puts it on the keys. No music words needed. If you can make a noise, you can make an instrument.',
+  setup:[{op:'stop'},{op:'go',to:'home'}],
+  win:'You turned a real sound into an instrument. It is saved under Sounds & ideas.',ch:'Catch a very different sound, like a breath or a hum, and compare the two.',
+  steps:[{id:'find',say:'Look around. Pick something that makes a short, clear sound: a mug, a door, or your voice saying “ahh”.',cont:'I have one'},
+   {id:'drop',at:'home',hl:['#echoBtn'],say:'Hold the big mic button, make your sound, then let go. Ecou keeps it.',base:function(){return {it:ECHO.item};},pred:function(B){return !ECHO.rec&&!!ECHO.item&&ECHO.item!==B.it;},
+    hints:[[8,'If the phone asks for the microphone, tap Allow. Nothing leaves your phone.'],[18,'You can also tap once to start and tap again to stop.']]},
+   {id:'hear',at:'home',hl:['#echoPlay'],say:'Hear it sing back? That tune is made from your sound. Tap Play it.',ex:function(){if(ECHO.item)echoSing(ECHO.item);},exL:'Hear it again',
+    pred:function(){return showTab.cur==='t-pad'||(showTab.cur==='t-gar'&&GAR.inst==='keys'&&GAR.view==='play');}},
+   {id:'keys',hl:function(){return LH.perc()?['#pads .pad.sel']:['#kb'];},say:function(){return LH.perc()?'Your sound is on this pad. Tap it five times, fast and slow.':'That is your sound on every key. Tap five keys, low and high.';},
+    ev:{type:'pointerdown',sel:KB+',#pads .pad',n:5},hints:[[12,'Low keys on the left sound deep. High keys on the right sound bright.']]},
+   {id:'tune',say:'Listen: a little tune played with what you just caught.',cont:'Done',exL:'Hear an idea',
+    ex:function(){if(LH.perc())lnBeat([[padSel,[0,3,6,8,11,14]]],100,2);else lnNotes(ECHO.ti!=null?ECHO.ti:keysTi(),[[0,60],[2,64],[4,67],[6,72],[8,67],[10,64],[12,60]],100);}}]},
+u1l2:{id:'u1l2',u:'u1',t:'Bend it',min:4,flow:'Transform',badge:'Shape Shifter',
+  concept:'One recording can become many instruments. Granular chops your sound into tiny grains and scatters them, like light through frosted glass. There is no right setting: move a control, listen, keep what you like.',
+  setup:[{op:'stop'},{op:'go',to:'sound/shape'},{op:'reveal',sel:'#granCard'},{op:'param',k:'gspray',v:0.1}],
+  win:'You transformed a sound by ear. That is sound design.',ch:'Make your sound unrecognisable in three moves, then tap Sampler to compare.',
+  steps:[{id:'before',at:'sound/shape',hl:['#kb'],say:'Tap a key and listen. This is your sound as you caught it.',ev:{type:'pointerdown',sel:KB,n:1}},
+   {id:'engine',at:'sound/shape',hl:['[data-engine="granular"]'],say:'Tap Granular. Your sound is now cut into tiny grains.',pred:function(){return engine==='granular';}},
+   {id:'size',at:'sound/shape',hl:['[data-p="gsize"]'],say:'Drag Grain size, then play a key. Stop when it sounds good to you.',base:function(){return {g:P.gsize.v};},pred:function(B){return Math.abs(P.gsize.v-B.g)/B.g>0.25;},
+    hints:[[10,'Drag further. Left is smooth and glassy, right is choppy.']]},
+   {id:'spray',at:'sound/shape',hl:['[data-p="gspray"]'],say:'Now push Spray past the middle. Hear the grains scatter into a cloud?',pred:function(){return P.gspray.v>=0.5;}},
+   {id:'ab',at:'sound/shape',hl:function(R){return [R.seq?'[data-engine="granular"]':'[data-engine="sampler"]'];},say:'Tap Sampler to hear the original, then Granular again. Same recording, two instruments.',
+    seq:[function(){return engine==='sampler';},function(){return engine==='granular';}]},
+   {id:'jam',at:'sound/shape',hl:['#kb'],say:'Play a few keys with your new sound.',ev:{type:'pointerdown',sel:KB,n:4}}]},
+u1l3:{id:'u1l3',u:'u1',t:'Make it groove',min:5,flow:'Play',badge:'First Loop',
+  concept:'A loop is a short pattern that repeats. The row of 16 lights is one trip around the loop; a lit light means “play the sound here”. The numbered lights are the pulse you tap your foot to.',
+  setup:[{op:'stop'},{op:'go',to:'play/pads'},{op:'freePattern'},{op:'param',k:'bpm',v:96},{op:'param',k:'swing',v:0},{op:'selectPad',pad:function(){return LH.freePad();}}],
+  win:'Your first loop, built on a sound nobody else has.',ch:'Add Closed Hat on every second light, then take away one kick. Does it still feel good?',
+  steps:[{id:'pad',at:'play/pads',hl:['#padRec'],say:'This pad is yours. Tap Record to pad, make a short sound (a knock, a clap, a “tss”), then tap Stop.',
+    base:function(){return {i:padSel,buf:pads[padSel].buf};},pred:function(B){var p=pads[B.i];return !capture&&p.buf!==B.buf&&p.cls==='other';},hints:[[8,'Tap once to start, make the sound, tap again to stop. No mic? Skip step.']]},
+   {id:'hit',at:'play/pads',hl:['#pads .pad.sel'],say:'Tap your pad three times and listen.',ev:{type:'pointerdown',sel:'#pads .pad.sel',n:3}},
+   {id:'steps',at:'play/pads',hl:['#steps'],say:'Light up any three of these 16 lights. Each one plays your sound.',pred:function(){return LH.hits(padSel).length>=3;},exL:'Hear an idea',
+    ex:function(){lnBeat([[LH.pad('kick'),[0,8]],[padSel,[4,10,12]]],96,2);},hints:[[12,'Tap a light once to turn it on, again to turn it off.']]},
+   {id:'play',at:'play/pads',hl:['#seqPlay'],say:'Press Play. Your sound is now a rhythm.',pred:function(){return seq.on&&seq.mode==='pattern';}},
+   lnKit(),
+   {id:'kpad',at:'play/pads',hl:function(){return ['#pads .pad[data-pad="'+LH.pad('kick')+'"]'];},say:'Keep it playing. Tap the Kick pad: the lights now show the kick.',pred:function(){return padSel===LH.pad('kick');}},
+   {id:'kick',at:'play/pads',hl:['#steps'],say:'Light number 1 and number 3. Boom on the beat.',pred:function(){return LH.on('kick',[0,8]);},hints:[[12,'The lights marked 1 and 3. If the wrong pad is lit, tap Kick first.']]},
+   {id:'listen',say:'Let it go round twice. Move a light if you want a different feel.',hold:{pred:function(){return seq.on;},s:function(){return LH.bars(2);}},hints:[[2,'If it stopped, press Play again.']]}]},
+u1l4:{id:'u1l4',u:'u1',t:'Beatbox flip',min:4,flow:'Capture → Transform',badge:'Beatbox Flip',
+  concept:'Your mouth is a drum kit. Boom, tss, ka: beatbox a few seconds and the Smart Slicer cuts every hit into its own pad. One recording becomes an instrument you can drum on.',
+  setup:[{op:'stop'},{op:'go',to:'sound/capture'}],
+  win:'You flipped your voice into a drum kit.',ch:'Try the AI Beatbox card on Pads: it also writes the pattern for you.',
+  steps:[{id:'rec',at:'sound/capture',hl:['[data-cap="A"]'],say:'Tap Record sample and beatbox for a few seconds: “boom, tss, ka, tss”. Tap Stop when you are done.',
+    base:function(){return {buf:slots.A&&slots.A.buf};},pred:function(B){return !capture&&!!slots.A&&!!slots.A.buf&&slots.A.buf!==B.buf;},hints:[[10,'Tap the same button again to stop. It also stops by itself after 10 seconds.']]},
+   {id:'slice',at:'sound/capture',hl:['[data-slice="A"]'],say:'Now tap Slice to pads. The Smart Slicer finds every hit.',pred:function(){return !$('#slSheet').hidden&&SL.from==='A';}},
+   {id:'hear',hl:['#slChips'],say:'Each chip is one hit. Tap three of them to hear the pieces.',ev:{type:'click',sel:'#slChips [data-sli]',n:3}},
+   {id:'send',hl:['#slSend'],say:'Tap Send to pads.',base:function(){return {b:pads.map(function(p){return p.buf;})};},
+    pred:function(B){var n=0;pads.forEach(function(p,i){if(p.buf&&p.buf._slc&&p.buf!==B.b[i])n++;});return n>=2;},hints:[[6,'If it asks to replace pads, tap again to confirm. Undo brings the old pads back.']]},
+   {id:'drum',at:'play/pads',hl:['#pads'],say:'Your beatbox is now a kit. Drum on the slice pads.',ev:{type:'pointerdown',sel:'#pads .pad',n:6}},
+   {id:'idea',say:'Hear an idea: your own slices played as a groove. You can light them up in the steps any time.',cont:'Done',exL:'Hear an idea',
+    ex:function(){var s=SL.start||0;lnBeat([[s,[0,8]],[s+1,[4,12]],[s+2,[2,6,10,14]]],96,2);}}]},
+u2l1:{id:'u2l1',u:'u2',t:'Boom and tap',min:4,flow:'Play',badge:'Backbeat',
+  concept:'Most songs you know stand on two sounds: a deep boom (the kick) and a sharp tap (the snare). Boom on 1 and 3, tap on 2 and 4. That is the backbeat, and your body already knows it.',
+  setup:[{op:'stop'},{op:'go',to:'play/pads'},{op:'freePattern'},{op:'param',k:'swing',v:0},{op:'selectPad',pad:'kick'}],
+  win:'That is the backbeat: the heart of pop, rock and hip-hop.',ch:'Swap the snare for a pad you recorded yourself.',
+  steps:[lnKit(),{id:'kpad',at:'play/pads',hl:function(){return ['#pads .pad[data-pad="'+LH.pad('kick')+'"]'];},say:'Tap the Kick pad: the deep boom.',pred:function(){return padSel===LH.pad('kick');}},
+   {id:'kick',at:'play/pads',hl:['#steps'],say:'Now light number 1 and number 3.',pred:function(){return LH.on('kick',[0,8]);},hints:[[12,'If other lights show, tap the Kick pad first.']]},
+   {id:'spad',at:'play/pads',hl:function(){return ['#pads .pad[data-pad="'+LH.pad('snare')+'"]'];},say:'Now tap the Snare pad.',pred:function(){return padSel===LH.pad('snare');}},
+   {id:'snare',at:'play/pads',hl:['#steps'],say:'Light number 2 and number 4.',pred:function(){return LH.on('snare',[4,12]);}},
+   {id:'play',at:'play/pads',hl:['#seqPlay'],say:'Press Play.',pred:function(){return seq.on;}},
+   {id:'groove',say:'Boom, tap, boom, tap. Nod along while it goes round twice.',hold:{pred:function(){return seq.on;},s:function(){return LH.bars(2);}},exL:'Hear an idea',
+    ex:function(){lnBeat([[LH.pad('kick'),[0,8,10]],[LH.pad('snare'),[4,12]]],P.bpm.v,1);}}]},
+u2l2:{id:'u2l2',u:'u2',t:'Fast, slow, bouncy',min:3,flow:'Play',badge:'Groove Feel',
+  concept:'Tempo is how fast the beat goes; Swing is how bouncy it feels. Slow feels heavy, fast feels urgent, swing makes it strut. Trust your ears: there are no wrong numbers.',
+  setup:[{op:'stop'},{op:'go',to:'play/pads'},{op:'freePattern',keep:true,fill:true},{op:'param',k:'swing',v:0}],
+  win:'You changed the feel without changing a single note.',ch:'Walk around the room, then set the tempo to match your steps.',
+  steps:[{id:'play',at:'play/pads',hl:['#seqPlay'],say:'Press Play to start the beat.',pred:function(){return seq.on;}},
+   {id:'tempo',at:'play/pads',hl:['#t-pad [data-p="bpm"]'],say:'Drag Tempo until it feels like walking, or like running. Listen while you drag.',base:function(){return {b:P.bpm.v};},pred:function(B){return Math.abs(P.bpm.v-B.b)>=10;}},
+   {id:'swing',at:'play/pads',hl:['#t-pad [data-p="swing"]'],say:'Now push Swing to the right. The in-between hits arrive late: bouncy.',pred:function(){return P.swing.v>=0.2;}},
+   {id:'feel',say:'Tempo is speed, Swing is bounce. Keep a feel you like; it is saved with your project.',cont:'Done'}]},
+u2l3:{id:'u2l3',u:'u2',t:'A drummer for you',min:4,flow:'Play',badge:'Bandleader',
+  concept:'You do not have to place every hit. The Drummer plays a real-feeling part for you. Drag one dot: right plays busier, up plays harder. You stay the boss; it follows.',
+  setup:[{op:'stop'},{op:'go',to:'play/sounds'}],
+  win:'You have a drummer that plays what you ask for.',ch:'Try three styles and keep the one that makes you move.',
+  steps:[{id:'pick',at:'play/sounds',hl:['[data-gi="drummer"]'],say:'Tap Drummer.',pred:function(){return showTab.cur==='t-gar'&&GAR.inst==='drummer'&&GAR.view==='play';}},
+   {id:'prev',hl:['#garDpv [data-pv="1"]'],say:'Tap Preview to hear your drummer.',pred:function(){return seq.on;}},
+   {id:'dot',hl:['#garDxy'],say:'Drag the dot. Right plays busier, up plays harder. Changes come in on the next loop.',base:function(){return {x:GAR.drum.cx,y:GAR.drum.ly};},
+    pred:function(B){return Math.abs(GAR.drum.cx-B.x)>0.15||Math.abs(GAR.drum.ly-B.y)>0.15;},hints:[[10,'Put your finger on the dot and slide it to another corner.']]},
+   {id:'style',hl:['#garDst'],say:'Pick another style from this row and listen.',base:function(){return {s:GAR.drum.style};},pred:function(B){return GAR.drum.style!==B.s;}},
+   {id:'keep',say:'Like it? Add to song places this part in your song. Come back any time.',cont:'Done'}]}};
+var LNU=[['u1','Catch a sound','Capture → Transform → Play',['u1l1','u1l2','u1l3','u1l4']],['u2','Feel the beat','Play',['u2l1','u2l2','u2l3','u2l4','u2l5']],
+  ['u3','Notes that belong together','Play → Create',['u3l1','u3l2','u3l3','u3l4','u3l5','u3l6']],['u4','From loop to song','Create',['u4l1','u4l2','u4l3','u4l4']],['u5','Record and mix','Produce',['u5l1','u5l2','u5l3','u5l4']],['u6','Finish and share','Share',['u6l1','u6l2','u6l3']]];
+var LNS={u2l4:['Play it live','Record a pad performance into the grid.'],u2l5:['Three, not four','Feel a waltz with the Backing Band.'],u3l1:['Tunes that cannot go wrong','Keys mode: pads play only notes that fit.'],
+  u3l2:['Colours of chords','Smart Keys: tap chord strips; colours show the role.'],u3l3:['Home, away, back','Play home, away and back again.'],u3l4:['The minor fall, the major lift','Go to the sad chord and back.'],
+  u3l5:['A band behind you','The Backing Band follows your chords; change genre.'],u3l6:['Bass holds it together','Smart Bass under your chords.'],u4l1:['Two parts','Make pattern B different from A.'],u4l2:['Chain a song','Arrange A A B A.'],
+  u4l3:['Verse and chorus','Band parts A and B with different energy.'],u4l4:['Loops you launch','Live Loops: record two cells, launch a column.'],u5l1:['Your voice on top','Record voice or guitar over the song.'],
+  u5l2:['Loud and quiet','Balance track volumes.'],u5l3:['Left, right, far away','Pan and reverb.'],u5l4:['Punch-in FX','Hold a punch-in effect while it plays.'],u6l1:['Finish line','Export the song as audio.'],
+  u6l2:['See your music','Turn a melody into sheet music or tabs.'],u6l3:['Tell its story','Name the song, note what you sampled, share.']};
+var LNORD=['u1l1','u1l2','u1l3','u1l4','u2l1','u2l2','u2l3'];
+function lnNextId(o){o=o||lnLoad();for(var i=0;i<LNORD.length;i++)if(!o.done[LNORD[i]])return LNORD[i];return null;}
+/* engine */
+function lnVis(s){try{var a=document.querySelectorAll(s);for(var i=0;i<a.length;i++){var r=a[i].getBoundingClientRect();if(r.width>0&&r.height>0)return a[i];}}catch(e){}return null;}
+function lnHl(R,st){var h=typeof st.hl==='function'?st.hl(R):st.hl;return h||[];}
+function lnTarget(R,st){var h=lnHl(R,st);for(var i=0;i<h.length;i++){var e=lnVis(h[i]);if(e)return e;}return null;}
+function lnTry(f,B){try{return !!f(B);}catch(e){return false;}}
+function lnPlace(){var R=LN.run;if(!R)return;var st=R.steps[R.i],hole=$('#lnHole'),bub=$('#lnBub'),e=R.fin?null:lnTarget(R,st);
+  if(e){var r=e.getBoundingClientRect(),p=6,vh=window.innerHeight;hole.hidden=false;hole.style.left=(r.left-p)+'px';hole.style.top=(r.top-p)+'px';hole.style.width=(r.width+2*p)+'px';hole.style.height=(r.height+2*p)+'px';
+    var bh=bub.offsetHeight||150,top=r.top+r.height/2>vh*0.5;if(!top&&r.bottom>vh-bh-70&&r.top>bh+20)top=true;bub.classList.toggle('top',top);}
+  else{hole.hidden=true;bub.classList.remove('top');}
+  $('#lnShow').hidden=!!e||R.fin||!st.at||!lnHl(R,st).length;}
+function lnScroll(){var R=LN.run;if(!R)return;var e=lnTarget(R,R.steps[R.i]);if(!e)return;var r=e.getBoundingClientRect();if(r.top<70||r.bottom>window.innerHeight-200){try{e.scrollIntoView({block:'center',behavior:RMOT()?'auto':'smooth'});}catch(x){}}lnPlace();}
+function lnSay(st){return typeof st.say==='function'?st.say():st.say;}
+function lnRender(){var R=LN.run,st=R.steps[R.i];$('#lnBub').hidden=false;$('#lnBub').classList.remove('ok');$('#lnTtl').textContent=R.L.t+' · step '+(R.i+1)+' of '+R.steps.length;
+  $('#lnSay').textContent=lnSay(st);$('#lnHint').hidden=true;$('#lnProg').textContent=st.ev?'0 / '+st.ev.n:'';
+  $('#lnDots').innerHTML=R.steps.map(function(s,k){return '<i class="'+(k<R.i?'d':k===R.i?'c':'')+'"></i>';}).join('');
+  $('#lnEx').hidden=!st.ex;$('#lnEx').textContent=st.exL||'Hear an idea';$('#lnGo').hidden=!st.cont;$('#lnGo').textContent=st.cont||'Next';
+  $('#lnSkip').hidden=!!st.cont;$('#lnSkip').textContent='Skip step';$('#lnX').textContent='Exit';lnPlace();}
+function lnEvOff(){if(LN.ev){document.removeEventListener(LN.ev.type,LN.ev.fn,true);LN.ev=null;}}
+function lnEvOn(ev){var R=LN.run;LN.ev={type:ev.type,fn:function(e){var t=e.target;if(LN.run!==R||R.busy||!t||!t.closest||t.closest('#lnBub'))return;if(!t.closest(ev.sel))return;
+  R.cnt++;$('#lnProg').textContent=Math.min(R.cnt,ev.n)+' / '+ev.n;if(R.cnt>=ev.n)lnDone();}};document.addEventListener(ev.type,LN.ev.fn,true);}
+function lnEnter(i){var R=LN.run;if(!R)return;if(i>=R.steps.length){lnFinish();return;}
+  var st=R.steps[i];R.i=i;R.t0=R.tl=performance.now();R.cnt=0;R.seq=0;R.hold=0;R.hint=-1;R.busy=false;R.B=st.base?st.base():{};
+  var o=lnLoad();o.cur={l:R.L.id,s:i};lnSave(o);lnEvOff();if(st.ev)lnEvOn(st.ev);lnRender();setTimeout(lnScroll,60);
+  if(st.pred&&!st.base&&lnTry(st.pred,R.B))lnDone(true);}
+function lnTick(){var R=LN.run;if(!R||R.fin)return;var st=R.steps[R.i],now=performance.now(),el=(now-R.t0)/1000,dt=(now-R.tl)/1000;R.tl=now;lnPlace();
+  if(st.hints){var h=-1;st.hints.forEach(function(x,k){if(el>=x[0])h=k;});if(h!==R.hint){R.hint=h;if(h>=0){$('#lnHint').hidden=false;$('#lnHint').textContent=st.hints[h][1];}}}
+  if(R.busy)return;var ok=false;
+  if(st.seq){if(lnTry(st.seq[R.seq],R.B)){R.seq++;if(R.seq<st.seq.length){$('#lnProg').textContent=R.seq+' / '+st.seq.length;lnPlace();}}ok=R.seq>=st.seq.length;}
+  else if(st.hold){if(lnTry(st.hold.pred,R.B))R.hold+=dt;var need=st.hold.s();$('#lnProg').textContent=Math.min(100,Math.round(R.hold/need*100))+'%';ok=R.hold>=need;}
+  else if(st.pred)ok=lnTry(st.pred,R.B);
+  if(ok)lnDone();}
+function lnDone(already){var R=LN.run;if(!R||R.busy)return;var st=R.steps[R.i];R.busy=true;lnEvOff();if(!st.cont)lnMade();
+  $('#lnBub').classList.add('ok');$('#lnProg').textContent=already?'Already done ✓':'Nice ✓';try{if(!st.cont&&navigator.vibrate)navigator.vibrate(12);}catch(e){}
+  var i=R.i;setTimeout(function(){if(LN.run===R&&R.i===i)lnEnter(i+1);},st.cont?0:already?500:750);}
+function lnOn(){if(LN.on)return;LN.on=true;LN.iv=setInterval(lnTick,200);document.addEventListener('scroll',lnPlace,true);window.addEventListener('resize',lnPlace);document.body.classList.add('ln-on');lnQSync();}
+function lnOff(){if(!LN.on)return;LN.on=false;clearInterval(LN.iv);LN.iv=0;document.removeEventListener('scroll',lnPlace,true);window.removeEventListener('resize',lnPlace);document.body.classList.remove('ln-on');$('#lnHole').hidden=true;}
+function lnStart(id,si,resume){var L=LNL[id];if(!L)return;lnStop(true);lnMapClose();if(!ctx)ensureAudio();
+  (L.setup||[]).forEach(function(op){try{lnOp(op,resume);}catch(e){errLog.push('lesson op: '+e.message);}});
+  LN.run={L:L,steps:[{id:'concept',say:L.concept,cont:resume?'Continue':'Start'}].concat(L.steps),i:0};lnOn();
+  if(resume){si=Math.min(si||0,LN.run.steps.length-1);for(var k=1;k<si;k++){var ps=LN.run.steps[k];if(ps.pred&&!ps.base&&!lnTry(ps.pred,{})){si=k;break;}}}
+  lnEnter(resume?si:0);}
+function lnStop(keep){var R=LN.run;lnEvOff();lnOff();LN.run=null;$('#lnBub').hidden=true;$$('.ln-rev').forEach(function(e){e.classList.remove('ln-rev');});
+  if(!keep&&R){var o=lnLoad();o.cur=null;lnSave(o);}lnQSync();if(showTab.cur==='t-home')lnCardUI();}
+function lnFinish(){var R=LN.run,L=R.L,o=lnLoad(),n=(o.reps[L.id]||0)+1;lnEvOff();lnOff();R.fin=true;
+  o.done[L.id]=o.done[L.id]||Date.now();o.reps[L.id]=n;o.rev[L.id]=Date.now()+[1,4,10,30][Math.min(n-1,3)]*864e5;o.cur=null;lnSave(o);lnMade();
+  var nx=lnNextId();$('#lnBub').hidden=false;$('#lnBub').classList.add('ok');$('#lnBub').classList.remove('top');$('#lnTtl').textContent=L.t+' · done · '+L.badge;
+  $('#lnSay').textContent=L.win;$('#lnHint').hidden=false;$('#lnHint').textContent='Try next: '+L.ch;$('#lnProg').textContent='';$('#lnDots').innerHTML='';
+  $('#lnEx').hidden=true;$('#lnShow').hidden=true;$('#lnSkip').hidden=false;$('#lnSkip').textContent='All lessons';$('#lnGo').hidden=!nx;$('#lnGo').textContent=nx?'Next: '+LNL[nx].t:'';$('#lnX').textContent='Close';
+  try{if(navigator.vibrate)navigator.vibrate([12,40,24]);}catch(e){}}
+/* entry points: Home card, course map, "?" in the sub-header */
+function lnCardUI(){var s=$('#lnCardS');if(!s||!LNORD)return;var o=lnLoad(),d=LNORD.filter(function(k){return o.done[k];}).length,nx=lnNextId(o),st=lnStreak(o);
+  s.textContent=d?(nx?'Next: '+LNL[nx].t+' · '+d+' of '+LNORD.length+' done':'All '+LNORD.length+' lessons done')+(st?' · '+st+'-day streak':''):'3–5 min lessons · start with your first sound';}
+function lnMapOpen(){var o=lnLoad(),nx=lnNextId(o),now=Date.now(),st=lnStreak(o),cur=o.cur&&LNL[o.cur.l]?o.cur.l:null;
+  $('#lnMapS').textContent=LNORD.filter(function(k){return o.done[k];}).length+' of '+LNORD.length+' lessons done'+(st?' · '+st+'-day streak':'')+' · each takes 3–5 minutes';
+  $('#lnUnits').innerHTML=LNU.map(function(u,ui){return '<section class="ln-u"><h4>Unit '+(ui+1)+' · '+u[1]+'</h4><span class="mu">'+u[2]+'</span><div class="ln-ls">'+u[3].map(function(k,li){var L=LNL[k];
+      if(!L){var s=LNS[k]||[k,''];return '<div class="ln-l soon"><span class="n">'+(li+1)+'</span><span class="tx"><b>'+s[0]+'</b><small>Coming soon · '+s[1]+'</small></span></div>';}
+      var dn=!!o.done[k],due=dn&&o.rev[k]&&o.rev[k]<=now,cl=dn?'done':k===(cur||nx)?'next':'',lab=k===cur?'Resume':dn?(due?'Review':'Done ✓'):k===nx?'Next':'';
+      return '<button class="ln-l '+cl+'" data-ln="'+k+'" aria-label="Lesson '+(li+1)+': '+L.t+'. '+(lab||'Not started')+'"><span class="n">'+(dn?'✓':li+1)+'</span><span class="tx"><b>'+L.t+'</b><small>'+L.min+' min · '+L.flow+'</small></span><span class="st">'+lab+'</span></button>';}).join('')+'</div></section>';}).join('');
+  $$('#lnUnits [data-ln]').forEach(function(b){b.addEventListener('click',function(){var k=b.getAttribute('data-ln'),c=lnLoad().cur;if(c&&c.l===k)lnStart(k,c.s,true);else lnStart(k);});});
+  $('#lnMap').hidden=false;document.addEventListener('keydown',lnEsc);var n=$('#lnUnits .ln-l.next');if(n)setTimeout(function(){try{n.scrollIntoView({block:'nearest'});}catch(e){}},30);}
+function lnEsc(e){if(e.key==='Escape')lnMapClose();}
+function lnMapClose(){var m=$('#lnMap');if(m)m.hidden=true;document.removeEventListener('keydown',lnEsc);}
+var LNQ={'t-cap':['u1l4'],'t-ins':['u1l2'],'t-pad':['u1l3','u2l1','u2l2'],'t-gar':['u2l3']};
+function lnQSync(){var q=$('#lnQ');if(!q||!LNQ)return;var c=showTab.cur,L=LNQ[c];if(c==='t-gar'&&GAR.view!=='sounds'&&GAR.inst!=='drummer')L=null;
+  var o=lnLoad(),k=L?(L.filter(function(x){return !o.done[x];})[0]||L[0]):null,on=!!k&&!LN.run&&!$('#subnav').hidden;q.hidden=!on;document.body.classList.toggle('ln-qon',on);
+  if(k){q.setAttribute('data-ln',k);q.setAttribute('aria-label','Lesson: '+LNL[k].t);q.title='Lesson: '+LNL[k].t;}}
+function initLearn(){
+  $('#lnCard').addEventListener('click',lnMapOpen);$('#lnMapX').addEventListener('click',lnMapClose);$('#lnMap').addEventListener('click',function(e){if(e.target.getAttribute('data-lnclose'))lnMapClose();});
+  $('#lnQ').addEventListener('click',function(){var k=this.getAttribute('data-ln');if(k)lnStart(k);});
+  $('#lnX').addEventListener('click',function(){lnStop(false);});
+  $('#lnSkip').addEventListener('click',function(){var R=LN.run;if(!R)return;if(R.fin){lnStop(true);lnMapOpen();return;}if(!R.busy)lnEnter(R.i+1);});
+  $('#lnGo').addEventListener('click',function(){var R=LN.run;if(!R)return;if(R.fin){var nx=lnNextId();lnStop(true);if(nx)lnStart(nx);return;}lnDone();});
+  $('#lnEx').addEventListener('click',function(){var R=LN.run;if(R&&R.steps[R.i].ex){try{R.steps[R.i].ex();}catch(e){}}});
+  $('#lnShow').addEventListener('click',function(){var R=LN.run;if(!R)return;var st=R.steps[R.i];if(st.at&&LNR[st.at])LNR[st.at]();setTimeout(lnScroll,80);});
+  var c=lnLoad().cur;if(c&&LNL[c.l]){var go=function(){setTimeout(function(){if(!LN.run)lnStart(c.l,c.s,true);},450);};['#startBtn','#startFresh'].forEach(function(s){var b=$(s);if(b)b.addEventListener('click',go,{once:true});});}
+  lnCardUI();lnQSync();}
+try{initLearn();}catch(e){errLog.push('learn: '+e.message);}
 (function(){var h=(location.hash||'').slice(1);for(var k in TABH)if(TABH[k]===h){showTab(k,true);}})();
 $('#midiOn').addEventListener('click',midiConnect);
 $$('[data-exp]').forEach(function(b){b.addEventListener('click',function(){ensureAudio();var k=b.getAttribute('data-exp'),s=slots[k];if(!s.buf)return;saveWav(encodeWav([s.buf.getChannelData(0)],s.buf.sampleRate),'ecou-'+s.name.replace(/[^a-z0-9]+/gi,'-').toLowerCase()+'-'+nname(ftom(s.root)));});});
