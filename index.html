@@ -57,6 +57,17 @@ input[type=checkbox]{accent-color:var(--ac);width:22px;height:22px;margin:0}
 body:not(.is-pro) .pro{display:none!important}
 .vt-panel{display:flex;flex-direction:column;gap:12px;overscroll-behavior:contain}#vtSheet input[type=range]{height:44px}#vtSheet select,#vtSheet .seg button,#vtSheet .btn,#vtCapBtn{min-height:44px}#vtSheet .chk{justify-content:space-between}#vtSheet .chk input{-webkit-appearance:none;appearance:none;flex:none;box-sizing:content-box;width:46px;height:28px;margin:0;border:8px solid transparent;border-radius:22px;background:#3A3A4A padding-box;position:relative;cursor:pointer;transition:background .15s}#vtSheet .chk input::before{content:"";position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:#fff;transition:transform .15s}#vtSheet .chk input:checked{background:var(--ac) padding-box}#vtSheet .chk input:checked::before{transform:translateX(18px)}#vtSheet .chk input:disabled{opacity:.45}.vt-panel>*,.vt-pro>*{flex-shrink:0}#vtSheet .vt-pro{display:none}body.is-pro #vtSheet .vt-pro,#vtSheet.all .vt-pro{display:flex}.vt-g2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px}.vt-g3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.vt-g2 .btn,.vt-g3 .btn{min-height:44px;padding:0 6px;font-size:13px}.vt-take{display:flex;flex-direction:column;gap:8px;padding:12px;border-radius:18px;background:var(--gp,var(--s1));border:1px solid var(--ac);text-align:left}.vt-take canvas{width:100%;height:56px;display:block;border-radius:10px;background:#0E0E14}.vt-take .row{display:flex;justify-content:space-between;align-items:center;gap:8px}.vt-warn{font-size:13px;color:#FBBF24;line-height:1.35}.vt-now{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:8px 12px;border-radius:14px;background:#0E0E14;border:1px solid var(--ln)}.vt-now b{font-size:30px;line-height:1;display:inline-block;min-width:64px}.vt-now span{display:block;font-size:12px}.vt-cm{position:relative;flex:1;max-width:150px;height:14px;border-radius:7px;background:linear-gradient(90deg,#FB7185,#FACC15 35%,#4ADE80 45%,#4ADE80 55%,#FACC15 65%,#FB7185)}.vt-cm i{position:absolute;top:-4px;left:50%;width:3px;height:22px;margin-left:-1px;background:#fff;border-radius:2px;transition:left .06s}.vt-keys{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:6px;margin-top:6px}.vt-keys button{min-height:44px;border-radius:12px;border:1px solid var(--ln);background:var(--s1);color:var(--mu);font-weight:700;font-size:13px}.vt-keys button[aria-pressed="true"]{background:rgba(56,189,248,.18);border-color:#38BDF8;color:#E0F2FE}.vt-keys button.tonic{box-shadow:inset 0 -3px 0 var(--ac)}.vt-hv{display:flex;flex-direction:column;gap:8px;padding:10px;border-radius:14px;background:var(--s1);border:1px solid var(--ln)}.vt-hv .row{display:flex;justify-content:space-between;align-items:center;gap:8px}.vt-hv select{max-width:60%}.vt-hv label{display:flex;flex-direction:column;font-size:12px;color:var(--mu);gap:2px}.vt-hv input[type=range]{width:100%;min-height:32px}#vtCv.drag{outline:2px solid #FACC15;outline-offset:-2px}.vt-panel .seg button,.vt-panel .btn,.vt-panel select{min-height:44px}.vt-sty button{flex:1}.vt-ab{gap:8px}.vt-ab .seg{flex:1}.vt-ab .seg button{flex:1}.vt-pro{display:flex;flex-direction:column;gap:10px}.vt-ed{border:1px solid var(--ln);border-radius:12px;overflow:hidden;background:#0E0E14}#vtCv{display:block;width:100%;height:240px;touch-action:none}.vt-note{display:flex;flex-direction:column;gap:8px}.vt-chip[aria-pressed="true"]{border-color:var(--ac);color:var(--ac)}.vt-panel select{flex:1;min-width:0}.vt-pro .grid2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px}.vt-panel .btn[aria-pressed="true"]{border-color:var(--ac);color:var(--ac);background:rgba(212,255,58,.08)}
 body.is-pro .simple-only{display:none!important}
+#vtSheet.vm .vt-panel>:not(.vm-k){display:none!important}#vtSheet:not(.vm) #vmBox{display:none!important}.vm-tabs button{flex:1;min-height:44px}#vmBox{display:flex;flex-direction:column;gap:12px}#vmBox.lock .vm-beg,#vmBox.lock .vm-pro{opacity:.4;pointer-events:none}.vm-head{display:flex;justify-content:space-between;align-items:center;gap:8px}.vm-head h3{margin:0;font-size:26px}.vm-head .chk{gap:8px;font-weight:700}
+.vm-pad{position:relative;width:100%;aspect-ratio:1/1;border-radius:26px;border:1px solid #3a3a4a;touch-action:none;user-select:none;-webkit-user-select:none;overflow:hidden;background:radial-gradient(circle,rgba(255,255,255,.09) 1px,transparent 1.6px) 0 0/16px 16px,radial-gradient(circle at 0 0,rgba(167,139,250,.28),transparent 55%),radial-gradient(circle at 100% 0,rgba(94,234,212,.22),transparent 55%),radial-gradient(circle at 0 100%,rgba(250,204,21,.2),transparent 55%),radial-gradient(circle at 100% 100%,rgba(251,146,60,.24),transparent 55%),#14141c}
+.vm-cor{position:absolute;width:36%;box-sizing:border-box;padding:8px 10px 6px;border-radius:14px;background:rgba(14,14,20,.88);border:1px solid #34344a;pointer-events:none;transition:border-color .1s}.vm-cor.tl{left:3%;top:3%}.vm-cor.tr{right:3%;top:3%}.vm-cor.bl{left:3%;bottom:3%}.vm-cor.br{right:3%;bottom:3%}.vm-cor.hot{border:2px solid #fff}
+.vm-cor b{display:flex;align-items:center;gap:6px;font-size:15px}.vm-cor b i{width:10px;height:10px;border-radius:50%;display:inline-block;flex:none}.vm-cor span{display:block;font-size:12px;color:var(--mu);margin:2px 0 2px 16px;white-space:nowrap}.vm-cor svg,.vm-sc svg{display:block;width:100%;height:20px}
+.vm-puck{position:absolute;width:64px;height:64px;margin:-32px 0 0 -32px;border-radius:50%;background:#FB7185;color:#1a0b10;font-weight:800;font-size:15px;display:flex;align-items:center;justify-content:center;box-shadow:0 0 0 12px rgba(251,113,133,.22),0 0 0 44px rgba(251,113,133,.07);pointer-events:none;transition:box-shadow .15s}.vm-pad.drag .vm-puck{box-shadow:0 0 0 18px rgba(251,113,133,.3),0 0 0 54px rgba(251,113,133,.09)}
+.vm-read{display:flex;align-items:center;gap:8px;font-size:13px}.vm-lv{font:700 12px ui-monospace,monospace;padding:4px 7px;border-radius:6px;background:#2a3311;color:#D4FF3A}.vm-bar{display:flex;gap:2px;width:22%;height:6px;flex:none}.vm-bar i{height:100%;border-radius:3px}#vmRd{flex:1;min-width:0;text-align:right;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:12px}
+.vm-shelf{display:flex;gap:10px;overflow-x:auto;padding:2px 2px 6px;scrollbar-width:none}.vm-sc{flex:none;width:112px;min-height:100px;box-sizing:border-box;border-radius:16px;border:2px solid #34344a;background:#15151c;color:inherit;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:2px;padding:8px;position:relative;touch-action:none;font:inherit;text-align:center}.vm-sc b{font-size:15px}.vm-sc span{font-size:12px;color:var(--mu)}.vm-sc em{position:absolute;top:6px;right:6px;font:700 11px ui-monospace,monospace;padding:1px 5px;border-radius:6px;color:#111}.vm-sc.new{border:2px dashed #D4FF3A;background:rgba(212,255,58,.08);color:#D4FF3A}.vm-sc.new span{color:#D4FF3A}.vm-ghost{position:fixed;z-index:99;pointer-events:none;opacity:.85;transform:translate(-50%,-50%)}.vm-hint{font-size:13px;margin:0}
+.vm-beg{display:flex;flex-direction:column;gap:12px}#vtSheet .vm-pro{display:none;flex-direction:column;gap:10px}#vtSheet.vmpro .vm-pro{display:flex}#vtSheet.vmpro .vm-beg{display:none}
+.vm-ab{display:grid;grid-template-columns:1fr 1.3fr 1fr;gap:8px;align-items:center;padding:10px;border-radius:18px;border:1px solid #34344a}.vm-ab output{display:block;text-align:center;font:12px ui-monospace,monospace;color:var(--mu)}.vm-ab input{width:100%;margin:0}
+.vm-row{display:grid;grid-template-columns:84px minmax(0,1fr) 64px 60px;gap:6px;align-items:center;min-height:44px}.vm-row input{width:100%;margin:0}.vm-row output{font:13px ui-monospace,monospace;text-align:right}.vm-tg{font:700 11px ui-monospace,monospace;padding:4px 0;border-radius:6px;background:#2a3311;color:#D4FF3A;text-align:center}.vm-tg.r{background:#26262f;color:#9a9aa8}
+.vm-ent{display:grid;grid-template-columns:1fr 1fr;gap:8px}.vm-ent .btn{min-height:44px}.vm-hc{display:grid;grid-template-columns:1fr auto;gap:4px 8px;align-items:center;padding:8px 10px;border-radius:14px;border:2px solid #34344a}.vm-hc select{grid-column:1/-1;min-height:44px}
 #xy{position:relative;height:210px;border-radius:16px;background-color:#101018;border:1px solid var(--ln);touch-action:none;background-image:linear-gradient(var(--ln) 1px,transparent 1px),linear-gradient(90deg,var(--ln) 1px,transparent 1px);background-size:25% 25%;background-position:center}
 #xydot{position:absolute;left:50%;top:50%;width:36px;height:36px;margin:-18px 0 0 -18px;border-radius:18px;border:3px solid var(--ac);pointer-events:none}
 .xylab{position:absolute;font-size:11px;color:var(--mu);pointer-events:none}
@@ -1438,9 +1449,34 @@ html.splash #splash{display:flex}
 <button id="micOn" hidden aria-label="Microphone is on — tap to turn it off">🎙 Mic on — tap to release</button>
 <button id="sndOff" hidden>🔇 Sound is paused — tap here to turn it on</button>
 <div class="gx-sheet" id="vtSheet" hidden><div class="gx-scrim" data-vtclose="1"></div><div class="gx-panel vt-panel" role="dialog" aria-modal="true" aria-labelledby="vtT" style="max-height:92vh;overflow-y:auto">
-  <div class="gx-grab"></div>
-  <div class="row"><div><span class="kicker" style="color:var(--ac)">Voice · Tune</span><h3 id="vtT">Tune</h3></div><button class="mv" id="vtX" style="width:auto;padding:0 12px;min-height:44px">Close</button></div>
-  <p class="mu" id="vtSub" style="margin:0"></p>
+  <div class="gx-grab vm-k"></div>
+  <div class="row vm-k"><div><span class="kicker" style="color:var(--ac)">Voice · Tune</span><h3 id="vtT">Tune</h3></div><button class="mv" id="vtX" style="width:auto;padding:0 12px;min-height:44px">Close</button></div>
+  <p class="mu vm-k" id="vtSub" style="margin:0"></p>
+  <div class="seg vm-tabs vm-k" role="group" aria-label="Vocal Studio section"><button data-vmt="tune" aria-pressed="true">Tune</button><button data-vmt="vm" aria-pressed="false">Voice Morph</button></div>
+  <div id="vmBox" class="vm-k">
+    <div class="vm-head"><h3>Voice Morph</h3><label class="chk"><span>Pro</span><input type="checkbox" id="vmPro" aria-label="Pro controls"></label></div>
+    <div class="vt-warn" id="vmConsent" hidden>This take was imported, not recorded in Ecou. Only transform another person’s voice with their permission. <button class="btn" id="vmOk" style="min-height:44px;margin-top:6px;width:100%">I have this person’s permission</button></div>
+    <div class="vm-beg">
+      <div class="vm-pad" id="vmPad" role="slider" aria-label="Voice space: drag YOU towards the voice cards; double-tap to return to your own voice" tabindex="0"><div class="vm-cor tl"></div><div class="vm-cor tr"></div><div class="vm-cor bl"></div><div class="vm-cor br"></div><div class="vm-puck" id="vmPuck">YOU</div></div>
+      <div class="vm-read"><span class="vm-lv" id="vmLv">PREVIEW</span><div class="vm-bar" id="vmBar"></div><span id="vmRd">Your own voice</span></div>
+      <div class="vm-shelf" id="vmShelf" aria-label="Voice cards"></div>
+      <p class="mu vm-hint">Drag a card onto a corner to swap it · tap a card to put it on the nearest corner · double-tap the pad to return to your own voice</p>
+      <div class="vt-g3"><button class="btn" id="vmHold" aria-pressed="false">AB Hold = you</button><button class="btn" id="vmSave">Save card</button><button class="btn" id="vmChoir">Make choir</button></div>
+    </div>
+    <div class="vm-pro">
+      <div class="vm-ab"><select id="vmA" aria-label="Card A"></select><div><output id="vmTo">A ← 50% → B</output><input type="range" id="vmT" min="0" max="100" step="1" value="50" aria-label="Morph between card A and card B"></div><select id="vmB" aria-label="Card B"></select></div>
+      <div class="row"><span class="kicker">Timbre</span><span class="mu" style="font-size:12px">LIVE: heard while monitoring · RENDER: on the take</span></div>
+      <div id="vmSl"></div>
+      <span class="kicker">Melody style · into each note</span>
+      <div class="vm-ent" role="group" aria-label="Entry style"><button class="btn" data-vme="straight">Straight</button><button class="btn" data-vme="scoop">Scoop</button><button class="btn" data-vme="fall">Fall</button><button class="btn" data-vme="slide">Slide</button></div>
+      <div class="row"><span class="kicker">Choir · harmonies</span><span class="mu" style="font-size:12px">each voice a character</span></div>
+      <div id="vmCh" style="display:flex;flex-direction:column;gap:8px"></div>
+      <div class="vt-g2"><button class="btn" id="vmChoir2">Make choir</button><button class="btn" id="vmSave2">Save card</button></div>
+    </div>
+    <div class="vt-g2"><button class="btn primary" id="vmPlay">▶ Play take</button><button class="btn" id="vmSong">Use in song</button></div>
+    <label class="chk"><span>Tag exported WAVs “Voice transformed with Ecou”</span><input type="checkbox" id="vmTag"></label>
+    <p class="note" id="vmInfo"></p>
+  </div>
   <div class="vt-warn" id="vtNone" role="status" hidden>No singing was heard in this take. Record again a little closer to the microphone, or choose another take — there is nothing to tune here.</div>
   <div class="vt-now" id="vtNow"><div><b id="vtNowN">–</b><span class="mu" id="vtNowS">Press Play to see your pitch live</span></div><div class="vt-cm" title="Cents from the target note"><i id="vtNowI"></i></div></div>
   <div class="vt-ed"><canvas id="vtCv" aria-label="Pitch editor: grey is what you sang, pink is the tuned pitch, blue blocks are notes; drag a note up or down to retune it"></canvas></div>
@@ -1847,7 +1883,7 @@ function encodeWavF(chs,sr){
   function u32(v){dv.setUint32(o,v,true);o+=4;}function u16(v){dv.setUint16(o,v,true);o+=2;}
   str('RIFF');u32(36+data);str('WAVE');str('fmt ');u32(16);u16(3);u16(nc);u32(sr);u32(sr*nc*4);u16(nc*4);u16(32);str('data');u32(data);
   for(var i=0;i<n;i++)for(var c=0;c<nc;c++){dv.setFloat32(o,chs[c][i],true);o+=4;}
-  return new Uint8Array(buf);
+  return vmTagWav(new Uint8Array(buf));
 }
 function encodeWav(chs,sr){
   var nc=chs.length,n=chs[0].length,bps=3,data=n*nc*bps,buf=new ArrayBuffer(44+data),dv=new DataView(buf),o=0;
@@ -1855,7 +1891,7 @@ function encodeWav(chs,sr){
   function u32(v){dv.setUint32(o,v,true);o+=4;}function u16(v){dv.setUint16(o,v,true);o+=2;}
   str('RIFF');u32(36+data);str('WAVE');str('fmt ');u32(16);u16(1);u16(nc);u32(sr);u32(sr*nc*bps);u16(nc*bps);u16(24);str('data');u32(data);
   for(var i=0;i<n;i++){for(var c=0;c<nc;c++){var s=Math.max(-1,Math.min(1,chs[c][i])),v=Math.round(s*8388607);dv.setUint8(o++,v&255);dv.setUint8(o++,(v>>8)&255);dv.setUint8(o++,(v>>16)&255);}}
-  return new Uint8Array(buf);
+  return vmTagWav(new Uint8Array(buf));
 }
 var CRC=null;
 function crc32(b){if(!CRC){CRC=new Uint32Array(256);for(var n=0;n<256;n++){var c=n;for(var k=0;k<8;k++)c=c&1?0xEDB88320^(c>>>1):c>>>1;CRC[n]=c>>>0;}}var crc=0xFFFFFFFF;for(var i=0;i<b.length;i++)crc=CRC[(crc^b[i])&255]^(crc>>>8);return (crc^0xFFFFFFFF)>>>0;}
@@ -3075,7 +3111,7 @@ function serialize(){
     amp:{model:ampModel,cab:cabCustom?bid(cabCustom):null,match:FX.match?FX.match.target:null,ref:matchRef},
     pads:pads.map(function(p){return {name:p.name,cls:p.cls,level:p.level,tune:p.tune,decay:p.decay,pan:p.pan,choke:p.choke,buf:bid(p.buf),cap:p.buf&&(p.buf._cap||p.buf._slc)?1:0};}),
     patterns:patterns.map(function(pt){return {name:pt.name,len:pt.len,drums:pt.drums.map(function(a){return a.map(function(x){return x?(typeof x==='number'?Math.round(x*100)/100:1):0;});}),notes:pt.notes,locks:pt.locks||{}};}),song:song,curPat:curPat,garage:garSave()};
-  data.shelf=shelfSave(bid);
+  data.shelf=shelfSave(bid);data.vmLib=VM.lib.slice();
   return {data:data,bufs:bufs};
 }
 /* convolvers need buffers at the context's sample rate; phones switch rate (speaker 48 kHz, Bluetooth 44.1/16 kHz) between sessions */
@@ -3086,7 +3122,7 @@ function loadProjectData(data,bufs){
   var B=[];bufs.forEach(function(b){try{if(!b||!b.chs||!b.chs.length||!b.chs[0].length)return;var ab=ctx.createBuffer(b.chs.length,b.chs[0].length,b.sr||ctx.sampleRate);b.chs.forEach(function(c,i){var d=ab.getChannelData(i);d.set(c);for(var k=0;k<d.length;k++){var v=d[k];if(!(v>-1e9&&v<1e9))d[k]=0;}});B[b.id]=ab;}catch(e){errLog.push('buffer '+b.id+': '+e.message);}});
   function gb(id){return id==null?null:(B[id]||null);}
   function dSlot(s){if(s&&s.stock){var st=stockSlot(s.stock);if(st)return st;}if(!s)return {name:'—',buf:null,root:261.63,det:false};var gbuf=gb(s.buf);if(gbuf&&s.cap)gbuf._cap=1;return {name:s.name,root:s.root,det:s.det,buf:gbuf};}
-  project.name=data.name||'Untitled beat';
+  project.name=data.name||'Untitled beat';try{if(data.vmLib)vmLibMerge(data.vmLib);}catch(e){}
   Object.keys(data.params||{}).forEach(function(k){if(P[k])setParam(k,data.params[k]);});
   fxOn=data.fxOn||{};var ord=(data.order||[]).filter(function(x){return FXDEF[x];});FXDEFORDER.forEach(function(x){if(ord.indexOf(x)<0)ord.push(x);});FXORDER.splice(0,FXORDER.length);ord.forEach(function(x){FXORDER.push(x);});
   setRotary(!!data.roFast);setSync(data.dsync||'1/8D');
@@ -5275,23 +5311,24 @@ function vtMarks(A){var x=A.x,sr=A.sr,hop=A.hop,n=x.length,M=[],Pp=[],Vv=[],t=0,
     if(vo){var a=Math.round(t+(prevV?-0.15*P:0)),b=Math.round(t+(prevV?0.15*P:P)),bi=Math.round(t),bv=-1e9;for(var i=Math.max(0,a);i<=Math.min(n-1,b);i++)if(x[i]>bv){bv=x[i];bi=i;}t=bi;}
     if(t<=last)t=last+1;M.push(t);Pp.push(P);Vv.push(vo);last=t;prevV=vo;t=Math.round(t+P);}
   return {M:M,P:Pp,V:Vv};}
-function vtPsola(src,A,sh,MK,phi){phi=phi||1;var sr=A.sr,hop=A.hop,n=src.length,acc=new Float32Array(n),ws=new Float32Array(n),M=MK.M,PP=MK.P,VV=MK.V||[],nM=M.length,j=0,jp=-1,ts=0,last=-1,disp=0,inBy=false,cap=sr*0.03,i;
+function vtPsola(src,A,sh,MK,phi,op){phi=phi||1;var RR=op?vmRand(op.seed):null,gc=0,gg=1;var sr=A.sr,hop=A.hop,n=src.length,acc=new Float32Array(n),ws=new Float32Array(n),M=MK.M,PP=MK.P,VV=MK.V||[],nM=M.length,j=0,jp=-1,ts=0,last=-1,disp=0,inBy=false,cap=sr*0.03,i;
   while(ts<n&&nM){var k=Math.min(A.F-1,Math.round(ts/hop)),s=sh[k],r=Math.pow(2,s/12);
     if(s===0&&phi===1){ /* bypass: grain j goes back on mark j; a leftover offset from a shifted stretch is eased out over a few periods */
       if(!inBy){while(j+1<nM&&Math.abs(M[j+1]-ts)<=Math.abs(M[j]-ts))j++;if(j<=jp)j=jp+1;if(j>=nM)break;disp=VV[j]?ts-M[j]:0;if(Math.abs(disp)>PP[j])disp=0;inBy=true;}
       else{j=jp+1;if(j>=nM)break;disp*=0.6;if(Math.abs(disp)<1)disp=0;}
       ts=M[j]+disp;}
     else{inBy=false;while(j+1<nM&&Math.abs(M[j+1]-ts)<=Math.abs(M[j]-ts))j++;}
-    if(ts<=last)ts=last+1;
+    if(ts<=last)ts=last+1;gg=1;if(op&&VV[j]){if(op.jit)gg*=1+(RR()*2-1)*op.jit*0.3;if(op.gw)gg*=1+((gc&1)?-1:1)*op.gw*0.45;}gc++;
     var ma=M[j],P=PP[j],Ll=Math.min(cap,Math.max(P,j>0?ma-M[j-1]:P)),Lr=Math.min(cap,Math.max(P,j+1<nM?M[j+1]-ma:P)),t0=Math.floor(ts),fr=ts-t0,
         i0=j===0?-t0:-Math.ceil(Ll),i1=j===nM-1?n-1-t0:Math.ceil(Lr);
     for(i=i0;i<=i1;i++){var o=t0+i;if(o<0||o>=n)continue;var u=i-fr,w;
       if(u<0){if(j===0)w=1;else{if(u<=-Ll)continue;w=0.5+0.5*Math.cos(Math.PI*u/Ll);}}
       else{if(j===nM-1)w=1;else{if(u>=Lr)continue;w=0.5+0.5*Math.cos(Math.PI*u/Lr);}}
-      var si=ma+u*phi;if(si<0)si=0;else if(si>n-1)si=n-1;var s0=Math.floor(si),f=si-s0,xv=(s0>=0&&s0<n?src[s0]:0)*(1-f)+(s0+1>=0&&s0+1<n?src[s0+1]:0)*f;acc[o]+=w*xv;ws[o]+=w;}
-    jp=j;last=ts;ts+=P/r;}
+      var si=ma+u*phi;if(si<0)si=0;else if(si>n-1)si=n-1;var s0=Math.floor(si),f=si-s0,xv=(s0>=0&&s0<n?src[s0]:0)*(1-f)+(s0+1>=0&&s0+1<n?src[s0+1]:0)*f;acc[o]+=w*xv*gg;ws[o]+=w;}
+    jp=j;last=ts;ts+=P/r*(op&&op.jit&&VV[j]?1+(RR()*2-1)*op.jit*0.06:1);}
   for(i=0;i<n;i++)acc[i]=ws[i]>0?acc[i]/Math.max(ws[i],0.6):0;return acc;}
-function vtRenderBuf(b,v,c,harm){var A=vtAnalyse(b),N=vtNotes(A,v,c),sh=vtCurve(A,N,v,harm),MK=A.mk||(A.mk=vtMarks(A)),C=b.numberOfChannels,nb=ctx.createBuffer(C,b.length,b.sampleRate);
+function vtRenderBuf(b,v,c,harm){var vc=vmEff(v);if(vc&&vc.rob)v=Object.assign({},v,{st:'hard',amt:100,spd:0,hum:0,mor:100});var A=vtAnalyse(b),N=vtNotes(A,v,c),sh=vtCurve(A,N,v,harm),MK=A.mk||(A.mk=vtMarks(A)),C=b.numberOfChannels,nb=ctx.createBuffer(C,b.length,b.sampleRate);
+  if(vc)return {buf:vmRender(b,v,A,N,sh,MK,vc),N:N,sh:sh,A:A};
   var phi=Math.pow(2,(v.fmt||0)/12),thr=(v.thr||0)/100;
   for(var ch=0;ch<C;ch++){var y=vtPsola(b.getChannelData(ch),A,sh,MK,phi);if(thr)vtThroat(y,b.sampleRate,thr);nb.getChannelData(ch).set(y);}return {buf:nb,N:N,sh:sh,A:A};}
 /* throat: + darker/chestier (low-passed body mixed in, top tamed), − thinner/brighter (body removed) */
@@ -5308,7 +5345,7 @@ function vtRender(){var v=vtSet(),b=vtSrcBuf();if(!v||!b)return;var t0=performan
   var hs=vtHs(v);if(hs.length){clearTimeout(VT.th);VT.th=setTimeout(function(){if(vtSet()!==v)return;hs.forEach(vtHarmRender);if(VT.au&&!VT.auRaw)vtPreview(true,false,vtPos());},500);}}
 function vtSchedule(ms){clearTimeout(VT.t);VT.t=setTimeout(vtRender,ms||120);}
 function vtOpenClip(c){if(!ensureAudio()||!c||c.type!=='aud')return;
-  if(!c.vt||(c.buf!==c.vt.out&&c.buf!==c.vt.src)){var keep=c.vt;c.vt=vtDef('pop');if(keep){['st','amt','mor','spd','hum','sc','k','band','fmt','thr','vib','vibR','pcs','hs'].forEach(function(q){c.vt[q]=keep[q];});}c.vt.src=c.buf;c.vt.out=null;}
+  if(!c.vt||(c.buf!==c.vt.out&&c.buf!==c.vt.src)){var keep=c.vt;c.vt=vtDef('pop');if(keep){['st','amt','mor','spd','hum','sc','k','band','fmt','thr','vib','vibR','pcs','hs','vm'].forEach(function(q){c.vt[q]=keep[q];});}c.vt.src=c.buf;c.vt.out=null;}
   VT.c=c;VT.slot=null;VT.sel=-1;vtShow();vtRender();}
 function vtOpenSlot(k){if(!ensureAudio())return;var s=slots[k];if(!s||!s.buf){toast('Record or import your voice into Source '+k+' first.');return;}
   if(!s.vtSrc||(s.buf!==s.vtSrc&&s.buf!==s.vtOut)){s.vtSrc=s.buf;s.vt=vtDef('pop');}VT.slot=k;VT.c=null;VT.sel=-1;vtShow();vtRender();}
@@ -5341,13 +5378,13 @@ var VTINT=[[-12,'Octave below'],[-2,'3rd below'],[2,'3rd above'],[3,'4th above']
 function vtIntName(st){for(var i=0;i<VTINT.length;i++)if(VTINT[i][0]===st)return VTINT[i][1];return 'Harmony';}
 function vtHs(v){if(!v||!v.hs)return [];v.hs=v.hs.filter(function(id){var h=clipById(id);return h&&tracks[h.ti];});return v.hs.map(clipById);}
 function vtWhere(c){return (tracks[c.ti]?tracks[c.ti].name:'Audio')+' · Song › Tracks · bar '+(Math.floor((c.s||0)/16)+1);}
-function vtHarmRender(h){var v=vtSet(),b=vtSrcBuf();if(!v||!b||!h||!h.hv)return;var vv=Object.assign({},v,{hum:Math.max(v.hum||0,40),fmt:(v.fmt||0)+(h.hv.fmt||0)}),R=vtRenderBuf(b,vv,VT.c,h.hv.st),old=h.buf;
+function vtHarmRender(h){var v=vtSet(),b=vtSrcBuf();if(!v||!b||!h||!h.hv)return;var vv=Object.assign({},v,{hum:Math.max(v.hum||0,40),fmt:(v.fmt||0)+(h.hv.fmt||0),vm:h.hv.vm?{on:true,c:h.hv.vm}:v.vm}),R=vtRenderBuf(b,vv,VT.c,h.hv.st),old=h.buf;
   h.buf=abufAdd(R.buf);h.takes=[h.buf];h.name='Harmony · '+vtIntName(h.hv.st);if(old&&old!==h.buf&&!daw.clips.some(function(c){return c!==h&&c.buf===old;}))delete abuf[old];dawNeed=true;markDirty();}
-function vtHarmony(steps){var v=vtSet(),b=vtSrcBuf();if(!v||!b){toast('Record or open a take first.');return;}
+function vtHarmony(steps,card,pan){var v=vtSet(),b=vtSrcBuf();if(!v||!b){toast('Record or open a take first.');return;}
   if(audioCount()>=MAXAUD){vtHmsg('No room for another voice: all '+MAXAUD+' audio tracks are in use. Delete a harmony (or an audio track in Song › Tracks) and try again.');toast('All '+MAXAUD+' audio tracks are in use.',3000);return;}
   var c=VT.c,base=c?tracks[c.ti].name:((slots[VT.slot]&&slots[VT.slot].name)||'Voice'),ni=addAudioTrack(base+' · '+vtIntName(steps).toLowerCase(),true);if(ni<0)return;
   var s0=c?c.s:Math.max(0,Math.floor((daw.play||0)/16)*16),h=newClip({type:'aud',ti:ni,s:s0,off:c?c.off||0:0,dur:c?c.dur:b.duration,buf:null,gain:(c?c.gain||0:0)-4,name:'Harmony'});
-  h.hv={st:steps,fmt:0};vtHarmRender(h);var k=(v.hs||[]).length;tracks[ni].vol=0.6;tracks[ni].pan=[-0.35,0.35,-0.6,0.6,0][k%5];try{applyMix();}catch(e){}
+  h.hv={st:steps,fmt:0};if(card){h.hv.vm=vmClean(card);h.hv.vmid=card.id;}vtHarmRender(h);var k=(v.hs||[]).length;tracks[ni].vol=0.6;tracks[ni].pan=pan!=null?pan:[-0.35,0.35,-0.6,0.6,0][k%5];try{applyMix();}catch(e){}
   (v.hs||(v.hs=[])).push(h.id);try{if(dcv)renderDawHeads();}catch(e){}dawNeed=true;markDirty();
   vtHmsg('Added '+vtIntName(steps).toLowerCase()+' on '+vtWhere(h)+'. Press Play to hear it with your voice.',h.id);vtHarmUI();if(VT.au&&!VT.auRaw)vtPreview(true,false,vtPos());
   toast(vtIntName(steps)+' added on '+tracks[ni].name+'.',2200);}
@@ -5363,7 +5400,7 @@ function vtGoClip(id){var c=clipById(id);if(!c)return;vtClose();vtStopTP();daw.s
 /* ---------- sheet UI ---------- */
 function vtShow(){var sh=$('#vtSheet');sh.hidden=false;sh.classList.toggle('all',!!VT.all);$('#vtAll').setAttribute('aria-pressed',!!VT.all);$('#vtAll').textContent=VT.all?'Hide extra options':'Show all options';
   $('#vtT').textContent=VT.c?'Vocal Studio · '+clipName(VT.c):'Vocal Studio · Source '+VT.slot;$('#vtSub').textContent=VT.c?'Saved in '+vtWhere(VT.c):'Capture Source '+VT.slot+' · harmonies go into the song as new audio tracks';
-  $('#vtBand').disabled=!VT.c;$('#vtHarm').hidden=false;$('#vtRm').hidden=!VT.c;$('#vtHmsg').hidden=true;VT.undo=[];VT.redo=[];VT.loop=false;vtHarmUI();vtUI();vtNowUI(-1);}
+  $('#vtBand').disabled=!VT.c;$('#vtHarm').hidden=false;$('#vtRm').hidden=!VT.c;$('#vtHmsg').hidden=true;VT.undo=[];VT.redo=[];VT.loop=false;vtHarmUI();vtUI();vtNowUI(-1);try{vmShow();}catch(e){errLog.push('vm: '+e.message);}}
 function vtUI(){var v=vtSet();if(!v)return;$$('[data-vts]').forEach(function(b){b.setAttribute('aria-pressed',b.getAttribute('data-vts')===v.st);});
   if(v.mor==null)v.mor=v.spd<=0?100:v.spd>=100?25:62;
   [['vtAmt','amt','%'],['vtSpd','spd',' ms'],['vtHum','hum','%'],['vtMor','mor',''],['vtFmt','fmt',' st'],['vtThr','thr',''],['vtVib','vib',' ct'],['vtVibR','vibR',' Hz']].forEach(function(q){var e=$('#'+q[0]);if(!e)return;var val=v[q[1]];if(val==null)val=+e.defaultValue;e.value=val;
@@ -5377,7 +5414,7 @@ function vtUI(){var v=vtSet();if(!v)return;$$('[data-vts]').forEach(function(b){
   $('#vtUndo').disabled=!(VT.undo&&VT.undo.length);$('#vtRedo').disabled=!(VT.redo&&VT.redo.length);
   var none=!!(VT.N&&!VT.N.length);$('#vtNone').hidden=!none;$('#vtHint').hidden=none;$('#vtNow').hidden=none;vtInfo();}
 function vtInfo(){var v=vtSet(),e=$('#vtInfo');if(!v||!e)return;e.textContent=(v.band&&VT.c?'Following the band chords (part '+(GAR.band.edit||'A')+')':vtScaleName(v))+' · '+(VT.N?VT.N.length:0)+' notes'+(VT.ms?' · rendered in '+Math.round(VT.ms)+' ms':'');}
-function vtPushUndo(){var v=vtSet();if(!v)return;VT.redo=[];(VT.undo||(VT.undo=[])).push(JSON.stringify({ed:v.ed||{},sp:v.sp||[],mg:v.mg||[]}));if(VT.undo.length>50)VT.undo.shift();}
+function vtPushUndo(){var v=vtSet();if(!v)return;VT.redo=[];(VT.undo||(VT.undo=[])).push(JSON.stringify({ed:v.ed||{},sp:v.sp||[],mg:v.mg||[],vm:v.vm||null}));if(VT.undo.length>50)VT.undo.shift();}
 function vtEd(n,o){var v=vtSet();v.ed=v.ed||{};var e=v.ed[n.a]||{};Object.assign(e,o);['tr','hum'].forEach(function(q){if(e[q]==null)delete e[q];});if(!e.dt&&!e.flat&&e.tr==null&&e.hum==null)delete v.ed[n.a];else v.ed[n.a]=e;vtSchedule();}
 function vtGeom(){var cv=$('#vtCv'),A=VT.A,N=VT.N||[];if(!A||!cv)return null;var lo=99,hi=0;N.forEach(function(n){lo=Math.min(lo,n.T,n.med);hi=Math.max(hi,n.T,n.med);});if(lo>hi){lo=57;hi=69;}
   lo=Math.floor(lo)-2;hi=Math.ceil(hi)+2;if(hi-lo<12){var c=(hi+lo)/2;lo=Math.floor(c-6);hi=lo+12;}
@@ -5404,7 +5441,7 @@ var VTL=(function(){try{return JSON.parse(localStorage.getItem('ecou.vtLive'))||
 function vtLiveSave(){try{localStorage.setItem('ecou.vtLive',JSON.stringify(VTL));}catch(e){}}
 function vtLiveNode(src){if(!VTL.on||!VT.wk)return null;var nd=new AudioWorkletNode(ctx,'ecou-vox',{numberOfInputs:1,numberOfOutputs:1,outputChannelCount:[1],channelCount:1,channelCountMode:'explicit'});
   src.connect(nd);vtLivePush(nd);nd._t=setInterval(function(){vtLivePush(nd);},120);VT.live=nd;return nd;}
-function vtLivePush(nd){var pcs=vtScale({sc:'song'});if(VTL.band&&BR&&BR.on&&BR.plan&&BR.plan.c)pcs=vtChordPcs(BR.plan.c);try{nd.port.postMessage({amt:VTL.amt/100,spd:VTL.spd/1000,pcs:pcs});}catch(e){}}
+function vtLivePush(nd){var pcs=vtScale({sc:'song'});if(VTL.band&&BR&&BR.on&&BR.plan&&BR.plan.c)pcs=vtChordPcs(BR.plan.c);try{nd.port.postMessage({amt:VTL.amt/100,spd:VTL.spd/1000,pcs:pcs,vm:VTL.vm||null});}catch(e){}}
 function vtLiveDrop(nd){if(!nd)return;clearInterval(nd._t);try{nd.disconnect();}catch(e){}if(VT.live===nd)VT.live=null;}
 function vtLiveLat(){return Math.round(0.0125*1000*10)/10;}
 /* ---------- headphones gate for live monitoring (asked once per session) ---------- */
@@ -5464,9 +5501,9 @@ function initVocal2(){
   $('#vtNTr').addEventListener('input',function(e){var n=cur();if(!n)return;if(!VT.ntr){vtPushUndo();VT.ntr=1;}n.tr=+e.target.value;vtEd(n,{tr:n.tr});vtUI();});
   $('#vtNHum').addEventListener('input',function(e){var n=cur();if(!n)return;if(!VT.ntr){vtPushUndo();VT.ntr=1;}n.hum=+e.target.value;vtEd(n,{hum:n.hum});vtUI();});
   ['vtNTr','vtNHum'].forEach(function(id){$('#'+id).addEventListener('change',function(){VT.ntr=0;});});
-  function vtSnapEd(v){return JSON.stringify({ed:v.ed||{},sp:v.sp||[],mg:v.mg||[]});}
-  $('#vtUndo').addEventListener('click',function(){var v=vtSet();if(!v||!VT.undo||!VT.undo.length)return;(VT.redo||(VT.redo=[])).push(vtSnapEd(v));var o=JSON.parse(VT.undo.pop());v.ed=o.ed;v.sp=o.sp;v.mg=o.mg;clearTimeout(VT.t);vtRender();toast('Undone.',1000);});
-  $('#vtRedo').addEventListener('click',function(){var v=vtSet();if(!v||!VT.redo||!VT.redo.length)return;(VT.undo||(VT.undo=[])).push(vtSnapEd(v));var o=JSON.parse(VT.redo.pop());v.ed=o.ed;v.sp=o.sp;v.mg=o.mg;clearTimeout(VT.t);vtRender();toast('Redone.',1000);});
+  function vtSnapEd(v){return JSON.stringify({ed:v.ed||{},sp:v.sp||[],mg:v.mg||[],vm:v.vm||null});}
+  $('#vtUndo').addEventListener('click',function(){var v=vtSet();if(!v||!VT.undo||!VT.undo.length)return;(VT.redo||(VT.redo=[])).push(vtSnapEd(v));var o=JSON.parse(VT.undo.pop());v.ed=o.ed;v.sp=o.sp;v.mg=o.mg;if('vm' in o){if(o.vm)v.vm=o.vm;else delete v.vm;VM.sig='';}clearTimeout(VT.t);vtRender();vmUI();toast('Undone.',1000);});
+  $('#vtRedo').addEventListener('click',function(){var v=vtSet();if(!v||!VT.redo||!VT.redo.length)return;(VT.undo||(VT.undo=[])).push(vtSnapEd(v));var o=JSON.parse(VT.redo.pop());v.ed=o.ed;v.sp=o.sp;v.mg=o.mg;if('vm' in o){if(o.vm)v.vm=o.vm;else delete v.vm;VM.sig='';}clearTimeout(VT.t);vtRender();vmUI();toast('Redone.',1000);});
   /* pitch editor: pointer events work for touch, pen and mouse; touch-action:none on the canvas, capture while dragging, the sheet cannot scroll mid-drag */
   var cv=$('#vtCv');
   cv.addEventListener('pointerdown',function(e){if(e.button>0)return;var i=vtHit(e);VT.sel=i;if(i<0){vtDraw();vtUI();return;}e.preventDefault();var n=VT.N[i];vtPushUndo();VT.drag={id:e.pointerId,y:e.clientY,T:n.T};try{cv.setPointerCapture(e.pointerId);}catch(x){}cv.classList.add('drag');if(navigator.vibrate)try{navigator.vibrate(8);}catch(x){}vtDraw();vtUI();});
@@ -5484,12 +5521,189 @@ function initVocal2(){
   $('#dawVt').addEventListener('change',function(e){vtLiveToggle(e.target.checked);});
   vtLiveUI();document.addEventListener('keydown',function(e){if(e.key==='Escape'&&!$('#vtSheet').hidden)vtClose();});
 }
+/* ---------- VOICE MORPH v1 (Sound › 02 Transform › Vocal Studio): voice cards on top of vtDef ----------
+   A card is a set of physical/artistic settings, never a person. Engine choices:
+   - body (vocal-tract length): the TD-PSOLA grains are read at phi=2^(-body/12) speed, which scales the whole spectral envelope
+     (formants) by the same ratio while the grain spacing keeps the pitch. Measured on the corpus voices it moves the LPC formants by the
+     requested amount up to ±4 st without the "chipmunk" coupling of pitch and formants, so no separate LPC warp stage is needed (and it costs nothing extra).
+   - register: semitones added to the PSOLA shift curve on voiced frames (formants kept).
+   - grit: per-grain period jitter + amplitude shimmer; growl (render only): alternating grain gain = sub-octave + soft saturation.
+   - breath: band-passed noise shaped by the take's envelope, boosted after onsets; bright: 3 kHz peak + linked de-ess; nasal: 500 Hz dip + 1 kHz peak.
+   - vibrato depth/rate/onset and entry style (scoop/fall/slide on notes >=150 ms) are added to the shift curve (render only).
+   - double: two extra PSOLA voices at ±8 ct, 12–25 ms; L/R sum equals the mono mix (mono-safe). Output RMS is matched to the input. */
+var VMK=['body','reg','br','gr','gw','bri','nas','vd','vr','vo','dbl','dly','wid'],VMLOG={vr:1,dly:1,vo:1};
+var VM0={body:0,reg:0,br:0,gr:0,gw:0,bri:0,nas:0,vd:0,vr:5.5,vo:300,ent:'straight',dbl:0,dly:18,wid:0};
+var VMP={
+  velvet:{n:'Velvet',d:'dark · soft',col:'#A78BFA',body:1.5,reg:0,br:35,gr:0,gw:0,bri:-2.5,nas:-0.2,vd:30,vr:5,vo:250,ent:'slide',dbl:20,dly:18,wid:40},
+  glass:{n:'Glass',d:'bright · pure',col:'#5EEAD4',body:-1.5,reg:0,br:15,gr:0,gw:0,bri:4,nas:0,vd:15,vr:5.5,vo:300,ent:'straight',dbl:30,dly:14,wid:60},
+  gravel:{n:'Gravel',d:'rough · low',col:'#FB923C',body:2,reg:-2,br:25,gr:55,gw:45,bri:-1,nas:0.2,vd:10,vr:5,vo:300,ent:'fall',dbl:0,dly:18,wid:0},
+  giant:{n:'Giant',d:'huge · slow',col:'#FACC15',body:4,reg:-5,br:10,gr:15,gw:25,bri:-3,nas:0,vd:25,vr:4,vo:400,ent:'scoop',dbl:0,dly:18,wid:0},
+  choirboy:{n:'Choirboy',d:'high · airy',col:'#93C5FD',body:-3,reg:5,br:40,gr:0,gw:0,bri:2,nas:-0.3,vd:12,vr:5.5,vo:400,ent:'straight',dbl:25,dly:20,wid:50},
+  robot:{n:'Robot Duet',d:'exact · twin',col:'#F472B6',body:0,reg:0,br:0,gr:0,gw:0,bri:1,nas:0.6,vd:0,vr:5.5,vo:300,ent:'straight',dbl:100,dly:12,wid:100,rob:1}};
+var VMS=[['body','Body size',-4,4,0.1,' st',1],['reg','Register',-12,12,0.5,' st',1],['br','Breath',0,100,1,'%',1],['gr','Grit',0,100,1,'',1],['gw','Growl',0,100,1,'',0],
+  ['bri','Bright',-6,6,0.5,' dB',1],['nas','Nasal',-1,1,0.1,'',1],['dbl','Double',0,100,1,'%',1],['dly','Dbl delay',12,25,0.5,' ms',1],['wid','Width',0,100,1,'%',0],
+  ['vd','Vibrato',0,100,1,' ct',0],['vr','Vib. rate',3,8,0.1,' Hz',0],['vo','Vib. onset',0,600,10,' ms',0]];
+var VMCOR=[[0,0],[1,0],[0,1],[1,1]],VMCN=['TL','TR','BL','BR'];
+var VM={lib:[],tab:'tune',t:null,zone:null,lt:0,sig:''};
+try{VM.lib=JSON.parse(localStorage.getItem('ecou.vmLib')||'[]')||[];}catch(e){VM.lib=[];}
+try{VM.tag=localStorage.getItem('ecou.vmTag')==='1';}catch(e){}
+function vmLibSave(){try{localStorage.setItem('ecou.vmLib',JSON.stringify(VM.lib));}catch(e){}}
+function vmLibMerge(L){(L||[]).forEach(function(c){if(c&&c.id&&!vmCard(c.id))VM.lib.push(c);});vmLibSave();}
+function vmCard(id){if(VMP[id])return Object.assign({id:id},VMP[id]);return VM.lib.filter(function(c){return c.id===id;})[0]||null;}
+function vmCards(){return Object.keys(VMP).map(vmCard).concat(VM.lib);}
+function vmClean(c){var o={};VMK.forEach(function(k){o[k]=c&&c[k]!=null&&!isNaN(+c[k])?+c[k]:VM0[k];});o.ent=c&&c.ent||'straight';if(c&&c.rob)o.rob=1;return o;}
+function vmActive(c){return !!c&&(c.body||c.reg||c.br||c.gr||c.gw||c.bri||c.nas||c.vd||c.dbl||c.rob||(c.ent&&c.ent!=='straight'))?true:false;}
+function vmEff(v){var m=v&&v.vm;return m&&m.on!==false&&m.c&&vmActive(m.c)?m.c:null;}
+/* blend: semitone/dB/% params linearly, time params (vibrato rate, onset, double delay) on a log scale; the entry style comes from the strongest card */
+function vmBlend(list){var o={},W=0;list.forEach(function(p){W+=p[1];});if(W<=0)return vmClean(null);
+  VMK.forEach(function(k){var s=0;list.forEach(function(p){var x=vmClean(p[0])[k];s+=p[1]/W*(VMLOG[k]?Math.log(x+50):x);});o[k]=VMLOG[k]?Math.exp(s)-50:s;o[k]=Math.round(o[k]*100)/100;});
+  var best=list.slice().sort(function(a,b){return b[1]-a[1];})[0][0];o.ent=best&&best.ent||'straight';if(list.some(function(p){return p[0]&&p[0].rob&&p[1]/W>0.5;}))o.rob=1;return o;}
+function vmPadW(x,y){var d=[],i;for(i=0;i<4;i++){var dx=x-VMCOR[i][0],dy=y-VMCOR[i][1];d.push([i,Math.sqrt(dx*dx+dy*dy)]);}d.sort(function(a,b){return a[1]-b[1];});
+  var w=d.slice(0,3).map(function(p){return [p[0],1/Math.pow(p[1]+0.03,2)];}),W=0;w.forEach(function(p){W+=p[1];});w.forEach(function(p){p[1]/=W;});
+  var dc=Math.sqrt((x-0.5)*(x-0.5)+(y-0.5)*(y-0.5));return {w:w,amt:Math.min(1,Math.max(0,(dc-0.06)/0.5))};}
+function vmFromPad(m){var P=vmPadW(m.x,m.y),L=P.w.map(function(p){return [vmCard(m.cor[p[0]]),p[1]*P.amt];});L.push([null,1-P.amt]);m.c=vmBlend(L);m.src='pad';}
+function vmV(){var v=vtSet();if(!v)return null;if(!v.vm)v.vm={on:true,x:0.5,y:0.5,cor:['velvet','glass','giant','gravel'],c:vmClean(null),a:'velvet',b:'gravel',t:50,src:'pad'};return v.vm;}
+function vmRand(s){s=s>>>0||1;return function(){s=(s*1664525+1013904223)>>>0;return s/4294967296;};}
+function vmCurve(A,N,sh,c){var F=A.F,fr=A.hop/A.sr,o=new Float32Array(F),k,i,vd=c.vd/100,vo=c.vo/1000;for(k=0;k<F;k++)o[k]=sh[k]+(isNaN(A.m[k])?0:c.reg);
+  for(i=0;i<N.length;i++){var n=N[i],a=n.a,b=Math.min(F,n.b),dur=(b-a)*fr,p=i>0?N[i-1]:null;
+    for(k=a;k<b;k++){if(isNaN(A.m[k]))continue;var t=(k-a)*fr,te=(b-k)*fr,add=0;
+      if(vd){var ramp=Math.min(1,Math.max(0,(t-vo)/0.2));add+=vd*Math.sin(2*Math.PI*c.vr*(t-vo))*ramp*Math.min(1,te/0.05);}
+      if(dur>=0.15){if(c.ent==='scoop'&&t<0.09)add-=1.5*Math.pow(1-t/0.09,2);else if(c.ent==='fall'&&te<0.14)add-=2*Math.pow(1-te/0.14,2);
+        else if(c.ent==='slide'&&p&&(a-p.b)*fr<0.25&&t<0.1){var dd=Math.max(-7,Math.min(7,(p.T-n.T)||0));add+=dd*Math.pow(1-t/0.1,2);}}
+      o[k]+=add;}}
+  return o;}
+function vmBq(y,sr,type,f,Q,dB){if(type==='pk'&&!dB)return;var A=Math.pow(10,(dB||0)/40),w=2*Math.PI*f/sr,cs=Math.cos(w),al=Math.sin(w)/(2*Q),b0,b1,b2,a0,a1,a2;
+  if(type==='pk'){b0=1+al*A;b1=-2*cs;b2=1-al*A;a0=1+al/A;a1=-2*cs;a2=1-al/A;}else if(type==='hp'){b0=(1+cs)/2;b1=-(1+cs);b2=b0;a0=1+al;a1=-2*cs;a2=1-al;}else{b0=(1-cs)/2;b1=1-cs;b2=b0;a0=1+al;a1=-2*cs;a2=1-al;}
+  b0/=a0;b1/=a0;b2/=a0;a1/=a0;a2/=a0;var x1=0,x2=0,y1=0,y2=0;for(var i=0;i<y.length;i++){var x=y[i],v=b0*x+b1*x1+b2*x2-a1*y1-a2*y2;x2=x1;x1=x;y2=y1;y1=v;y[i]=v;}}
+function vmPost(y,A,c,sr,seed){var n=y.length,i,k;
+  if(c.bri){vmBq(y,sr,'pk',3000,0.7,c.bri);
+    if(c.bri>0){var h=new Float32Array(y),e=0;vmBq(h,sr,'hp',5500,0.7);for(i=0;i<n;i++)e+=h[i]*h[i];var thr=Math.sqrt(e/n)*1.6,env=0,at=Math.exp(-1/(sr*0.002)),rl=Math.exp(-1/(sr*0.06)),dep=Math.min(1,c.bri/4);
+      for(i=0;i<n;i++){var a=Math.abs(h[i]);env=a>env?a+(env-a)*at:a+(env-a)*rl;if(env>thr)y[i]-=h[i]*(1-thr/env)*dep;}}}
+  if(c.nas){vmBq(y,sr,'pk',500,1.2,-6*c.nas);vmBq(y,sr,'pk',1000,1.4,5*c.nas);}
+  if(c.gw){var pk=0;for(i=0;i<n;i++)if(Math.abs(y[i])>pk)pk=Math.abs(y[i]);if(pk>1e-6){var dr=1+c.gw/100*1.5,tn=Math.tanh(dr),mx=c.gw/100*0.6;for(i=0;i<n;i++)y[i]+=mx*(Math.tanh(dr*y[i]/pk)/tn*pk-y[i]);}}
+  if(c.br){var R=vmRand(seed||7),nz=new Float32Array(n),ns=0,hop=A.hop,F=A.F,env2=new Float32Array(F),bo=0,dec=Math.exp(-hop/sr/0.15),pr=0,lvl=c.br/100*0.9;
+    for(i=0;i<n;i++)nz[i]=R()*2-1;vmBq(nz,sr,'hp',1800,0.7);vmBq(nz,sr,'lp',7500,0.7);for(i=0;i<n;i++)ns+=nz[i]*nz[i];ns=Math.sqrt(ns/n)||1;
+    /* aspiration follows the take's own 1.8–7.5 kHz envelope, so a dark or band-limited recording gets proportionally less hiss */
+    if(!A.hfr){var hx=new Float32Array(A.x);vmBq(hx,sr,'hp',1800,0.7);vmBq(hx,sr,'lp',7500,0.7);A.hfr=new Float32Array(F);for(k=0;k<F;k++){var e3=0,j0=Math.max(0,k*hop-hop),j1=Math.min(n,k*hop+hop);for(i=j0;i<j1;i++)e3+=hx[i]*hx[i];A.hfr[k]=Math.sqrt(e3/Math.max(1,j1-j0));}}
+    for(k=0;k<F;k++){var r=A.rms[k];if(r>pr*2&&r>0.01)bo=1;else bo*=dec;pr=pr*0.6+r*0.4;env2[k]=Math.min(A.hfr[k],0.25*r)*(1+1.5*bo);}
+    for(i=0;i<n;i++){var fk=i/hop,k0=Math.min(F-1,Math.floor(fk)),k1=Math.min(F-1,k0+1),fi=fk-k0;nz[i]*=lvl*(env2[k0]*(1-fi)+env2[k1]*fi)/ns;}
+    /* click guard: the hiss may add at most 15 % to the take's largest sample-to-sample step (matters on dark, band-limited phone takes) */
+    if(A.mj==null){A.mj=0;for(i=1;i<n;i++){var q=Math.abs(A.x[i]-A.x[i-1]);if(q>A.mj)A.mj=q;}}var nj=0;for(i=1;i<n;i++){var q2=Math.abs(nz[i]-nz[i-1]);if(q2>nj)nj=q2;}var gc=nj>0.15*A.mj?0.15*A.mj/nj:1;
+    for(i=0;i<n;i++)y[i]+=nz[i]*gc;}}
+function vmRender(b,v,A,N,sh,MK,vc){var sr=b.sampleRate,C=b.numberOfChannels,n=b.length,s2=vmCurve(A,N,sh,vc),phi=Math.pow(2,((v.fmt||0)-vc.body)/12),thr=(v.thr||0)/100,
+    op={jit:vc.gr/100,gw:vc.gw/100,seed:11},lv=vc.dbl/100*0.55,wd=vc.wid/100,st=lv>0&&wd>0,ys=[],ch,i,k;
+  for(ch=0;ch<C;ch++){var y=vtPsola(b.getChannelData(ch),A,s2,MK,phi,op);if(thr)vtThroat(y,sr,thr);ys.push(y);}
+  if(st&&ys.length===1)ys.push(new Float32Array(ys[0]));
+  if(lv>0){var sa=new Float32Array(s2.length),sb=new Float32Array(s2.length);for(k=0;k<s2.length;k++){var vo=!isNaN(A.m[k]);sa[k]=s2[k]+(vo?0.08:0);sb[k]=s2[k]-(vo?0.08:0);}
+    var d1=vtPsola(A.x,A,sa,MK,phi,{jit:op.jit,gw:op.gw,seed:23}),d2=vtPsola(A.x,A,sb,MK,phi,{jit:op.jit,gw:op.gw,seed:37}),L1=Math.round(vc.dly/1000*sr),L2=Math.round(Math.min(25,vc.dly+5)/1000*sr);
+    for(ch=0;ch<ys.length;ch++){var yy=ys[ch],pa=ys.length===1?0.5:ch===0?(1+wd)/2:(1-wd)/2,pb=1-pa;for(i=0;i<n;i++)yy[i]+=lv*(pa*(i>=L1?d1[i-L1]:0)+pb*(i>=L2?d2[i-L2]:0));}}
+  ys.forEach(function(y,c2){vmPost(y,A,vc,sr,101+c2);});
+  var ei=0,eo=0,pk=0;for(i=0;i<n;i++)ei+=A.x[i]*A.x[i];ys.forEach(function(y){for(i=0;i<n;i++){eo+=y[i]*y[i];if(Math.abs(y[i])>pk)pk=Math.abs(y[i]);}});eo/=ys.length;
+  var g=eo>1e-12?Math.sqrt(ei/eo):1;g=Math.max(0.1,Math.min(8,g));if(pk*g>0.99)g=0.99/pk;
+  var nb=ctx.createBuffer(ys.length,n,sr);ys.forEach(function(y,c2){for(i=0;i<n;i++)y[i]*=g;nb.getChannelData(c2).set(y);});return nb;}
+/* names for "New singer": two invented words, checked against a blocklist of common first/last names and accent/language/region/ethnicity words */
+var VMADJ=['Copper','Silver','Paper','Midnight','Hollow','Static','Neon','Cobalt','Dusty','Lunar','Velour','Rusty','Quiet','Electric','Woolen','Marble','Ember','Tidal','Frosted','Smoky','Amber','Crimson','Pale','Wired','Gentle','Golden'];
+var VMNOUN=['Moth','Lantern','Comet','Harbor','Kettle','Falcon','Thistle','Engine','Meadow','Raven','Pebble','Signal','Orchard','Cinder','Ferry','Bramble','Beacon','Otter','Glacier','Mirror','Sparrow','Tram','Kite','Echo','Robin','Stone'];
+var VMBLOCK=('grace rose ruby jade amber pearl hope faith joy will mark bill jack frank drake prince robin sky river summer autumn dawn eve ivy lily daisy hunter king smith brown young bell wolf fox stone cash raven taylor jones miller davis garcia wilson moore lee '+
+  'african american arab arabic asian british cajun celtic chinese creole english eastern european french german gypsy roma hispanic indian irish italian japanese jewish korean latin latino latina mexican native nordic oriental russian scottish slavic southern spanish tribal western black white accent dialect brogue cockney yankee ethnic').split(' ');
+function vmNameOk(nm){return nm.toLowerCase().split(/\s+/).every(function(w){return VMBLOCK.indexOf(w)<0;});}
+function vmName(R){R=R||Math.random;for(var t=0;t<60;t++){var nm=VMADJ[Math.floor(R()*VMADJ.length)]+' '+VMNOUN[Math.floor(R()*VMNOUN.length)];if(vmNameOk(nm)&&!vmCards().some(function(c){return c.n===nm;}))return nm;}return 'Paper Comet';}
+/* coherent randomiser: bigger body pulls the register down, more growl takes brightness away */
+function vmRoll(R){R=R||Math.random;var cl=function(x,a,b){return Math.max(a,Math.min(b,x));},r2=function(x){return Math.round(x*2)/2;},body=Math.round((-3+R()*7)*10)/10,gw=R()<0.35?Math.round(R()*60):0;
+  return {body:body,reg:cl(r2(-body*1.3+R()*3-1.5),-12,12),br:Math.round(R()*50),gr:Math.round(cl(R()*35+gw*0.4,0,100)),gw:gw,bri:cl(r2(2.5-gw/15-body*0.5+R()*2-1),-6,6),nas:Math.round((R()*1.2-0.6)*10)/10,
+    vd:Math.round(R()*40),vr:Math.round((4+R()*2.5)*10)/10,vo:Math.round(150+R()*350),ent:['straight','scoop','fall','slide'][Math.floor(R()*4)],dbl:R()<0.4?Math.round(R()*50):0,dly:Math.round(12+R()*13),wid:0};}
+function vmWave(c,col){c=vmClean(c);var p='',i;for(i=0;i<=48;i++){var x=i/48,amp=4+Math.min(4,Math.abs(c.body))+c.gw/30,f=3+c.bri/3+c.reg/8,j=(c.gr/100)*Math.sin(i*7.3)*2.5,y=12-Math.sin(x*f*Math.PI)*amp*Math.exp(-x*(1.4-c.br/100))-j;p+=(i?'L':'M')+(x*100).toFixed(1)+' '+y.toFixed(1);}
+  return '<svg viewBox="0 0 100 24" preserveAspectRatio="none" aria-hidden="true"><path d="'+p+'" fill="none" stroke="'+(col||'#ccc')+'" stroke-width="2.2" stroke-linecap="round" vector-effect="non-scaling-stroke"/></svg>';}
+function vmMix(m){if(m.src==='ab'){var A=vmCard(m.a),B=vmCard(m.b);return [[A,100-m.t],[B,m.t]].filter(function(p){return p[0];}).sort(function(a,b){return b[1]-a[1];});}
+  if(m.src!=='pad')return vmActive(m.c)?[[{n:m.nm||'Custom card',col:'#D4FF3A'},100]]:[];var P=vmPadW(m.x,m.y);if(P.amt<0.04)return [];return P.w.map(function(p){return [vmCard(m.cor[p[0]]),Math.round(p[1]*100)];});}
+function vmLocked(){return !!(VT.c&&VT.c.imp&&!VT.c.vmOk);}
+function vmApply(now){var v=vtSet(),m=v&&v.vm;if(!m)return;vmUI();if(vmLocked())return;
+  if(VTL.on&&VT.live){VTL.vm=vmEff(v);vtLivePush(VT.live);}
+  clearTimeout(VM.t);VM.t=setTimeout(function(){VM.t=null;var was=VT.au&&!VT.auRaw,p=vtPos();vtRender();if(was)vtPreview(true,false,p);vmUI();},now?0:160);}
+function vmShow(){var sh=$('#vtSheet');if(!sh)return;sh.classList.toggle('vm',VM.tab==='vm');sh.classList.toggle('vmpro',!!(VT.all||document.body.classList.contains('is-pro')));
+  $$('[data-vmt]').forEach(function(b){b.setAttribute('aria-pressed',b.getAttribute('data-vmt')===VM.tab);});if(VM.tab==='vm'){vmV();VM.sig='';vmUI();}}
+function vmUI(){var v=vtSet(),m=v&&v.vm;if(!m||$('#vtSheet').hidden)return;var c=m.c||vmClean(null);
+  $$('#vmPad .vm-cor').forEach(function(el,i){var k=vmCard(m.cor[i])||vmCard('velvet');el.innerHTML='<b><i style="background:'+k.col+'"></i>'+escapeH(k.n)+'</b><span>'+escapeH(k.d||'')+'</span>'+vmWave(k,k.col);});
+  var pk=$('#vmPuck');pk.style.left=(m.x*100)+'%';pk.style.top=(m.y*100)+'%';
+  var mx=vmMix(m),tx=mx.length?mx.map(function(p){return escapeH(p[0].n)+' '+p[1];}).join(' · '):'Your own voice';$('#vmRd').innerHTML=tx;$('#vmPad').setAttribute('aria-valuetext',tx);
+  $('#vmBar').innerHTML=mx.map(function(p){return '<i style="flex:'+Math.max(1,p[1])+';background:'+(p[0].col||'#ccc')+'"></i>';}).join('')||'<i style="flex:1;background:#FB7185"></i>';
+  $('#vmLv').textContent=VTL.on&&VT.live?'LIVE':VT.au&&!VT.auRaw?'PLAYING':'PREVIEW';
+  var cs=vmCards(),sig=JSON.stringify([m.cor,m.src==='roll'?m.nm:'',cs.map(function(k){return k.id;})]);
+  if(sig!==VM.sig){VM.sig=sig;var rolled=m.src==='roll'?'<button class="vm-sc" data-vmc="__roll" style="border-color:#D4FF3A">'+vmWave(c,'#D4FF3A')+'<b>'+escapeH(m.nm||'New singer')+'</b><span>just rolled</span></button>':'';
+    $('#vmShelf').innerHTML='<button class="vm-sc new" id="vmNew"><b style="font-size:22px">🎲</b><b>New singer</b><span>roll a voice</span></button>'+rolled+cs.map(function(k){var ci=m.cor.indexOf(k.id);
+      return '<button class="vm-sc" data-vmc="'+escapeH(k.id)+'"'+(ci>=0?' style="border-color:'+k.col+'"':'')+' aria-label="'+escapeH(k.n+' card: '+(k.d||'')+'. Drag onto a corner of the voice space')+'">'+(ci>=0?'<em style="background:'+k.col+'">'+VMCN[ci]+'</em>':'')+vmWave(k,k.col)+'<b>'+escapeH(k.n)+'</b><span>'+escapeH(k.d||'')+'</span></button>';}).join('');
+    var opt=cs.map(function(k){return '<option value="'+escapeH(k.id)+'">'+escapeH(k.n)+'</option>';}).join('');$('#vmA').innerHTML=opt;$('#vmB').innerHTML=opt;}
+  $('#vmA').value=m.a;$('#vmB').value=m.b;$('#vmT').value=m.t;$('#vmTo').textContent='A ← '+Math.round(m.t)+'% → B';
+  VMS.forEach(function(q){var e=$('#vmS_'+q[0]);if(!e)return;if(document.activeElement!==e)e.value=c[q[0]];var val=c[q[0]];$('#vmO_'+q[0]).textContent=(val>0&&q[2]<0?'+':'')+(Math.round(val*10)/10)+q[5];});
+  $$('[data-vme]').forEach(function(b){b.setAttribute('aria-pressed',b.getAttribute('data-vme')===c.ent);});
+  $('#vmConsent').hidden=!vmLocked();$('#vmBox').classList.toggle('lock',vmLocked());$('#vmTag').checked=!!VM.tag;
+  $('#vmPlay').textContent=VT.au&&!VT.auRaw?'■ Stop':'▶ Play take';vmChUI();
+  $('#vmInfo').textContent=(vmEff(v)?'Voice card on':'Your own voice')+(VT.ms?' · rendered in '+Math.round(VT.ms)+' ms':'')+' · LIVE controls are heard while monitoring with headphones; RENDER controls apply to the take.';}
+function vmChUI(){var v=vtSet(),el=$('#vmCh');if(!el||!v)return;var hs=vtHs(v),cs=vmCards();
+  var s=hs.map(function(h){var t=tracks[h.ti],p=t?t.pan||0:0,k=h.hv.vmid&&vmCard(h.hv.vmid);return '<div class="vm-hc" data-vmh="'+h.id+'" style="border-color:'+(k?k.col:'#34344a')+'"><b>'+escapeH(k?k.n:'Same as lead')+'</b><span class="mu" style="font:12px ui-monospace,monospace">'+escapeH(vtIntName(h.hv.st))+' · '+(p<-0.05?'L'+Math.round(-p*100):p>0.05?'R'+Math.round(p*100):'C')+'</span>'+
+    '<select aria-label="Voice card for this harmony"><option value="">Same as lead</option>'+cs.map(function(c){return '<option value="'+escapeH(c.id)+'"'+(h.hv.vmid===c.id?' selected':'')+'>'+escapeH(c.n)+'</option>';}).join('')+'</select></div>';}).join('');
+  el.innerHTML=s||'<span class="mu" style="font-size:13px">No harmonies yet. Make choir adds three, each sung by a different card.</span>';}
+function vmChoir(){var v=vtSet();if(!v){toast('Open a take first.');return;}if(vmLocked()){toast('Confirm permission first.');return;}
+  var plan=[[2,'choirboy',-0.4],[-12,'giant',0],[4,'glass',0.4]],n0=vtHs(v).length;plan.forEach(function(p){vtHarmony(p[0],vmCard(p[1]),p[2]);});
+  var n=vtHs(v).length-n0;VM.sig='';vmUI();if(n)toast('Choir: '+n+' harmony voices added, each with its own card and place in the stereo field.',2600);}
+function vmSaveCard(){var v=vtSet(),m=v&&v.vm;if(!m)return;var nm=m.src==='roll'&&m.nm?m.nm:vmName(),mx=vmMix(m);
+  var k=Object.assign(vmClean(m.c),{id:'u'+Date.now().toString(36)+Math.floor(Math.random()*1e4),n:nm,d:mx.length>1?mx.slice(0,2).map(function(p){return p[0].n.toLowerCase();}).join(' + '):'my card',col:['#D4FF3A','#F9A8D4','#67E8F9','#FDBA74'][VM.lib.length%4]});
+  VM.lib.push(k);vmLibSave();markDirty();VM.sig='';vmUI();toast('Saved “'+nm+'” to your cards.',2000);return k;}
+function vmTagWav(u8){try{if(!VM.tag||!daw.clips.some(function(c){return (c.vt&&vmEff(c.vt))||(c.hv&&c.hv.vm);}))return u8;}catch(e){return u8;}
+  var s='Voice transformed with Ecou\0',pad=s.length&1,len=12+s.length+pad,out=new Uint8Array(u8.length+8+len),dv=new DataView(out.buffer),o=u8.length;out.set(u8);
+  function str(t){for(var i=0;i<t.length;i++)out[o++]=t.charCodeAt(i);}str('LIST');dv.setUint32(o,len,true);o+=4;str('INFO');str('ICMT');dv.setUint32(o,s.length,true);o+=4;str(s);if(pad)out[o++]=0;dv.setUint32(4,out.length-8,true);return out;}
+function vmInit(){var pad=$('#vmPad');if(!pad)return;
+  $('#vmSl').innerHTML=VMS.map(function(q){return '<label class="vm-row"><span>'+q[1]+'</span><input type="range" id="vmS_'+q[0]+'" min="'+q[2]+'" max="'+q[3]+'" step="'+q[4]+'" aria-label="'+q[1]+'"><output id="vmO_'+q[0]+'"></output><span class="vm-tg'+(q[6]?'':' r')+'">'+(q[6]?'LIVE':'RENDER')+'</span></label>';}).join('');
+  $$('[data-vmt]').forEach(function(b){b.addEventListener('click',function(){VM.tab=b.getAttribute('data-vmt');vmShow();if(VM.tab==='tune')requestAnimationFrame(vtDraw);});});
+  $('#vmPro').addEventListener('change',function(e){VT.all=e.target.checked;try{localStorage.setItem('ecou.vtAll',VT.all?'1':'0');}catch(x){}$('#vtSheet').classList.toggle('all',VT.all);$('#vtSheet').classList.toggle('vmpro',VT.all||document.body.classList.contains('is-pro'));vmUI();});
+  function zone(m){for(var i=0;i<4;i++){var dx=m.x-VMCOR[i][0],dy=m.y-VMCOR[i][1];if(dx*dx+dy*dy<0.03)return i;}var cx=m.x-0.5,cy=m.y-0.5;return cx*cx+cy*cy<0.006?'c':null;}
+  function move(e){var m=vmV(),r=pad.getBoundingClientRect();m.x=Math.max(0,Math.min(1,(e.clientX-r.left)/r.width));m.y=Math.max(0,Math.min(1,(e.clientY-r.top)/r.height));vmFromPad(m);
+    var z=zone(m);if(z!==VM.zone&&z!=null&&navigator.vibrate)try{navigator.vibrate(z==='c'?[6,40,6]:8);}catch(x){}VM.zone=z;vmApply();}
+  pad.addEventListener('pointerdown',function(e){if(vmLocked())return;e.preventDefault();var now=Date.now();
+    if(now-VM.lt<320){VM.lt=0;vtPushUndo();var m=vmV();m.x=0.5;m.y=0.5;vmFromPad(m);if(navigator.vibrate)try{navigator.vibrate([6,40,6]);}catch(x){}vmApply(true);toast('Back to your own voice.',1200);return;}
+    VM.lt=now;vtPushUndo();VM.drag=e.pointerId;pad.classList.add('drag');try{pad.setPointerCapture(e.pointerId);}catch(x){}move(e);});
+  pad.addEventListener('pointermove',function(e){if(VM.drag===e.pointerId)move(e);});
+  function up(e){if(VM.drag!==e.pointerId)return;VM.drag=null;pad.classList.remove('drag');vmApply(true);}pad.addEventListener('pointerup',up);pad.addEventListener('pointercancel',up);
+  /* shelf: tap a card = put it on the corner nearest to YOU; drag it onto a corner = swap that corner */
+  var sh=$('#vmShelf'),gh=null,sd=null;
+  sh.addEventListener('pointerdown',function(e){var b=e.target.closest('[data-vmc]');if(!b||vmLocked())return;sd={id:b.getAttribute('data-vmc'),x:e.clientX,y:e.clientY,lx:e.clientX,mv:false,h:false,el:b,pid:e.pointerId};try{b.setPointerCapture(e.pointerId);}catch(x){}});
+  sh.addEventListener('pointermove',function(e){if(!sd||sd.pid!==e.pointerId)return;if(!sd.mv&&(sd.h||Math.abs(e.clientX-sd.x)>10&&Math.abs(e.clientX-sd.x)>2*Math.abs(e.clientY-sd.y))){sd.h=true;sh.scrollLeft-=e.clientX-sd.lx;sd.lx=e.clientX;return;}if(!sd.mv&&Math.abs(e.clientY-sd.y)>10){sd.mv=true;try{sd.el.setPointerCapture(e.pointerId);}catch(x){}gh=sd.el.cloneNode(true);gh.classList.add('vm-ghost');document.body.appendChild(gh);}
+    if(sd.mv){sd.px=e.clientX;sd.py=e.clientY;gh.style.left=e.clientX+'px';gh.style.top=e.clientY+'px';var hit=document.elementFromPoint(e.clientX,e.clientY),cor=hit&&hit.closest&&hit.closest('#vmPad')?vmNearCor(e):-1;$$('#vmPad .vm-cor').forEach(function(el,i){el.classList.toggle('hot',i===cor);});}});
+  function vmNearCor(e){var r=pad.getBoundingClientRect(),x=(e.clientX-r.left)/r.width,y=(e.clientY-r.top)/r.height;return (x<0.5?0:1)+(y<0.5?0:2);}
+  function place(id,ci){var m=vmV();if(id==='__roll'){var k=vmSaveCard();if(!k)return;id=k.id;}vtPushUndo();m.cor[ci]=id;if(m.src!=='pad')m.src='pad';vmFromPad(m);VM.sig='';if(navigator.vibrate)try{navigator.vibrate(8);}catch(x){}vmApply(true);toast((vmCard(id)||{}).n+' is now the '+['top-left','top-right','bottom-left','bottom-right'][ci]+' corner.',1600);}
+  function sup(e){if(!sd||sd.pid!==e.pointerId)return;var d=sd;sd=null;if(gh){gh.remove();gh=null;}$$('#vmPad .vm-cor').forEach(function(el){el.classList.remove('hot');});
+    if(d.mv){var r=pad.getBoundingClientRect(),pt={clientX:d.px!=null?d.px:e.clientX,clientY:d.py!=null?d.py:e.clientY};if(pt.clientX>=r.left&&pt.clientX<=r.right&&pt.clientY>=r.top&&pt.clientY<=r.bottom)place(d.id,vmNearCor(pt));}
+    else if(e.type==='pointerup'&&!d.h){var m=vmV();if(m.cor.indexOf(d.id)>=0&&d.id!=='__roll'){toast('That card is already on the pad.',1200);return;}var best=0,bd=9;VMCOR.forEach(function(p,i){var q=(m.x-p[0])*(m.x-p[0])+(m.y-p[1])*(m.y-p[1]);if(q<bd){bd=q;best=i;}});place(d.id,best);}}
+  sh.addEventListener('pointerup',sup);sh.addEventListener('pointercancel',sup);
+  sh.addEventListener('click',function(e){if(e.target.closest('#vmNew')&&!vmLocked()){var m=vmV();vtPushUndo();m.c=vmRoll();m.nm=vmName();m.src='roll';VM.sig='';vmApply(true);toast('New singer: '+m.nm+'. Save card to keep it.',2200);}});
+  var hold=$('#vmHold');function hdn(e){e.preventDefault();if(VM.hold)return;VM.hold=1;VM.hw=!!(VT.au&&!VT.auRaw);if(VT.au)vtPreview(true,true,vtPos());else vtPreview(false,true);hold.setAttribute('aria-pressed','true');}
+  function hup(){if(!VM.hold)return;VM.hold=0;hold.setAttribute('aria-pressed','false');if(VM.hw&&VT.au)vtPreview(true,false,vtPos());else{vtStopAu();vtUI();}vmUI();}
+  hold.addEventListener('pointerdown',hdn);['pointerup','pointercancel','pointerleave'].forEach(function(t){hold.addEventListener(t,hup);});hold.addEventListener('contextmenu',function(e){e.preventDefault();});
+  $('#vmSave').addEventListener('click',vmSaveCard);$('#vmSave2').addEventListener('click',vmSaveCard);$('#vmChoir').addEventListener('click',vmChoir);$('#vmChoir2').addEventListener('click',vmChoir);
+  $('#vmPlay').addEventListener('click',function(){vtPreview(false,false);vmUI();});$('#vmSong').addEventListener('click',function(){if(VT.c)vtGoClip(VT.c.id);else{vtClose();toast('Your morphed voice is in the Capture source.',1800);}});
+  $('#vmOk').addEventListener('click',function(){if(VT.c){VT.c.vmOk=1;markDirty();}vmUI();toast('Thanks. Only share transformed voices with the speaker’s consent.',2200);});
+  $('#vmTag').addEventListener('change',function(e){VM.tag=e.target.checked;try{localStorage.setItem('ecou.vmTag',VM.tag?'1':'0');}catch(x){}});
+  function ab(){var m=vmV();m.src='ab';m.c=vmBlend([[vmCard(m.a),100-m.t],[vmCard(m.b),m.t]]);vmApply();}
+  $('#vmA').addEventListener('change',function(e){vtPushUndo();vmV().a=e.target.value;ab();});$('#vmB').addEventListener('change',function(e){vtPushUndo();vmV().b=e.target.value;ab();});
+  $('#vmT').addEventListener('pointerdown',function(){vtPushUndo();});$('#vmT').addEventListener('input',function(e){vmV().t=+e.target.value;ab();});
+  $('#vmSl').addEventListener('pointerdown',function(){vtPushUndo();});
+  $('#vmSl').addEventListener('input',function(e){var k=e.target.id.replace('vmS_','');if(VM0[k]==null)return;var m=vmV();m.c=vmClean(m.c);m.c[k]=+e.target.value;if(m.src!=='roll')m.src='edit';vmApply();});
+  $$('[data-vme]').forEach(function(b){b.addEventListener('click',function(){vtPushUndo();var m=vmV();m.c=vmClean(m.c);m.c.ent=b.getAttribute('data-vme');if(m.src!=='roll')m.src='edit';vmApply(true);});});
+  $('#vmCh').addEventListener('change',function(e){var r=e.target.closest('[data-vmh]');if(!r)return;var h=clipById(+r.getAttribute('data-vmh'))||clipById(r.getAttribute('data-vmh'));if(!h)return;var k=vmCard(e.target.value);
+    if(k){h.hv.vm=vmClean(k);h.hv.vmid=k.id;}else{delete h.hv.vm;delete h.hv.vmid;}vtHarmRender(h);vmChUI();if(VT.au&&!VT.auRaw)vtPreview(true,false,vtPos());});}
 var VOX_WORKLET='('+function(){
   class V extends AudioWorkletProcessor{
     constructor(){super();var sr=sampleRate;this.sr=sr;this.N=16384;this.K=this.N-1;this.x=new Float32Array(this.N);this.acc=new Float32Array(this.N);this.ws=new Float32Array(this.N);
       this.w=0;this.D=Math.round(sr*0.0125);this.Pmax=Math.floor(this.D*0.85);this.Pmin=Math.floor(sr/1100);this.U=Math.round(sr*0.005);
       this.W2=Math.round(sr*0.012);this.y=new Float32Array(2048);this.d=new Float32Array(1024);this.P=0;this.vo=false;this.lm=-1;this.M=[];this.MP=[];this.ts=-1;this.dF=0;this.r=1;this.T=null;this.cnt=0;
-      this.amt=1;this.spd=0.015;this.pcs=[0,2,4,5,7,9,11];var me=this;this.port.onmessage=function(e){var d=e.data;if(d.amt!=null)me.amt=d.amt;if(d.spd!=null)me.spd=d.spd;if(d.pcs)me.pcs=d.pcs;};}
+      this.amt=1;this.spd=0.015;this.pcs=[0,2,4,5,7,9,11];var me=this;this.port.onmessage=function(e){var d=e.data;if(d.amt!=null)me.amt=d.amt;if(d.spd!=null)me.spd=d.spd;if(d.pcs)me.pcs=d.pcs;if(d.vm!==undefined)me.setVm(d.vm);};this.fm=1;this.rg=1;this.jit=0;this.br=0;this.dbl=0;this.dly=0;this.bq=[];this.env=0;this.nzp=0;this.rs=12345;this.dl=new Float32Array(4096);this.dw=0;this.ph=0;this.on2=false;}
+    setVm(c){this.on2=!!c;if(!c){this.fm=1;this.rg=1;this.jit=0;this.br=0;this.dbl=0;this.bq=[];return;}var sr=this.sr;this.fm=Math.pow(2,-(c.body||0)/12);this.rg=Math.pow(2,(c.reg||0)/12);this.jit=(c.gr||0)/100;this.br=(c.br||0)/100;this.dbl=(c.dbl||0)/100*0.55;this.dly=(c.dly||18)/1000*sr;
+      var L=[[3000,0.7,c.bri||0],[500,1.2,-6*(c.nas||0)],[1000,1.4,5*(c.nas||0)]],bq=[];L.forEach(function(p){if(!p[2])return;var A=Math.pow(10,p[2]/40),w=2*Math.PI*p[0]/sr,cs=Math.cos(w),al=Math.sin(w)/(2*p[1]),a0=1+al/A;bq.push(new Float64Array([(1+al*A)/a0,-2*cs/a0,(1-al*A)/a0,-2*cs/a0,(1-al/A)/a0,0,0,0,0]));});this.bq=bq;}
+    rnd(){this.rs=(this.rs*1664525+1013904223)>>>0;return this.rs/4294967296;}
+    post(o){var n=o.length,i,q,b,dl=this.dl;for(i=0;i<n;i++){var v=o[i];for(q=0;q<this.bq.length;q++){b=this.bq[q];var y=b[0]*v+b[1]*b[5]+b[2]*b[6]-b[3]*b[7]-b[4]*b[8];b[6]=b[5];b[5]=v;b[8]=b[7];b[7]=y;v=y;}
+      if(this.br){var a=Math.abs(v);this.env+=(a-this.env)*(a>this.env?0.02:0.0015);var z=this.rnd()*2-1,h=z-this.nzp;this.nzp=z;v+=this.br*0.5*this.env*h;}
+      if(this.dbl){dl[this.dw&4095]=v;this.ph+=2*Math.PI*0.35/this.sr;var dd=this.dly*(1+0.12*Math.sin(this.ph)),p=this.dw-dd,p0=Math.floor(p),f=p-p0;v+=this.dbl*(dl[p0&4095]*(1-f)+dl[(p0+1)&4095]*f);this.dw++;}
+      o[i]=v;}}
     detect(){var x=this.x,K=this.K,sr=this.sr,W=this.W2,maxL=Math.ceil(this.Pmax/2),minL=Math.max(2,Math.floor(this.Pmin/2)),n=W+maxL+2,a=this.w-2*n,y=this.y,d=this.d,i,t,e=0;
       if(a<0)return 0;for(i=0;i<n;i++){var p=x[(a+2*i)&K],q=x[(a+2*i+1)&K];y[i]=0.5*(p+q);e+=y[i]*y[i];}
       if(Math.sqrt(e/n)<0.003)return 0;var cum=0,tau=-1;d[0]=1;
@@ -5510,11 +5724,11 @@ var VOX_WORKLET='('+function(){
         nm=Math.round(nm);this.M.push(nm);this.MP.push(P);this.lm=nm;}
       var o0=this.w-n-this.D,acc=this.acc,ws=this.ws;if(this.ts<0)this.ts=o0;
       while(this.M.length>2&&this.M[1]<o0-2*this.Pmax){this.M.shift();this.MP.shift();}
-      var guard=0;while(guard++<64){var ts=this.ts,j=-1,bd=1e9;for(i=0;i<this.M.length;i++){if(this.M[i]+this.MP[i]>this.w)break;var dd=Math.abs(this.M[i]-ts);if(dd<bd){bd=dd;j=i;}}
-        var Pm=j<0?this.U:this.MP[j],L=Math.max(8,Math.round(Pm));if(ts-L>=o0+n)break;var ma=j<0?Math.round(ts):this.M[j],t0=Math.floor(ts),fr=ts-t0,rr=j<0?1:this.r;
-        for(i=-L;i<=L;i++){var u=i-fr;if(u<=-L||u>=L)continue;var oi=t0+i;if(oi<o0)continue;var w=0.5+0.5*Math.cos(Math.PI*u/L),si=ma+u,s0=Math.floor(si),f=si-s0;acc[oi&K]+=w*(x[s0&K]*(1-f)+x[(s0+1)&K]*f);ws[oi&K]+=w;}
-        this.ts+=Pm/rr;}
-      for(i=0;i<n;i++){var k=(o0+i)&K;o[i]=ws[k]>1e-6?acc[k]/ws[k]:x[k];acc[k]=0;ws[k]=0;}
+      var guard=0;while(guard++<64){var ts=this.ts,j=-1,bd=1e9;for(i=0;i<this.M.length;i++){if(this.M[i]+this.MP[i]*Math.max(1,this.fm)>this.w)break;var dd=Math.abs(this.M[i]-ts);if(dd<bd){bd=dd;j=i;}}
+        var Pm=j<0?this.U:this.MP[j],L=Math.max(8,Math.round(Pm));if(ts-L>=o0+n)break;var ma=j<0?Math.round(ts):this.M[j],t0=Math.floor(ts),fr=ts-t0,rr=j<0?1:this.r*(this.vo?this.rg:1),gg=this.jit&&j>=0?1+(this.rnd()-0.5)*this.jit*0.6:1;
+        for(i=-L;i<=L;i++){var u=i-fr;if(u<=-L||u>=L)continue;var oi=t0+i;if(oi<o0)continue;var w=0.5+0.5*Math.cos(Math.PI*u/L),si=ma+u*this.fm,s0=Math.floor(si),f=si-s0;acc[oi&K]+=w*gg*(x[s0&K]*(1-f)+x[(s0+1)&K]*f);ws[oi&K]+=w;}
+        this.ts+=Pm/rr*(this.jit&&j>=0?1+(this.rnd()-0.5)*this.jit*0.12:1);}
+      for(i=0;i<n;i++){var k=(o0+i)&K;o[i]=ws[k]>1e-6?acc[k]/ws[k]:x[k];acc[k]=0;ws[k]=0;}if(this.on2)this.post(o);
       for(var c=1;c<outs[0].length;c++)outs[0][c].set(o);return true;}}
   registerProcessor('ecou-vox',V);}.toString()+')();';
 
@@ -5563,7 +5777,7 @@ function importAudioToLane(file){if(!file||!ensureAudio())return;
     var first=!daw.clips.some(function(c){return c.type==='aud';}),bpmD=b.duration>=4?detectBpm(b):0,tmsg='';
     if(first&&bpmD&&Math.abs(bpmD-P.bpm.v)>=1){setParam('bpm',bpmD);tmsg=' Tempo set to '+bpmD+' BPM to match it.';}
     var s=dawSnap(daw.play),pl=placeAudio(s,b.duration/stepDur()),ti=pl.ti;s=pl.s;if(ti<0)return;seq.src='arrange';updTransportUI();
-    var c=newClip({type:'aud',ti:ti,s:s,off:0,dur:b.duration,buf:abufAdd(b),name:(file.name||'Audio').replace(/\.[^.]+$/,'').slice(0,40)});daw.sel=c.id;markDirty();renderInsp();dawNeed=true;
+    var c=newClip({type:'aud',ti:ti,s:s,off:0,dur:b.duration,buf:abufAdd(b),imp:1,name:(file.name||'Audio').replace(/\.[^.]+$/,'').slice(0,40)});daw.sel=c.id;markDirty();renderInsp();dawNeed=true;
     toast('Imported '+dec(b.duration,1)+' s at bar '+(Math.floor(s/16)+1)+'.'+tmsg+(bpmD?'':' Set the project tempo to the beat’s BPM so pads and loops line up.'),4500);
   }).catch(function(){toast('That file couldn’t be decoded in this browser.');});
 }
@@ -7053,14 +7267,14 @@ function vtTakeBtns(){$$('[data-take]').forEach(function(el){var p=el.querySelec
   if(p)p.textContent=on&&!VT.tpRaw?'■ Stop':'▶ Play';if(r)r.textContent=on&&VT.tpRaw?'■ Stop':'▶ Original';});}
 function vtTakeCard(c){var t=tracks[c.ti],tu=!!(c.vt&&c.vt.on&&c.vt.out&&c.buf===c.vt.out),rv=t?t.rev||0:0;
   return '<div class="vt-take" data-take="'+c.id+'"><div class="row"><b>Your take</b><span class="mu">'+vtFmtDur(c.dur)+(tu?' · tuned ('+(VTSTY[c.vt.st]?VTSTY[c.vt.st].n:'custom')+')':'')+'</span></div><canvas data-tkw aria-label="Waveform of your take"></canvas><span class="mu" style="font-size:13px">Saved in '+escapeH(vtWhere(c))+'</span>'+
-    '<div class="vt-g2"><button class="btn" data-tk="play">▶ Play</button><button class="btn" data-tk="raw" aria-label="Play the original take: no tuning, no reverb, no effects">▶ Original</button><button class="btn vt-chip" data-tk="tune" aria-pressed="'+tu+'">Tune voice</button><button class="btn" data-tk="song">Open in Song</button></div>'+
+    '<div class="vt-g2"><button class="btn" data-tk="play">▶ Play</button><button class="btn" data-tk="raw" aria-label="Play the original take: no tuning, no reverb, no effects">▶ Original</button><button class="btn vt-chip" data-tk="tune" aria-pressed="'+tu+'">Tune voice</button><button class="btn" data-tk="song">Open in Song</button><button class="btn vt-chip" data-tk="vm" style="grid-column:1/-1" aria-pressed="'+!!(c.vt&&vmEff(c.vt))+'">Voice Morph'+(c.vt&&vmEff(c.vt)?' · on':'')+'</button></div>'+
     '<label class="ctl"><span class="row"><span>Reverb on '+escapeH(t?t.name:'this track')+'</span><output data-tkro>'+(rv?fPct(rv):'dry')+'</output></span><input type="range" data-tkr min="0" max="1" step="0.01" value="'+rv+'" aria-label="Reverb for this track"></label></div>';}
 function vtThumb(cv,b,c){if(!cv||!b)return;var dpr=window.devicePixelRatio||1,W=cv.clientWidth||300,H=cv.clientHeight||56;cv.width=Math.round(W*dpr);cv.height=Math.round(H*dpr);var g=cv.getContext('2d');g.setTransform(dpr,0,0,dpr,0,0);g.clearRect(0,0,W,H);
   var p=peaksOf(b),i0=Math.floor((c.off||0)*b.sampleRate/256),i1=Math.max(i0+1,Math.min(p.length,Math.ceil(((c.off||0)+c.dur)*b.sampleRate/256))),n=i1-i0,mx=0.02,i,x;for(i=i0;i<i1;i++)if(p[i]>mx)mx=p[i];
   g.fillStyle='#D4FF3A';for(x=0;x<W;x++){var a=i0+Math.floor(x/W*n),e=Math.max(a+1,i0+Math.floor((x+1)/W*n)),m=0;for(i=a;i<e&&i<i1;i++)if(p[i]>m)m=p[i];var h=Math.max(1,m/mx*(H/2-3));g.fillRect(x,H/2-h,1,h*2);}}
 function vtTakeBind(root,c){var el=root&&root.querySelector('[data-take="'+c.id+'"]');if(!el)return;var cv=el.querySelector('canvas');vtThumb(cv,abuf[c.buf],c);requestAnimationFrame(function(){vtThumb(cv,abuf[c.buf],c);});
   el.querySelector('[data-tk="play"]').addEventListener('click',function(){vtPlayTake(c,false);});el.querySelector('[data-tk="raw"]').addEventListener('click',function(){vtPlayTake(c,true);});
-  el.querySelector('[data-tk="tune"]').addEventListener('click',function(){vtStopTP();vtOpenClip(c);});el.querySelector('[data-tk="song"]').addEventListener('click',function(){vtGoClip(c.id);});
+  el.querySelector('[data-tk="tune"]').addEventListener('click',function(){VM.tab='tune';vtStopTP();vtOpenClip(c);});el.querySelector('[data-tk="vm"]').addEventListener('click',function(){VM.tab='vm';vtStopTP();vtOpenClip(c);});el.querySelector('[data-tk="song"]').addEventListener('click',function(){vtGoClip(c.id);});
   var r=el.querySelector('[data-tkr]');r.addEventListener('input',function(){var t=tracks[c.ti];if(!t)return;t.rev=+r.value;el.querySelector('[data-tkro]').textContent=t.rev?fPct(t.rev):'dry';try{applyMix();}catch(e){}});r.addEventListener('change',function(){markDirty();try{renderMixer();}catch(e){}});vtTakeBtns();}
 function garAudioUI(){var el=$('#garInst');el.classList.remove('fret');var t=tracks[GAR.ti],lc=arr.rec?null:garLastAud(),mon=daw.mon||VTL.on;
   var live=VTL.on?'<div class="gx-row"><span>Live style</span><div class="seg" role="group" aria-label="Live auto-tune style">'+Object.keys(VTSTY).map(function(k){return '<button data-gvs="'+k+'" aria-pressed="'+((VTL.st||'pop')===k)+'" style="min-height:44px">'+VTSTY[k].n+'</button>';}).join('')+'</div></div><label class="ctl"><span class="row"><span>Live amount</span><output id="garVtAo">'+VTL.amt+'%</output></span><input type="range" id="garVtA" min="0" max="100" step="1" value="'+VTL.amt+'" aria-label="Live auto-tune amount"></label>':'';
@@ -7659,7 +7873,7 @@ function bandKeyChanged(ok,om){var B=GAR.band,d=GAR.key-ok,mi=!!(BMODE[B.mode]||
 function bandMigrate(d){var B=GAR.band;if(!d)return;Object.keys(d).forEach(function(k){if(k in B)B[k]=d[k];});B.parts=Object.assign({A:null,B:null,C:null},d.parts||{});B.pen=Object.assign({A:0.5,B:0.7,C:0.35},d.pen||{});
   if(d.energy!=null&&!d.pen){B.pen.A=d.energy;B.pen.B=Math.min(1,d.energy+0.15);}if(d.genre&&!d.dS&&BGEN[d.genre]){var G0=BGEN[d.genre];B.meter=G0.m;B.dS=G0.d;B.bS=G0.b;B.kS=G0.k;B.feel=G0.f;B.swing=G0.sw;}
   B.groove=d.groove||{};B.gOn=Object.assign({d:false,b:false,k:false},d.gOn||{});B.open=Object.assign({harm:true},d.open||{});if(!BMET[B.meter])B.meter='4/4';if(!BMODE[B.mode])B.mode='ionian';B.keyHint=null;B.tr=d.tr&&typeof d.tr==='object'?d.tr:null;bandTr();}
-try{initVocal();}catch(e){errLog.push('vocal: '+e.message);}setInterval(bandNowTick,60);
+try{initVocal();}catch(e){errLog.push('vocal: '+e.message);}try{vmInit();}catch(e){errLog.push('vmorph: '+e.message);}setInterval(bandNowTick,60);
 
 function garRenderPlay(){
   var inst=GAR.inst||'skeys';GAR.inst=inst;var I=GINST[inst],fam=FAM[IFAM[inst]];$('#t-gar').style.setProperty('--fam',fam);
