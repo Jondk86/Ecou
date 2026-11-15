@@ -3576,6 +3576,15 @@ var TONIC={C:0,'C#':1,Db:1,D:2,Eb:3,E:4,F:5,'F#':6,Gb:6,G:7,'G#':8,Ab:8,A:9,Bb:1
 var DRUMMAP=[['F',4,0,'Kick'],['C',5,0,'Snare'],['C',5,0,'Clap'],['C',5,1,'Rim'],['G',5,1,'Closed hat'],['G',5,1,'Open hat'],['F',5,1,'Shaker'],['A',5,1,'Cowbell'],['A',4,0,'Tom lo'],['D',5,0,'Tom mid'],['E',5,0,'Tom hi'],['A',5,1,'Crash'],['E',4,0,'808'],['B',5,1,'FX'],['B',5,1,'FX'],['B',5,1,'FX']];
 var GMDRUM=[36,38,39,37,42,46,70,56,41,45,48,49,35,27,81,55],GMPROG=[0,11,52,38];
 function collectSong(){
+  /* when the song lives on the timeline (band parts, Studio clips), notate what plays there: every unmuted pattern clip on every track, as arrStep() plays it */
+  var pc=daw.clips.filter(function(c){return c.type==='pat'&&!c.mute&&patterns[c.p]&&tracks[c.ti]&&tracks[c.ti].kind!=='audio';});
+  if(stemSrc()==='arrange'&&pc.length){var T0={},D0=[],ks=KEYSI(),z=Math.floor(Math.min.apply(null,pc.map(function(c){return c.s;}))/16)*16,end=0;ks.forEach(function(k){T0[k]=[];});
+    pc.forEach(function(c){var pt=patterns[c.p],L=pt.len,o=c.o||0,ce=c.s+c.l;end=Math.max(end,ce);
+      for(var r=Math.floor(o/L)*L-o;c.s+r<ce;r+=L){var b=c.s+r;
+        if(c.ti===0){pt.drums.forEach(function(a,pad){for(var s=0;s<L;s++){var g=b+s;if(a[s]&&g>=c.s&&g<ce)D0.push({s:g-z,pad:pad});}});}
+        else if(T0[c.ti])(pt.notes[c.ti]||[]).forEach(function(n){var s=Math.round(n.s);if(s>=L)return;var g=b+s;if(g<c.s||g>=ce)return;T0[c.ti].push({s:g-z,l:Math.min(Math.max(1,Math.round(n.l)),ce-g),m:n.m,v:n.v});});}});
+    ks.forEach(function(k){T0[k].sort(function(a,b){return a.s-b.s;});});D0.sort(function(a,b){return a.s-b.s;});
+    return {total:Math.max(16,Math.ceil((end-z)/16)*16),keys:T0,drums:D0};}
   var order=song.length?song:[curPat],off=0,T={},D=[];KEYSI().forEach(function(k){T[k]=[];});
   order.forEach(function(pi){var pt=patterns[pi];
     KEYSI().forEach(function(ti){(pt.notes[ti]||[]).forEach(function(n){var s=Math.round(n.s);if(s>=pt.len)return;var l=Math.min(Math.max(1,Math.round(n.l)),pt.len-s);T[ti].push({s:off+s,l:l,m:n.m,v:n.v});});});
@@ -8281,7 +8290,9 @@ function reelMime(){var L=['video/mp4;codecs=avc1.42E01E,mp4a.40.2','video/mp4;c
 function reelDraw(c,S,t){var g=c.getContext('2d'),W=c.width,H=c.height,u=W/1080,cx=W/2,cy=H*0.46,R=300*u,ev=S.ev,i,j;
   g.globalAlpha=1;g.fillStyle='#0B0B0E';g.fillRect(0,0,W,H);
   var s0=Math.max(0,Math.floor(t*S.sr)),lv=0,L=S.ch[0],Rr=S.ch[1];for(i=0;i<2048&&s0+i<L.length;i+=8){var a=Math.abs(L[s0+i])+Math.abs(Rr[s0+i]);if(a>lv)lv=a;}lv=Math.min(1,lv*0.6);
-  var gr=g.createRadialGradient(cx,cy,R*0.2,cx,cy,H*0.6);gr.addColorStop(0,'rgba(212,255,58,'+(0.05+lv*0.08)+')');gr.addColorStop(1,'rgba(11,11,14,0)');g.fillStyle=gr;g.fillRect(0,0,W,H);
+  /* the glow is drawn once per size and blitted with globalAlpha (same pixels as a per-frame gradient, far cheaper to raster) */
+  if(!S.glow||S.glow.width!==W){var gc=typeof OffscreenCanvas!=='undefined'?new OffscreenCanvas(W,H):document.createElement('canvas');gc.width=W;gc.height=H;var gg=gc.getContext('2d'),gr=gg.createRadialGradient(cx,cy,R*0.2,cx,cy,H*0.6);gr.addColorStop(0,'rgba(212,255,58,1)');gr.addColorStop(1,'rgba(11,11,14,0)');gg.fillStyle=gr;gg.fillRect(0,0,W,H);S.glow=gc;}
+  g.globalAlpha=0.05+lv*0.08;g.drawImage(S.glow,0,0);g.globalAlpha=1;
   var LIFE=S.rm?0.7:2.4;i=S.i0;while(i<ev.length&&ev[i].t<t-LIFE)i++;S.i0=i;
   var FR={k:0,g:1,b:2,d:3,v:4,s:5};
   for(j=i;j<ev.length&&ev[j].t<=t;j++){var e=ev[j],ag=t-e.t,k=ag/LIFE;g.strokeStyle=RFAM[e.f]||'#fff';g.beginPath();
@@ -8308,14 +8319,67 @@ function reelFixWebm(blob,ms){if(!blob.arrayBuffer)return Promise.resolve(blob);
     return new Blob([b.subarray(0,so),h,b.subarray(co,ce),d,b.subarray(ce)],{type:blob.type});}}return blob;});}
 function reelUI(st,f){if(st)REEL.state=st;st=REEL.state;var s=$('#rlStat');if(!s)return;
   $('#rlGo').hidden=st==='render'||st==='rec';$('#rlCancel').hidden=!(st==='render'||st==='rec');$('#rlOut').hidden=st!=='done';$('#rlProg').hidden=!(st==='render'||st==='rec');
-  $('#rlStage').hidden=st==='idle';$('#rlCv').hidden=st!=='rec'&&st!=='render';$('#rlVid').hidden=st!=='done';$('#rlLen').classList.toggle('dis',st==='render'||st==='rec');
+  $('#rlStage').hidden=st==='idle';$('#rlCv').hidden=st!=='rec'&&st!=='render';$('#rlVid').hidden=st!=='done';$('#rlLen').classList.toggle('dis',st==='render'||st==='rec');if(st==='idle'||st==='done')reelLenUI();
   if(f!=null)$('#rlBar').style.width=Math.round(f*100)+'%';
-  s.textContent=st==='render'?'Rendering the audio… '+Math.round((f||0)*100)+'%':st==='rec'?'Recording video… '+Math.round((f||0)*REEL.dur)+' / '+Math.round(REEL.dur)+' s (real time — you can close this sheet)':st==='done'?REEL.info:'';
+  s.textContent=st==='render'?'Rendering the audio… '+Math.round((f||0)*100)+'%':st==='rec'?(REEL.mode==='wc'?'Making video… '+Math.round((f||0)*100)+'% (faster than real time — you can close this sheet)':'Recording video… '+Math.round((f||0)*REEL.dur)+' / '+Math.round(REEL.dur)+' s (real time — you can close this sheet)'):st==='done'?REEL.info:'';
   $('#rlGo').textContent=st==='done'?'New video':'Make video';var sb=$('#shareBtn');if(sb)sb.classList.toggle('busy',st==='render'||st==='rec');}
+function reelMRok(){return typeof MediaRecorder!=='undefined'&&!!HTMLCanvasElement.prototype.captureStream&&!!(ctx&&ctx.createMediaStreamDestination);}
+function reelWCok(){return typeof VideoEncoder!=='undefined'&&typeof AudioEncoder!=='undefined'&&typeof VideoFrame!=='undefined'&&typeof AudioData!=='undefined'&&typeof OfflineAudioContext!=='undefined';}
+/* vendored MIT muxers (Vanilagy mp4-muxer / webm-muxer), lazy-loaded; cached by sw.js for offline use */
+function reelLoad(path,g){if(window[g])return Promise.resolve(window[g]);
+  function one(base){return new Promise(function(res,rej){var s=document.createElement('script');s.src=new URL(path,base).href;s.onload=function(){window[g]?res(window[g]):rej('noload');};s.onerror=function(){s.remove();rej('noload');};document.head.appendChild(s);});}
+  return one(location.href).catch(function(){return one(SMPALT);});}
+function reelFirst(L,f){return L.reduce(function(p,c){return p.then(function(r){return r||Promise.resolve().then(function(){return f(c);}).then(function(x){return x&&x.supported?c:null;},function(){return null;});});},Promise.resolve(null));}
+function reelPickA(){return reelFirst([{codec:'mp4a.40.2',sampleRate:48000,numberOfChannels:2,bitrate:160000},{codec:'opus',sampleRate:48000,numberOfChannels:2,bitrate:160000}],function(c){return AudioEncoder.isConfigSupported(c);});}
+function reelPickV(boxes,maxW){var C=[];boxes.forEach(function(bx){[[1080,1920,8e6,'28','40'],[720,1280,5e6,'1f','31']].forEach(function(z){if(z[0]>(maxW||1080))return;
+    (bx==='mp4'?['avc1.6400'+z[3],'avc1.4d00'+z[3],'avc1.42e0'+z[3]]:['vp8','vp09.00.'+z[4]+'.08']).forEach(function(cd){var cfg={codec:cd,width:z[0],height:z[1],bitrate:z[2],framerate:30,latencyMode:'quality'};if(bx==='mp4')cfg.avc={format:'avc'};C.push({box:bx,codec:cd,width:z[0],height:z[1],cfg:cfg});});});});
+  return reelFirst(C,function(c){return VideoEncoder.isConfigSupported(c.cfg);});}
+function reelTo48(ab){if(ab.sampleRate===48000)return Promise.resolve(ab);var oc=new OfflineAudioContext(2,Math.ceil(ab.duration*48000),48000),s=oc.createBufferSource();s.buffer=ab;s.connect(oc.destination);s.start();return oc.startRendering();}
+/* codec plan: AAC-LC → MP4 + H.264. No AAC encoder → Opus, still in MP4 + H.264 (measured 1.3x faster than VP8/WebM here; plays in Chrome, Firefox, Safari 17+), WebM VP8/VP9 only without H.264 */
+function reelPlan(maxW){var ac;return reelPickA().then(function(a){if(!a)throw 'noaud';ac=a;return reelPickV(a.codec==='opus'?(REEL.opusBoxes||['mp4','webm']):['mp4'],maxW);}).then(function(v){if(!v)throw 'novid';return {a:ac,v:v};});}
+function reelWC(cv,S,ab,maxW){var M,vc,ac,venc=null,aenc=null,mux,tgt,err=null,t0=performance.now();REEL.mode='wc';
+  function shut(){[venc,aenc].forEach(function(x){try{if(x&&x.state!=='closed')x.close();}catch(e){}});}
+  return reelPlan(maxW).then(function(pl){ac=pl.a;vc=pl.v;
+    return Promise.all([vc.box==='mp4'?reelLoad('vendor/mp4-muxer/mp4-muxer.js','Mp4Muxer'):reelLoad('vendor/webm-muxer/webm-muxer.js','WebMMuxer'),reelTo48(ab)]);}).then(function(r){
+    if(REEL.cx)throw 'cx';M=r[0];var a48=r[1],mp4=vc.box==='mp4',opus=ac.codec==='opus';cv.width=vc.width;cv.height=vc.height;S.big=vc.width;S.i0=0;tgt=new M.ArrayBufferTarget();
+    mux=mp4?new M.Muxer({target:tgt,video:{codec:'avc',width:vc.width,height:vc.height,frameRate:30},audio:{codec:opus?'opus':'aac',numberOfChannels:2,sampleRate:48000},fastStart:'in-memory',firstTimestampBehavior:'cross-track-offset'})
+      :new M.Muxer({target:tgt,video:{codec:vc.codec==='vp8'?'V_VP8':'V_VP9',width:vc.width,height:vc.height,frameRate:30},audio:{codec:'A_OPUS',numberOfChannels:2,sampleRate:48000},firstTimestampBehavior:'offset'});
+    venc=new VideoEncoder({output:function(c,m){mux.addVideoChunk(c,m);},error:function(e){err=e;}});venc.configure(vc.cfg);
+    aenc=new AudioEncoder({output:function(c,m){mux.addAudioChunk(c,m);},error:function(e){err=e;}});aenc.configure(ac);
+    REEL.st={stop:function(){REEL.cx=true;}};REEL.vinfo=(mp4?'MP4':'WebM')+' · '+(vc.codec.indexOf('avc')===0?'H.264':vc.codec==='vp8'?'VP8':'VP9')+' + '+(opus?'Opus':'AAC');reelUI('rec',0);
+    var L=a48.getChannelData(0),R=a48.getChannelData(1),N=L.length,ao=0,F=4800,nf=Math.max(1,Math.round(S.dur*30)),i=0,lu=0,tS=performance.now(),probed=false;REEL.wst={draw:0,vf:0,w:vc.width,codec:vc.codec};
+    /* draw on an OffscreenCanvas (cheaper frame readback); the sheet's canvas shows every 5th frame as a preview */
+    var oc=cv,pg=null;if(typeof OffscreenCanvas!=='undefined'){try{oc=new OffscreenCanvas(vc.width,vc.height);if(!oc.getContext('2d'))oc=cv;}catch(e){oc=cv;}}if(oc!==cv){cv.width=360;cv.height=640;pg=cv.getContext('2d');}
+    function feedA(to){to=Math.min(N,to);while(ao<to){var n=Math.min(F,N-ao),b=new Float32Array(n*2);b.set(L.subarray(ao,ao+n),0);b.set(R.subarray(ao,ao+n),n);
+      var d=new AudioData({format:'f32-planar',sampleRate:48000,numberOfFrames:n,numberOfChannels:2,timestamp:Math.round(ao*1e6/48000),data:b});aenc.encode(d);d.close();ao+=n;}}
+    return new Promise(function(res,rej){
+      function step(){if(err)return rej(err);if(REEL.cx)return rej('cx');var tEnd=performance.now()+24;
+        while(i<nf&&performance.now()<tEnd&&venc.encodeQueueSize<6){var tt=i/30;feedA(Math.round((tt+0.5)*48000));var td=performance.now();reelDraw(oc,S,tt);var tv=performance.now();REEL.wst.draw+=tv-td;
+          var vf=new VideoFrame(oc,{timestamp:Math.round(i*1e6/30),duration:Math.round(1e6/30)});venc.encode(vf,{keyFrame:i%60===0});vf.close();REEL.wst.vf+=performance.now()-tv;
+          if(oc!==cv&&i%5===0)pg.drawImage(oc,0,0,cv.width,cv.height);i++;}
+        if(i-lu>=6||i>=nf){lu=i;reelUI('rec',i/nf);}
+        /* speed probe: a software encoder that can't beat 1.2x real time at 1080p starts again at 720p */
+        if(!probed&&i>=45&&i<nf){probed=true;if(i/((performance.now()-tS)/1000)<36&&vc.width>720)return rej('slow');}
+        if(i<nf){setTimeout(step,venc.encodeQueueSize>=6?6:0);return;}
+        feedA(N);Promise.all([venc.flush(),aenc.flush()]).then(function(){if(err)throw err;res();}).catch(rej);}
+      step();});
+  }).then(function(){shut();REEL.st=null;mux.finalize();var mp4=vc.box==='mp4',b=new Blob([tgt.buffer],{type:mp4?'video/mp4':'video/webm'});REEL.encMs=Math.round(performance.now()-t0);
+    reelFinish(b,mp4?'mp4':'webm',S,ac.codec==='opus'?'Opus':'AAC',REEL.encMs);},function(e){shut();REEL.st=null;throw e;});}
+function reelFinish(b2,ext,S,aud,ms){REEL.busy=false;if(REEL.url)URL.revokeObjectURL(REEL.url);REEL.blob=b2;REEL.url=URL.createObjectURL(b2);REEL.name='ecou-'+safeName(project.name)+'-reel.'+ext;REEL.aud=aud;
+  $('#rlVid').src=REEL.url;REEL.info='Video ready · '+dec(S.dur,1)+' s · '+S.big+'×'+Math.round(S.big*16/9)+' · '+(REEL.mode==='wc'?REEL.vinfo:ext.toUpperCase()+' + '+aud)+' · '+dec(b2.size/1048576,1)+' MB'+
+    (aud==='Opus'?' — this browser has no AAC audio encoder, so some apps (Instagram, iPhone) may refuse the sound; Chrome on Android/Windows/Mac makes AAC':'');reelUI('done');
+  if($('#shareSheet').hidden)toast('Your video is ready — open Share to post it.');}
+/* the reel's real length before rendering: timeline/song length (+ the short tail the mix keeps) */
+function reelSongLen(){var sd=stepDur();return stemSrc()==='arrange'?arrEnd()*sd:songOrder().reduce(function(a,pi){return a+patterns[pi].len;},0)*sd;}
+function reelLenUI(){var L=reelSongLen(),w=$('#rlLen');if(!w)return;var any=false,Lw=Math.min(60,Math.round(L+1));/* whole reel = song + up to 1 s of tail */
+  $$('#rlLen button').forEach(function(b){var n=+b.getAttribute('data-rl');if(n){b.hidden=n>=Lw;if(!b.hidden)any=true;}else b.textContent=L>60?'First 60 s':'Whole song';});
+  if(REEL.len&&REEL.len>=Lw)REEL.len=0;$$('#rlLen button').forEach(function(b){b.setAttribute('aria-pressed',String(+b.getAttribute('data-rl')===REEL.len));});
+  var i=$('#rlLenInfo');if(i)i.textContent=REEL.len?'~'+REEL.len+' s — the last '+REEL.len+' s of a ~'+Math.round(L)+' s song':L>60?'~60 s — the first minute of a ~'+Math.round(L)+' s song':'~'+Math.max(1,Lw)+' s — whole song';
+  var wc=reelWCok(),m=$('#rlMon');if(m)m.closest('label').hidden=wc;var nt=$('#rlNote');if(nt)nt.textContent=wc?'Videos are made faster than real time at a steady 30 fps (up to 60 s). You can close this sheet and keep working.':'Videos record in real time (up to 60 s): this browser can only encode while the song plays. You can close this sheet and keep working.';}
 function reelMake(){
   if(REEL.busy){toast('A video is already being made.');return;}if(!ensureAudio())return;if(seq.bounce||stemsRunning){toast('An export is already running.');return;}
-  if(typeof MediaRecorder==='undefined'||!HTMLCanvasElement.prototype.captureStream||!ctx.createMediaStreamDestination){toast('Video export isn’t supported in this browser — try Chrome.');return;}
-  transportStop();REEL.busy=true;REEL.cx=false;REEL.log=[];reelUI('render',0);var sr=ctx.sampleRate;
+  var wc=reelWCok();if(!wc&&!reelMRok()){toast('Video export isn’t supported in this browser — try Chrome.');return;}
+  transportStop();REEL.mode=wc?'wc':'mr';REEL.busy=true;REEL.cx=false;REEL.log=[];reelUI('render',0);var sr=ctx.sampleRate;
   waitCal().then(function(){return renderOffline({mode:'mix',spatial:false,src:stemSrc(),onProgress:function(f){if(REEL.state==='render')reelUI('render',f);}});}).then(function(r){
     var ev=REEL.log||[];REEL.log=null;if(REEL.cx)throw 'cx';
     var lat=r.js?Math.round(TRACKLAT*sr):masterLatency(sr),full=r.buf,endS=Math.min(tailLength(full,r.end),Math.round((r.end+1)*sr)+lat),N=REEL.len||60,st=REEL.len?Math.max(lat,endS-N*sr):lat,en=REEL.len?endS:Math.min(endS,lat+N*sr),n=Math.max(sr,en-st);
@@ -8323,25 +8387,30 @@ function reelMake(){
     for(var c=0;c<2;c++){var x=full.getChannelData(c);ch[c].set(x.subarray(st,Math.min(x.length,st+n)));if(st>lat)for(var i=0;i<fi;i++)ch[c][i]*=i/fi;for(i=0;i<fo&&i<n;i++)ch[c][n-1-i]*=i/fo;}
     var off=(lat-st)/sr,E=[];if(ev.length<8){ev=reelOnsets(ch,sr);off=0;}if(!ev.length)throw 'empty';ev.forEach(function(e){var t=e.t+off;if(t>-3&&t<n/sr)E.push({t:t,f:e.f,m:e.m,v:e.v,d:e.d,k:e.k});});E.sort(function(a,b){return a.t-b.t;});
     REEL.ev=E;var dur=n/sr,S={ev:E,i0:0,sr:sr,ch:ch,dur:dur,chords:reelChords(E,dur),key:GNOTE[GAR.key||0]+(GAR.minor?' minor':' major'),bpm:Math.round(P.bpm.v),title:(project.name||'Untitled'),rm:!!(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches)};
-    REEL.dur=dur;var cv=$('#rlCv');cv.width=1080;cv.height=1920;var t0=performance.now();for(i=0;i<4;i++)reelDraw(cv,S,dur*0.5+i*0.03);S.i0=0;
-    if((performance.now()-t0)/4>12||!/avc1/.test(reelMime())){cv.width=720;cv.height=1280;}/* 1080p only with an H.264 (hardware) encoder and a fast canvas; VP8/9 software encode at 1080p drops frames */S.big=cv.width;reelRecord(cv,S,ab);
-  }).catch(function(e){REEL.log=null;REEL.busy=false;if(e==='empty')toast('Nothing to film yet — add a part to the song first.');else if(e!=='cx'){console.error(e);toast('Couldn’t make the video in this browser.');}reelUI(REEL.blob?'done':'idle');});
+    REEL.dur=dur;var cv=$('#rlCv');
+    /* WebCodecs: frame i is drawn at t=i/30 from the logged events and encoded offline (constant 30 fps, exact sync, faster than real time).
+       MediaRecorder (no WebCodecs): real time at 720x1280, dropping to 540x960 if the first second runs under 26 fps */
+    var mr=function(){if(!reelMRok())throw 'nosup';REEL.mode='mr';cv.width=720;cv.height=1280;S.big=720;S.i0=0;reelRecord(cv,S,ab);};
+    if(!wc)return mr();
+    return reelWC(cv,S,ab).catch(function(e){if(e==='slow')return reelWC(cv,S,ab,720);throw e;}).catch(function(e){if(e==='cx')throw e;console.warn('Ecou reel: WebCodecs path failed, using MediaRecorder',e);return mr();});
+  }).catch(function(e){REEL.log=null;REEL.busy=false;REEL.st=null;if(e==='cx'&&REEL.mode==='wc')toast('Video cancelled.');if(e==='empty')toast('Nothing to film yet — add a part to the song first.');else if(e!=='cx'){console.error(e);toast('Couldn’t make the video in this browser.');}reelUI(REEL.blob?'done':'idle');});
 }
 function reelRecord(cv,S,ab){
   var mt=reelMime(),dest=ctx.createMediaStreamDestination(),src=ctx.createBufferSource(),mg=null;src.buffer=ab;src.connect(dest);if(REEL.mon){mg=ctx.createGain();mg.gain.value=1;src.connect(mg);mg.connect(ctx.destination);}
   var vs=cv.captureStream(30),ms=new MediaStream([vs.getVideoTracks()[0],dest.stream.getAudioTracks()[0]]),o=mt?{mimeType:mt,videoBitsPerSecond:cv.width>800?8000000:4500000,audioBitsPerSecond:160000}:{},rec,chunks=[];
   try{rec=new MediaRecorder(ms,o);}catch(e){rec=new MediaRecorder(ms);}
   rec.ondataavailable=function(e){if(e.data&&e.data.size)chunks.push(e.data);};
-  var t0=0,tw=0,last=0,raf=0,done=false,p0=0;
+  var t0=0,tw=0,last=0,raf=0,done=false,p0=0,nd=0,chk=false,redo=false,vt=vs.getVideoTracks()[0];
   function stop(){if(done)return;done=true;cancelAnimationFrame(raf);try{src.stop();}catch(e){}try{src.disconnect();if(mg)mg.disconnect();}catch(e){}try{rec.stop();}catch(e){}}
   REEL.st={stop:stop};
   rec.onstop=function(){ms.getTracks().forEach(function(t){try{t.stop();}catch(e){}});REEL.st=null;REEL.busy=false;var dms=performance.now()-p0;
     if(REEL.cx){reelUI(REEL.blob?'done':'idle');toast('Video cancelled.');return;}
-    var ty=(rec.mimeType||mt||'video/webm').split(';')[0],b=new Blob(chunks,{type:ty}),ext=/mp4/.test(ty)?'mp4':'webm';
-    (ext==='webm'?reelFixWebm(b,dms):Promise.resolve(b)).then(function(b2){if(REEL.url)URL.revokeObjectURL(REEL.url);REEL.blob=b2;REEL.url=URL.createObjectURL(b2);REEL.name='ecou-'+safeName(project.name)+'-reel.'+ext;
-      $('#rlVid').src=REEL.url;REEL.info='Video ready · '+dec(S.dur,1)+' s · '+S.big+'×'+Math.round(S.big*16/9)+' · '+ext.toUpperCase()+' · '+dec(b2.size/1048576,1)+' MB';reelUI('done');
-      if($('#shareSheet').hidden)toast('Your video is ready — open Share to post it.');});};
-  function fr(){if(done)return;var now=ctx.currentTime,t=now-t0-0.04;/* 40 ms: the MediaStream audio path lags the canvas capture (measured) */if(performance.now()-last>=30){last=performance.now();reelDraw(cv,S,Math.max(0,t));if(t-tw>0.25){tw=t;reelUI('rec',Math.max(0,Math.min(1,t/S.dur)));}}
+    if(redo){REEL.busy=true;cv.width=540;cv.height=960;S.big=540;S.i0=0;reelRecord(cv,S,ab);return;}
+    var ty=(rec.mimeType||mt||'video/webm').split(';')[0],b=new Blob(chunks,{type:ty}),ext=/mp4/.test(ty)?'mp4':'webm',am=rec.mimeType||mt||'';
+    (ext==='webm'?reelFixWebm(b,dms):Promise.resolve(b)).then(function(b2){reelFinish(b2,ext,S,/mp4a/.test(am)?'AAC':'Opus',dms);});};
+  function fr(){if(done)return;var now=ctx.currentTime,t=now-t0-0.04;/* 40 ms: the MediaStream audio path lags the canvas capture (measured) */if(performance.now()-last>=30){last=performance.now();reelDraw(cv,S,Math.max(0,t));nd++;if(t-tw>0.25){tw=t;reelUI('rec',Math.max(0,Math.min(1,t/S.dur)));}}
+    if(!chk&&t>=1){chk=true;var st=null;try{st=vt.stats;}catch(e){}var fps=(st&&st.deliveredFrames>0?st.deliveredFrames:nd)/t;REEL.mrFps=Math.round(fps*10)/10;
+      if(fps<26&&cv.width>540){redo=true;stop();return;}}/* real encode rate too low for this phone: start again at 540x960 */
     if(t>S.dur+0.06){stop();return;}raf=requestAnimationFrame(fr);}
   reelDraw(cv,S,0);rec.start(1000);p0=performance.now();t0=ctx.currentTime+0.1;src.start(t0);src.onended=function(){setTimeout(stop,120);};reelUI('rec',0);raf=requestAnimationFrame(fr);
 }
@@ -8349,19 +8418,19 @@ function reelCancel(){REEL.cx=true;if(REEL.st)REEL.st.stop();else if(REEL.state=
 function reelShare(){var b=REEL.blob;if(!b)return;var f=null;try{f=new File([b],REEL.name,{type:b.type});}catch(e){}
   if(f&&navigator.share&&navigator.canShare&&navigator.canShare({files:[f]})){navigator.share({files:[f],title:project.name||'Ecou',text:'Made with Ecou · ecou.geoptimize.io'}).catch(function(e){if(!e||e.name!=='AbortError')saveBlob(b,REEL.name,'Video saved.');});}
   else saveBlob(b,REEL.name,'Video saved (sharing files isn’t available here).');}
-function shareOpen(){var s=$('#shareSheet');s.hidden=false;FLOW.share=true;flowSync();reelUI();setTimeout(function(){var f=$('#rlGo');if(f&&!f.hidden)f.focus();},30);}
+function shareOpen(){var s=$('#shareSheet');s.hidden=false;FLOW.share=true;flowSync();reelUI();try{reelLenUI();}catch(e){}setTimeout(function(){var f=$('#rlGo');if(f&&!f.hidden)f.focus();},30);}
 function shareClose(){$('#shareSheet').hidden=true;FLOW.share=false;flowSync();}
 function shareInit(){var d=document.createElement('div');d.className='gx-sheet';d.id='shareSheet';d.hidden=true;
   function it(k,t,s){return '<button class="gx-btn sh-it" data-sh="'+k+'"><span><b>'+t+'</b><small>'+s+'</small></span></button>';}
   d.innerHTML='<div class="gx-scrim" data-sclose="1"></div><div class="gx-panel" role="dialog" aria-modal="true" aria-labelledby="shareT"><div class="gx-grab"></div><div class="sh-hd"><h3 id="shareT">06 · Finish &amp; share</h3><button class="gx-btn" id="shareX" aria-label="Close share sheet">✕</button></div>'+
     '<div class="gx-sec"><div class="sh-t"><b>Ripple Reel</b><small>Vertical 9:16 video with ripples, chords and your title — for Shorts, Reels, TikTok</small></div>'+
-    '<div class="seg" id="rlLen" role="group" aria-label="Video length"><button data-rl="15" aria-pressed="true">Last 15 s</button><button data-rl="30" aria-pressed="false">30 s</button><button data-rl="60" aria-pressed="false">60 s</button><button data-rl="0" aria-pressed="false">Whole</button></div>'+
+    '<div class="seg" id="rlLen" role="group" aria-label="Video length"><button data-rl="15" aria-pressed="true">Last 15 s</button><button data-rl="30" aria-pressed="false">Last 30 s</button><button data-rl="60" aria-pressed="false">Last 60 s</button><button data-rl="0" aria-pressed="false">Whole song</button></div><p class="note" id="rlLenInfo"></p>'+
     '<label class="chk"><span>Play the sound while it records</span><input type="checkbox" id="rlMon" checked></label>'+
     '<div id="rlStage" class="sh-stage" hidden><canvas id="rlCv" width="720" height="1280" aria-label="Video being recorded"></canvas><video id="rlVid" controls playsinline hidden aria-label="Video preview"></video></div>'+
     '<div class="sh-prog" id="rlProg" hidden><i id="rlBar"></i></div><p class="note" id="rlStat" aria-live="polite"></p>'+
     '<div class="btns"><button class="gx-btn sh-pri" id="rlGo">Make video</button><button class="gx-btn" id="rlCancel" hidden>Cancel</button></div>'+
     '<div class="btns" id="rlOut" hidden><button class="gx-btn sh-pri" id="rlShare">Share video</button><button class="gx-btn" id="rlDl">Download</button></div>'+
-    '<p class="note">Videos record in real time (up to 60 s): the browser can only encode while the song plays. You can close this sheet and keep working.</p></div>'+
+    '<p class="note" id="rlNote">Videos record in real time (up to 60 s): the browser can only encode while the song plays. You can close this sheet and keep working.</p></div>'+
     '<div class="gx-sec"><div class="sh-t"><b>Audio</b></div><div class="seg" id="shBits" role="group" aria-label="WAV bit depth"><button data-bits="24" aria-pressed="true">24-bit</button><button data-bits="16" aria-pressed="false">16-bit (CD)</button></div>'+
     it('wav','Song (WAV)','The whole arrangement, mastered')+it('stems','Stems','One WAV per track + full mix, all from bar 1')+it('rec','Capture output','Record what you play live to a WAV')+'</div>'+
     '<div class="gx-sec"><div class="sh-t"><b>Notes &amp; score</b></div>'+it('midi','MIDI + MusicXML','For any DAW, MuseScore, Sibelius…')+it('score','Sheet music','View, print or save as PDF')+'</div>'+
@@ -8371,7 +8440,7 @@ function shareInit(){var d=document.createElement('div');d.className='gx-sheet';
   var lc=$('#lcd');lc.parentNode.insertBefore(sb,lc.nextSibling);sb.addEventListener('click',shareOpen);
   d.addEventListener('click',function(e){if(e.target.getAttribute('data-sclose'))shareClose();});$('#shareX').addEventListener('click',shareClose);
   d.addEventListener('keydown',function(e){if(e.key==='Escape')shareClose();});
-  $$('#rlLen button').forEach(function(b){b.addEventListener('click',function(){if(REEL.busy)return;REEL.len=+b.getAttribute('data-rl');$$('#rlLen button').forEach(function(x){x.setAttribute('aria-pressed',x===b?'true':'false');});});});
+  $$('#rlLen button').forEach(function(b){b.addEventListener('click',function(){if(REEL.busy)return;REEL.len=+b.getAttribute('data-rl');$$('#rlLen button').forEach(function(x){x.setAttribute('aria-pressed',x===b?'true':'false');});reelLenUI();});});
   $$('#shBits button').forEach(function(b){b.addEventListener('click',function(){WAVBITS=+b.getAttribute('data-bits');$$('#shBits button').forEach(function(x){x.setAttribute('aria-pressed',x===b?'true':'false');});});});
   $('#rlMon').addEventListener('change',function(){REEL.mon=this.checked;});
   $('#rlGo').addEventListener('click',reelMake);$('#rlCancel').addEventListener('click',reelCancel);$('#rlShare').addEventListener('click',reelShare);$('#rlDl').addEventListener('click',function(){if(REEL.blob)saveBlob(REEL.blob,REEL.name,'Video saved.');});
@@ -8386,6 +8455,8 @@ function shareInit(){var d=document.createElement('div');d.className='gx-sheet';
   try{new MutationObserver(function(){if($('#take').classList.contains('show')&&!$('#shareSheet').hidden)shareClose();}).observe($('#take'),{attributes:true,attributeFilter:['class']});}catch(e){}
 }
 try{shareInit();}catch(e){errLog.push('share: '+e.message);}
+/* warm the service-worker cache with the muxer so Ripple Reel also works offline later */
+setTimeout(function(){try{if(reelWCok()&&navigator.onLine!==false)['vendor/mp4-muxer/mp4-muxer.js','vendor/webm-muxer/webm-muxer.js'].forEach(function(u){fetch(u).catch(function(){});});}catch(e){}},15000);
 
 function garRenderPlay(){
   var inst=GAR.inst||'skeys';GAR.inst=inst;var I=GINST[inst],fam=FAM[IFAM[inst]];$('#t-gar').style.setProperty('--fam',fam);
@@ -8936,6 +9007,6 @@ $('#midiOn').addEventListener('click',midiConnect);
 $$('[data-exp]').forEach(function(b){b.addEventListener('click',function(){ensureAudio();var k=b.getAttribute('data-exp'),s=slots[k];if(!s.buf)return;saveWav(encodeWav([s.buf.getChannelData(0)],s.buf.sampleRate),'ecou-'+s.name.replace(/[^a-z0-9]+/gi,'-').toLowerCase()+'-'+nname(ftom(s.root)));});});
 })();
 </script>
-<div id="updBar" hidden><span>A new version of Ecou is ready.</span><button id="updGo">Update</button></div><style>#updBar{position:fixed;left:12px;right:12px;bottom:calc(84px + env(safe-area-inset-bottom));z-index:950;display:flex;align-items:center;gap:12px;padding:12px 12px 12px 16px;border-radius:16px;background:#1E1E28;border:1px solid #2B2B37;color:#E9E9F0;font:14px/1.4 system-ui,sans-serif;box-shadow:0 10px 30px rgba(0,0,0,.5)}#updBar[hidden]{display:none}#updBar span{flex:1}#updBar button{border:0;border-radius:999px;background:#D4FF3A;color:#0B0B10;font:700 14px system-ui,sans-serif;padding:9px 16px}</style><script>(function(){var V="e3c7bcf550",busy=false,last=0;function chk(){if(busy||Date.now()-last<60000)return;busy=true;last=Date.now();fetch("version.txt?"+Date.now(),{cache:"no-store"}).then(function(r){return r.ok?r.text():"";}).then(function(t){t=(t||"").trim();if(t&&t!==V)document.getElementById("updBar").hidden=false;}).catch(function(){}).then(function(){busy=false;});}document.addEventListener("visibilitychange",function(){if(!document.hidden)chk();});setTimeout(chk,8000);document.addEventListener("click",function(e){if(e.target&&e.target.id==="updGo"){try{if(typeof saveProject==="function")saveProject(true);}catch(x){}location.reload();}});})();</script>
+<div id="updBar" hidden><span>A new version of Ecou is ready.</span><button id="updGo">Update</button></div><style>#updBar{position:fixed;left:12px;right:12px;bottom:calc(84px + env(safe-area-inset-bottom));z-index:950;display:flex;align-items:center;gap:12px;padding:12px 12px 12px 16px;border-radius:16px;background:#1E1E28;border:1px solid #2B2B37;color:#E9E9F0;font:14px/1.4 system-ui,sans-serif;box-shadow:0 10px 30px rgba(0,0,0,.5)}#updBar[hidden]{display:none}#updBar span{flex:1}#updBar button{border:0;border-radius:999px;background:#D4FF3A;color:#0B0B10;font:700 14px system-ui,sans-serif;padding:9px 16px}</style><script>(function(){var V="8a776cd812",busy=false,last=0;function chk(){if(busy||Date.now()-last<60000)return;busy=true;last=Date.now();fetch("version.txt?"+Date.now(),{cache:"no-store"}).then(function(r){return r.ok?r.text():"";}).then(function(t){t=(t||"").trim();if(t&&t!==V)document.getElementById("updBar").hidden=false;}).catch(function(){}).then(function(){busy=false;});}document.addEventListener("visibilitychange",function(){if(!document.hidden)chk();});setTimeout(chk,8000);document.addEventListener("click",function(e){if(e.target&&e.target.id==="updGo"){try{if(typeof saveProject==="function")saveProject(true);}catch(x){}location.reload();}});})();</script>
 </body>
 </html>
