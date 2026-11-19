@@ -1,0 +1,23 @@
+<div id="start">
+  <h1>ECOU</h1>
+  <p>Turn any sound into a playable instrument. Capture it, resynthesize it, and shape it with camera, motion and real acoustic space.</p>
+  <button id="startBtn">Continue last project</button>
+  <button id="startFresh" style="min-height:44px;background:transparent;border:1px solid #3A3A48;color:var(--mu);font-size:14px;padding:0 18px">Start with a new project</button>
+  <p style="font-size:13px">Audio starts on your first tap. On iPhone, disable silent mode.</p>
+  <p style="font-size:13px;margin-top:4px"><a href="help.html" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline">Help &amp; FAQ</a></p>
+</div>
+
+<header>
+  <span class="logo">ECOU</span>
+  <canvas id="scope" aria-hidden="true"></canvas>
+  <button id="lcd" class="lcd" aria-label="Position, tempo and key. Tap for tempo, key, click and count-in"><span class="pos" id="lcdPos">1.1.1</span><span class="meta"><span><b id="lcdBpm">120</b> BPM</span><span id="lcdKey">C maj · 4/4</span></span><span class="beat" id="lcdBeat" aria-hidden="true"><i></i><i></i><i></i><i></i></span></button>
+  <button class="hbtn" id="undoBtn" aria-label="Undo" disabled><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/></svg></button>
+  <button class="hbtn" id="redoBtn" aria-label="Redo" disabled><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 14 5-5-5-5"/><path d="M20 9H9.5a5.5 5.5 0 0 0 0 11H13"/></svg></button>
+  <button class="hbtn" id="tRec" aria-label="Record"><i></i></button>
+  <button id="hPlay" aria-label="Play">▶</button>
+</header>
+<div class="flowrow"><div id="flow" class="flow" role="navigation" aria-label="Flow: capture to share"></div><button id="mPro" aria-pressed="false" aria-label="Advanced mode (show all controls)" title="Advanced mode: show all controls"><i aria-hidden="true"></i>Pro</button></div>
+<div id="subnav" class="seg5" role="tablist" hidden></div>
+<div id="mxBk" hidden></div><div id="mxSheet" hidden role="dialog" aria-label="Channel strip"></div>
+<button id="lnQ" hidden aria-label="Lesson">?</button>
+

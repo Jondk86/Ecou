@@ -1,0 +1,84 @@
+<div class="gx-sheet" id="vtSheet" hidden><div class="gx-scrim" data-vtclose="1"></div><div class="gx-panel vt-panel" role="dialog" aria-modal="true" aria-labelledby="vtT" style="max-height:92vh;overflow-y:auto">
+  <div class="gx-grab vm-k"></div>
+  <div class="row vm-k"><div><span class="kicker" style="color:var(--ac)">Voice · Tune</span><h3 id="vtT">Tune</h3></div><button class="mv" id="vtX" style="width:auto;padding:0 12px;min-height:44px">Close</button></div>
+  <p class="mu vm-k" id="vtSub" style="margin:0"></p>
+  <div class="seg vm-tabs vm-k" role="group" aria-label="Vocal Studio section"><button data-vmt="tune" aria-pressed="true">Tune</button><button data-vmt="vm" aria-pressed="false">Voice Morph</button></div>
+  <div id="vmBox" class="vm-k">
+    <div class="vm-head"><h3>Voice Morph</h3><label class="chk"><span>Pro</span><input type="checkbox" id="vmPro" aria-label="Pro controls"></label></div>
+    <div class="vt-warn" id="vmConsent" hidden>This take was imported, not recorded in Ecou. Only transform another person’s voice with their permission. <button class="btn" id="vmOk" style="min-height:44px;margin-top:6px;width:100%">I have this person’s permission</button></div>
+    <div class="vm-beg">
+      <div class="vm-pad" id="vmPad" role="slider" aria-label="Voice space: drag YOU towards the voice cards; double-tap to return to your own voice" tabindex="0"><div class="vm-cor tl"></div><div class="vm-cor tr"></div><div class="vm-cor bl"></div><div class="vm-cor br"></div><div class="vm-puck" id="vmPuck">YOU</div></div>
+      <div class="vm-read"><span class="vm-lv" id="vmLv">PREVIEW</span><div class="vm-bar" id="vmBar"></div><span id="vmRd">Your own voice</span></div>
+      <div class="vm-shelf" id="vmShelf" aria-label="Voice cards"></div>
+      <p class="mu vm-hint">Drag a card onto a corner to swap it · tap a card to put it on the nearest corner · double-tap the pad to return to your own voice</p>
+      <div class="vt-g3"><button class="btn" id="vmHold" aria-pressed="false">Hold = you</button><button class="btn" id="vmSave">Save card</button><button class="btn" id="vmChoir">Make choir</button></div>
+    </div>
+    <div class="vm-pro">
+      <div class="vm-ab"><select id="vmA" aria-label="Card A"></select><div><output id="vmTo">A ← 50% → B</output><input type="range" id="vmT" min="0" max="100" step="1" value="50" aria-label="Morph between card A and card B"></div><select id="vmB" aria-label="Card B"></select></div>
+      <div class="row"><span class="kicker">Timbre</span><span class="mu" style="font-size:12px">LIVE: heard while monitoring · RENDER: on the take</span></div>
+      <div id="vmSl"></div>
+      <span class="kicker">Melody style · into each note</span>
+      <div class="vm-ent" role="group" aria-label="Entry style"><button class="btn" data-vme="straight">Straight</button><button class="btn" data-vme="scoop">Scoop</button><button class="btn" data-vme="fall">Fall</button><button class="btn" data-vme="slide">Slide</button></div>
+      <div class="row"><span class="kicker">Choir · harmonies</span><span class="mu" style="font-size:12px">each voice a character</span></div>
+      <div id="vmCh" style="display:flex;flex-direction:column;gap:8px"></div>
+      <div class="vt-g2"><button class="btn" id="vmChoir2">Make choir</button><button class="btn" id="vmSave2">Save card</button></div>
+    </div>
+    <div class="vt-g2"><button class="btn primary" id="vmPlay">▶ Play take</button><button class="btn" id="vmSong">Use in song</button></div>
+    <label class="chk"><span>Tag exported WAVs “Voice transformed with Ecou”</span><input type="checkbox" id="vmTag"></label>
+    <p class="note" id="vmInfo"></p>
+  </div>
+  <div class="vt-warn" id="vtNone" role="status" hidden>No singing was heard in this take. Record again a little closer to the microphone, or choose another take — there is nothing to tune here.</div>
+  <div class="vt-now" id="vtNow"><div><b id="vtNowN">–</b><span class="mu" id="vtNowS">Press Play to see your pitch live</span></div><div class="vt-cm" title="Cents from the target note"><i id="vtNowI"></i></div></div>
+  <div class="vt-ed"><canvas id="vtCv" aria-label="Pitch editor: grey is what you sang, pink is the tuned pitch, blue blocks are notes; drag a note up or down to retune it"></canvas></div>
+  <div class="row" style="gap:8px"><button class="btn" id="vtUndo" disabled style="min-height:44px">↶ Undo</button><button class="btn" id="vtRedo" disabled style="min-height:44px">↷ Redo</button><span class="mu" id="vtHint" style="font-size:12px;flex:1">Tap a blue note to select it, drag it up or down to change it.</span></div>
+  <div class="row vt-ab"><div class="seg" role="group" aria-label="Compare"><button id="vtA" aria-pressed="false">A · Original</button><button id="vtB" aria-pressed="true">B · Tuned</button></div></div>
+  <div class="vt-g3"><button class="btn primary" id="vtPlay">▶ Play</button><button class="btn" id="vtRaw">▶ Original</button><button class="btn" id="vtLoop" aria-pressed="false">⟳ Loop</button></div>
+  <div class="vt-sty seg" id="vtSty" role="group" aria-label="Tuning style"></div>
+  <label class="ctl"><span class="row"><span>Natural ↔ Hard-tune</span><output id="vtMorO">60</output></span><input type="range" id="vtMor" min="0" max="100" step="1" value="60" aria-label="Morph from natural correction to hard-tune"></label>
+  <label class="ctl"><span class="row"><span>Amount</span><output id="vtAmtO">100%</output></span><input type="range" id="vtAmt" min="0" max="100" step="1" value="100" aria-label="Correction amount"></label>
+  <div class="row" style="gap:8px"><select id="vtKey" aria-label="Key root"></select><select id="vtSc" aria-label="Scale"></select></div>
+  <div><div class="row" style="gap:8px"><span class="kicker">Target notes</span><button class="btn" id="vtDet" style="min-height:44px">Detect key from my voice</button></div><div class="vt-keys" id="vtKeys" role="group" aria-label="Target notes: tap a note to allow or block it"></div></div>
+  <label class="chk"><span>Follow the band’s chords (snap to chord notes bar by bar)</span><input type="checkbox" id="vtBand"></label>
+  <button class="btn simple-only" id="vtAll" aria-pressed="false">Show all options</button>
+  <div class="vt-pro">
+    <div class="grid2"><label class="ctl"><span class="row"><span>Retune speed</span><output id="vtSpdO">35 ms</output></span><input type="range" id="vtSpd" min="0" max="400" step="5" value="35" aria-label="Retune speed: 0 is hard-tune, higher is more natural"></label>
+    <label class="ctl"><span class="row"><span>Humanize</span><output id="vtHumO">45%</output></span><input type="range" id="vtHum" min="0" max="100" step="1" value="45" aria-label="Humanize: keep this much of your own drift and vibrato"></label></div>
+    <div class="grid2"><label class="ctl"><span class="row"><span>Formant</span><output id="vtFmtO">0 st</output></span><input type="range" id="vtFmt" min="-6" max="6" step="0.5" value="0" aria-label="Formant shift in semitones: lower sounds bigger/deeper, higher sounds smaller/brighter"></label>
+    <label class="ctl"><span class="row"><span>Throat</span><output id="vtThrO">neutral</output></span><input type="range" id="vtThr" min="-100" max="100" step="5" value="0" aria-label="Throat: deeper or brighter character"></label></div>
+    <div class="grid2"><label class="ctl"><span class="row"><span>Add vibrato</span><output id="vtVibO">0 ct</output></span><input type="range" id="vtVib" min="0" max="100" step="5" value="0" aria-label="Added vibrato depth in cents"></label>
+    <label class="ctl"><span class="row"><span>Vibrato rate</span><output id="vtVibRO">5.5 Hz</output></span><input type="range" id="vtVibR" min="3" max="8" step="0.5" value="5.5" aria-label="Vibrato rate"></label></div>
+    <div class="vt-note" id="vtNote" hidden><span id="vtNl" class="mu"></span>
+      <div class="btn3"><button class="btn" id="vtDn" aria-label="Note down a scale step">▼ Down</button><button class="btn" id="vtUp" aria-label="Note up a scale step">▲ Up</button><button class="btn" id="vtFlat" aria-pressed="false">Flatten vibrato</button></div>
+      <div class="btn3"><button class="btn" id="vtSplit">Split note</button><button class="btn" id="vtMerge">Merge with next</button><button class="btn" id="vtRst">Reset note</button></div>
+      <div class="grid2"><label class="ctl"><span class="row"><span>Transition</span><output id="vtNTrO">auto</output></span><input type="range" id="vtNTr" min="0" max="300" step="5" value="35" aria-label="This note: transition time in ms"></label>
+      <label class="ctl"><span class="row"><span>Keep drift</span><output id="vtNHumO">auto</output></span><input type="range" id="vtNHum" min="0" max="100" step="5" value="45" aria-label="This note: how much of your pitch drift to keep"></label></div></div>
+    <p class="note">Grey line: what you sang. Pink: after tuning. Blue blocks are notes (yellow = selected). Loop plays the selected note.</p>
+  </div>
+  <div id="vtHarm" style="display:flex;flex-direction:column;gap:8px"><div class="row"><span class="kicker">Harmony voices</span><span class="mu" style="font-size:12px">own track each · heard here with you</span></div><div class="btn3"><button class="btn" data-vth="2">+ 3rd above</button><button class="btn" data-vth="4">+ 5th above</button><button class="btn" data-vth="-2">+ 3rd below</button></div><div class="vt-note" id="vtHl"></div><div class="vt-warn" id="vtHmsg" hidden></div></div>
+  <p class="note" id="vtInfo"></p>
+  <button class="btn" id="vtRm">Remove tuning (back to original)</button>
+</div></div>
+<div class="gx-sheet" id="hpSheet" hidden><div class="gx-scrim" id="hpScrim"></div><div class="gx-panel" role="dialog" aria-modal="true" aria-labelledby="hpT" style="display:flex;flex-direction:column;gap:12px"><div class="gx-grab"></div><h3 id="hpT" style="margin:0">Are you wearing headphones?</h3><p class="mu" id="hpTx" style="margin:0"></p><button class="btn primary" id="hpYes" style="min-height:48px">I’m wearing headphones</button><button class="btn" id="hpNo" style="min-height:48px">No, I’m using the speaker</button></div></div>
+<div class="gx-sheet" id="slSheet" hidden><div class="gx-scrim" data-slclose="1"></div><div class="gx-panel" role="dialog" aria-modal="true" aria-labelledby="slT" style="max-height:92vh;overflow-y:auto">
+  <div class="gx-grab"></div>
+  <div class="row"><div><span class="kicker" style="color:var(--ac)">Transform · Slice</span><h3 id="slT">Slice to pads</h3></div><button class="mv" id="slX" style="width:auto;padding:0 12px">Close</button></div>
+  <p class="mu" id="slSub" style="margin:0"></p>
+  <div class="seg" role="group" aria-label="How to cut" style="align-self:flex-start"><button data-slm="tr" aria-pressed="true">Hits</button><button data-slm="grid" aria-pressed="false">Grid</button><button data-slm="man" aria-pressed="false">Manual</button></div>
+  <canvas id="slWave" class="wave" style="height:128px;touch-action:none" aria-label="Waveform with slice cuts"></canvas>
+  <p class="note" id="slHint"></p>
+  <label class="ctl" id="slTrP"><span class="row"><span>Sensitivity</span><output id="slSo">50%</output></span><input type="range" id="slS" min="0" max="1" step="0.01" value="0.5"></label>
+  <div id="slGrP" hidden class="row" style="flex-wrap:wrap"><div class="seg" role="group" aria-label="Grid"><button data-slg="4">4</button><button data-slg="8">8</button><button data-slg="16">16</button><button data-slg="beat">Beats</button></div><span class="mu" id="slBpm"></span></div>
+  <div class="chips" id="slChips" aria-label="Slices: tap to hear"></div>
+  <div class="pro ctl" id="slPro" style="gap:8px"><div class="row"><strong id="slPT">Slice 1</strong><label class="chk"><span>Reverse</span><input type="checkbox" id="slRev"></label></div><label><span class="row"><span>Pitch</span><output id="slPo">0 st</output></span><input type="range" id="slPit" min="-12" max="12" step="1" value="0" style="width:100%"></label></div>
+  <div class="row"><span class="mu">Onto</span><div class="row" style="gap:6px"><button class="mv" id="slPm" aria-label="Start one pad earlier">◀</button><strong id="slPads" style="min-width:88px;text-align:center"></strong><button class="mv" id="slPp" aria-label="Start one pad later">▶</button></div></div>
+  <button class="btn primary" id="slSend">Send to pads</button>
+  <button class="btn pro" id="slPat">Make a pattern from the groove</button>
+</div></div>
+<div id="lnHole" hidden></div>
+<div id="lnBub" role="dialog" aria-label="Lesson" hidden><div class="ln-top"><span id="lnTtl"></span><button id="lnX" aria-label="Exit lesson">Exit</button></div><p id="lnSay" aria-live="polite"></p><p id="lnHint" aria-live="polite" hidden></p><div class="ln-row"><div id="lnDots" aria-hidden="true"></div><span id="lnProg" aria-live="polite"></span></div><div class="ln-btns"><button id="lnEx">Hear an idea</button><button id="lnShow" hidden>Show me where</button><button id="lnSkip">Skip step</button><button id="lnGo" class="pri">Next</button></div></div>
+<div class="gx-sheet" id="lnMap" hidden><div class="gx-scrim" data-lnclose="1"></div><div class="gx-panel" role="dialog" aria-modal="true" aria-labelledby="lnMapT" style="max-height:92vh;overflow-y:auto"><div class="gx-grab"></div><div class="row"><div><span class="kicker" style="color:var(--ac)">Learn</span><h3 id="lnMapT">Learn to make music</h3></div><button class="mv" id="lnMapX" style="width:auto;padding:0 12px;min-height:44px">Close</button></div><p class="mu" id="lnMapS" style="margin:0"></p><div id="lnUnits"></div></div></div>
+<button id="ideaFab" hidden aria-label="Idea: tap to catch an idea, hold to start humming a melody now"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.6 10.8c.6.5 1 1.2 1 2V16h5.2v-.2c0-.8.4-1.5 1-2A6 6 0 0 0 12 3z"/></svg></button>
+<div class="gx-sheet" id="ideaSheet" hidden><div class="gx-scrim" data-idclose="1"></div><div class="gx-panel" role="dialog" aria-modal="true" aria-labelledby="idT"><div class="gx-grab"></div><div class="id-hd"><h3 id="idT">Catch an idea</h3><button class="id-x" data-idclose="1" aria-label="Close">×</button></div><div class="id-modes" id="idModes" role="tablist" aria-label="Idea type"></div><div class="id-body" id="idBody"></div></div></div>
+<div class="gx-sheet" id="scSheet" hidden><div class="gx-scrim" data-scclose="1"></div><div class="gx-panel" role="dialog" aria-modal="true" aria-label="Sound card"><div class="gx-grab"></div><div class="id-hd"><h3>Sound card</h3><button class="id-x" data-scclose="1" aria-label="Close">×</button></div><div class="hm-card" id="scSheetC"></div></div></div>
+<div id="toast" role="status" aria-live="polite"></div>
+
