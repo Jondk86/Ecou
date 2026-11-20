@@ -2372,7 +2372,7 @@ function startCapture(target){
   if(!ensureAudio())return;
   if(capture){var same=capture.target===target;stopCapture();if(same)return;}
   if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){micBlocked(target);return;}
-  navigator.mediaDevices.getUserMedia({audio:{echoCancellation:false,noiseSuppression:false,autoGainControl:false}}).then(function(stream){
+  var gst=null;navigator.mediaDevices.getUserMedia({audio:{echoCancellation:false,noiseSuppression:false,autoGainControl:false}}).then(function(stream){gst=stream;
     var s=ctx.createMediaStreamSource(stream),proc=ctx.createScriptProcessor(4096,1,1),mute=ctx.createGain();mute.gain.value=0;
     var chunks=[];
     proc.onaudioprocess=function(ev){chunks.push(new Float32Array(ev.inputBuffer.getChannelData(0)));};
@@ -2381,7 +2381,7 @@ function startCapture(target){
     capture={target:target,stream:stream,s:s,proc:proc,mute:mute,chunks:chunks,t0:performance.now(),timer:setTimeout(stopCapture,max*1000)};
     setCapUI(target,true);
     if(target!=='ECHO'&&target!=='IDEA')toast({IR:'Listening — clap now.',BB:'Recording — beatbox now (max 8 s).',PAD:'Recording — max 4 s.'}[target]||'Recording — max 10 s.',2200);
-  }).catch(function(){micBlocked(target);});
+  }).catch(function(){if(gst&&!(capture&&capture.stream===gst))gst.getTracks().forEach(function(t){t.stop();});micBlocked(target);});
 }
 function stopCapture(){
   var c=capture;if(!c)return;capture=null;clearTimeout(c.timer);
@@ -3928,13 +3928,13 @@ var live=null;
 function liveStart(){
   if(!ensureAudio())return;
   if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){toast('Live input isn’t available in this view. Use the full version (hosted ecou.html) in Chrome.',5500);return;}
-  navigator.mediaDevices.getUserMedia({audio:{echoCancellation:false,noiseSuppression:false,autoGainControl:false}}).then(function(stream){
+  var gst=null;navigator.mediaDevices.getUserMedia({audio:{echoCancellation:false,noiseSuppression:false,autoGainControl:false}}).then(function(stream){gst=stream;
     liveStop();var s=ctx.createMediaStreamSource(stream);N.liveIn=N.liveIn||G(1);N.liveIn.gain.value=P.liveGain.v;s.connect(N.liveIn);
     try{N.liveIn.disconnect();}catch(e){}N.liveIn.connect(N.chainIn);
     live={stream:stream,src:s};if(VTL.on)vtLiveAttach(live);var lat=Math.round(((ctx.baseLatency||0)+(ctx.outputLatency||0))*1000);
     $('#liveState').textContent='live'+(lat?' · ~'+lat+' ms output latency':'');$('#liveOn').disabled=true;$('#liveOff').disabled=false;
-    toast('Input is live through the insert chain. Use headphones to avoid feedback.',4000);
-  }).catch(function(){toast('Microphone access is blocked in this view. Use the full version (hosted ecou.html) in Chrome.',5500);});
+    toast('Input is live through the insert chain. Use headphones to avoid feedback.',4000);btMonHint();
+  }).catch(function(){if(gst&&!(live&&live.stream===gst))gst.getTracks().forEach(function(t){t.stop();});toast('Microphone access is blocked in this view. Use the full version (hosted ecou.html) in Chrome.',5500);});
 }
 function liveStop(){if(!live)return;try{live.src.disconnect();}catch(e){}vtLiveDrop(live.vox);live.stream.getTracks().forEach(function(t){t.stop();});live=null;$('#liveState').textContent='off';$('#liveOn').disabled=false;$('#liveOff').disabled=true;}
 function initAmp(){
@@ -4604,7 +4604,7 @@ var TABH={'t-home':'home','t-gar':'garage','t-cap':'capture','t-ins':'instrument
 function hideOverlayEls(name){if(name==='tab'){tabHide();return;}if(name==='score'){$('#scoreOv').hidden=true;$('#scoreInner').innerHTML='';}if(name==='take')$('#take').classList.remove('show');}
 function pushOverlay(name){overlay=name;try{if(location.hash!=='#'+name)location.hash=name;}catch(e){}}
 function closeOverlay(name){hideOverlayEls(name);if(overlay===name){overlay=null;try{if(location.hash==='#'+name)history.back();}catch(e){}}}
-function showTab(id,fromHash){if(!TABH[id])return;var tt=$('#toast');if(tt&&showTab.cur!==id){tt.classList.remove('show');}if(FLOW)FLOW.share=false;
+function showTab(id,fromHash){if(!TABH[id])return;try{if(showTab.cur&&showTab.cur!==id)micTabSwitch(showTab.cur,id);}catch(e){}var tt=$('#toast');if(tt&&showTab.cur!==id){tt.classList.remove('show');}if(FLOW)FLOW.share=false;
   $$('.tab').forEach(function(t){t.classList.toggle('active',t.id===id);});
   $('main').scrollTop=0;$('#kbwrap').hidden=id==='t-pad'||id==='t-home'||id==='t-fx';showTab.cur=id;var KBS=showTab.kb||(showTab.kb={});setKbCollapsed(id in KBS?KBS[id]:(id==='t-daw'||id==='t-song'||id==='t-fx'));
   if(id==='t-song'){renderSongUI();drawRoll();}if(id==='t-pad'){paintSteps();updJam();}if(id==='t-daw')dawShown();if(id==='t-home')homeShown();document.body.classList.toggle('on-gar',id==='t-gar');if(id==='t-gar')garShown();else if(GAR.apOn>=0)garApStop();navSync();
@@ -5870,10 +5870,14 @@ function drawRecLive(g){var R=arr.rec;if(!R||R.tStart==null||R.pkF0==null||!R.pk
     for(var x=Math.max(0,Math.floor(x0));x<Math.min(dW,Math.ceil(x1));x++){var ta=cy.t+(x-x0)/ppx*sd,tb=ta+sd/ppx,i0=Math.floor(((ta+R.lat)*sr-R.pkF0)/RECBIN),i1=Math.max(i0+1,Math.floor(((tb+R.lat)*sr-R.pkF0)/RECBIN)),m=0;
       for(var i=Math.max(0,i0);i<i1&&i<R.pkL.length;i++){var v=recPk(R,ch,i);if(v>m)m=v;}var hh=Math.min(1,m)*hh0;g.fillRect(x,mid-hh,1,Math.max(1,hh*2));}
     g.restore();});}
-function dawRecord(){
-  if(seq.on&&seq.mode==='arrange'&&arr.rec){transportStop();return;}
+function dawRecord(force){
+  if(seq.on&&seq.mode==='arrange'&&arr.rec){transportStop();return;}if(seq.on&&seq.rec&&!arr.rec){noteRecStop();return;}
   if(!ensureAudio())return;if(seq.bounce||stemsRunning){toast('An export is running.');return;}
   var armed=[];tracks.forEach(function(t,i){if(t.kind==='audio'&&t.arm)armed.push(i);});
+  /* never auto-arm an audio lane (= open the mic) when the user is on an instrument lane: record notes instead */
+  if(!armed.length&&!force){var ln=tracks[daw.lane];
+    if(ln&&ln.kind!=='audio'&&ln.kind!=='drums'){noteRecStart(daw.lane);return;}
+    if(!ln||ln.kind!=='audio'){recAsk('daw',function(){noteRecStart();},function(){dawRecord(true);});return;}}
   if(!armed.length){var ti=daw.lane;if(!tracks[ti]||tracks[ti].kind!=='audio')ti=firstAudioLane();if(ti<0)return;tracks[ti].arm=true;armed=[ti];renderDawHeads();}
   if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){micBlocked();return;}
   var stream=null;
@@ -5887,7 +5891,7 @@ function dawRecord(){
     var lat=0;try{var st=stream.getAudioTracks()[0].getSettings();if(st&&typeof st.latency==='number')lat=st.latency;}catch(e){}
     R.lat=lat+recLatency()+daw.offMs/1000;
     arr.rec=R;arr.pre=daw.count?16:0;transportStart('arrange');recMeterStart();
-    toast((daw.count?'Count-in… recording starts on bar '+(Math.floor(arr.startG/16)+1)+'.':'Recording.')+(VT.hp?'':' Not monitoring (no headphones confirmed); metronome muted during the take.'),VT.hp?1800:3000);
+    toast((daw.count?'Count-in… recording starts on bar '+(Math.floor(arr.startG/16)+1)+'.':'Recording.')+(VT.hp?'':' Not monitoring (no headphones confirmed); metronome muted during the take.'),VT.hp?1800:3000);if(R.mon)btMonHint();
   }).catch(function(){if(stream)stream.getTracks().forEach(function(t){t.stop();});micBlocked();});
 }
 function arrRecFinish(tStop){
@@ -7049,7 +7053,7 @@ function pasteClip(){
 /* transport bar */
 function updDawTr(){
   var pl=$('#dawPlay');if(!pl)return;var on=seq.on&&seq.mode==='arrange';
-  pl.textContent=on?'■ Stop':'▶ Play';$('#dawRec').classList.toggle('live',!!arr.rec);$('#dawRec').textContent=arr.rec?'■ Stop rec':'● Record';
+  pl.textContent=on?'■ Stop':'▶ Play';var drc=!!arr.rec||!!(seq.on&&seq.rec);$('#dawRec').classList.toggle('live',drc);$('#dawRec').textContent=drc?'■ Stop rec':'● Record';
   $('#dawLoop').setAttribute('aria-pressed',daw.loop.on);$('#dawMetro').setAttribute('aria-pressed',!!seq.metro);$('#dawCount').setAttribute('aria-pressed',daw.count);
   $$('[data-snap]').forEach(function(b){b.setAttribute('aria-pressed',+b.getAttribute('data-snap')===daw.snap);});
   $('#dawAuto').value=daw.auto;var bb=$('#dawBpm');if(bb)bb.textContent=Math.round(P.bpm.v);
@@ -7178,7 +7182,7 @@ function dawKeys(e){
 function initDaw(){
   dcv=$('#dawCv');dg=dcv.getContext('2d');initDawPointer();
   $('#dawPlay').addEventListener('click',function(){if(arr.rec){transportStop();return;}seq.src='arrange';transportToggle('arrange');});
-  $('#dawRec').addEventListener('click',dawRecord);
+  $('#dawRec').addEventListener('click',function(){dawRecord();});
   $('#dawHome').addEventListener('click',function(){setPlayhead(daw.loop.on?daw.loop.a:0);daw.sx=Math.max(0,daw.play-4);dawNeed=true;});
   $('#dawLoop').addEventListener('click',function(){daw.loop.on=!daw.loop.on;if(daw.loop.b<=daw.loop.a){daw.loop.a=Math.floor(daw.play/16)*16;daw.loop.b=daw.loop.a+64;}updDawTr();dawNeed=true;markDirty();});
   $('#dawMetro').addEventListener('click',function(){seq.metro=!seq.metro;$('#trMetro').checked=seq.metro;updDawTr();});
@@ -7253,10 +7257,57 @@ function detectBpm(b){
 /* microphone hygiene: Android switches Bluetooth headphones to low-quality call mode while any mic is open,
    so every mic stream is tracked and released as soon as it is not needed (and whenever the page is hidden) */
 var openStreams=new Set();
+/* Bluetooth: on Android, opening ANY mic while Bluetooth headphones are connected can switch them from A2DP (music)
+   to HFP/SCO (call mode: mono, quiet, narrow-band). Chrome often only switches back when the page is torn down.
+   So (1) note recording never opens the mic (see recRoute/noteRecStart), (2) when the mic IS needed we prefer the
+   built-in phone mic over a headset mic (a headset mic forces SCO for sure; the built-in mic usually avoids it),
+   (3) every stream is tracked so nothing stays open, (4) after a Bluetooth take we offer "Restore sound". */
+var BTRE=/bluetooth|headset|hands-?free|\bbt\b|\bsco\b|\bhfp\b|airpods|buds/i,MICBT={seen:false,used:false,was:false,hint:false};
+function micPick(list){var ins=(list||[]).filter(function(d){return d.kind==='audioinput';});
+  if(!ins.some(function(d){return d.label;}))return null;           /* no labels before permission: decide after the first open */
+  if(!ins.some(function(d){return BTRE.test(d.label);}))return null; /* no Bluetooth mic around: leave the browser default alone */
+  MICBT.seen=true;var ok=ins.filter(function(d){return d.deviceId&&d.deviceId!=='communications'&&!BTRE.test(d.label);});
+  var pick=ok.filter(function(d){return d.deviceId!=='default';})[0]||ok[0];return pick?pick.deviceId:null;}
+function btScan(list){(list||[]).forEach(function(d){if(d.label&&BTRE.test(d.label))MICBT.seen=true;});}
+function micWithDev(c,id){if(!id)return c;var cc=Object.assign({},c);cc.audio=Object.assign({},c.audio===true?{}:c.audio,{deviceId:{exact:id}});return cc;}
 (function(){var md=navigator.mediaDevices;if(!md||!md.getUserMedia)return;var gum=md.getUserMedia.bind(md);
-  md.getUserMedia=function(c){if(c&&c.audio&&audioInId){if(c.audio===true)c={audio:{deviceId:{exact:audioInId}},video:c.video};else{c=Object.assign({},c);c.audio=Object.assign({},c.audio,{deviceId:{exact:audioInId}});}}return gum(c).then(function(st){if(c&&c.audio){openStreams.add(st);st.getTracks().forEach(function(t){t.addEventListener('ended',function(){if(!st.getTracks().some(function(x){return x.readyState==='live';}))openStreams.delete(st);});});}updMic();return st;});};})();
+  function en(){return md.enumerateDevices?md.enumerateDevices().catch(function(){return [];}):Promise.resolve([]);}
+  function track(st){openStreams.add(st);st.getAudioTracks().forEach(function(t){if(BTRE.test(t.label||''))MICBT.used=true;});
+    st.getTracks().forEach(function(t){t.addEventListener('ended',function(){if(!st.getTracks().some(function(x){return x.readyState==='live';}))openStreams.delete(st);updMic();});});updMic();return st;}
+  md.getUserMedia=function(c){if(!(c&&c.audio))return gum(c);
+    if(audioInId)return gum(micWithDev(c,audioInId)).then(track);   /* the user's own pick in the input picker always wins */
+    if(typeof c.audio==='object'&&c.audio.deviceId)return gum(c).then(track);
+    return en().then(function(l){btScan(l);var id=micPick(l);
+      return gum(micWithDev(c,id)).then(function(st){if(id)return st;
+        /* first open (labels were hidden): if the browser handed us a headset mic and a built-in one exists, swap */
+        return en().then(function(l2){btScan(l2);var id2=micPick(l2),tr=st.getAudioTracks()[0];
+          if(id2&&tr&&BTRE.test(tr.label||'')){st.getTracks().forEach(function(t){t.stop();});return gum(micWithDev(c,id2));}return st;});});
+    }).then(track);};})();
+window.__micOpen=function(){var n=0;openStreams.forEach(function(st){st.getAudioTracks().forEach(function(t){if(t.readyState==='live')n++;});});return n;};
+/* live-monitor hint: Bluetooth audio adds ~200 ms, so monitoring yourself through it is unusable */
+function btMonHint(){var md=navigator.mediaDevices;if(MICBT.hint||!md||!md.enumerateDevices)return;md.enumerateDevices().then(function(l){btScan(l);
+  if(MICBT.seen&&!MICBT.hint){MICBT.hint=true;toast('Bluetooth adds ~200 ms delay; use wired headphones or the phone speaker for live monitoring.',3200);}}).catch(function(){});}
+function micClosed(){var deg=ctx&&ctx.sampleRate<32000;if(!(MICBT.seen||MICBT.used||deg))return;MICBT.used=false;sndFixShow();}
+function sndFixShow(){var b=$('#sndFix');if(!b){b=document.createElement('div');b.id='sndFix';b.setAttribute('role','status');
+    b.style.cssText='position:fixed;left:12px;right:12px;bottom:calc(84px + env(safe-area-inset-bottom));z-index:60;display:flex;gap:8px;align-items:center;padding:10px 12px;border-radius:14px;background:#1f2430;color:#fff;font:500 13px Inter,system-ui,sans-serif;box-shadow:0 6px 24px rgba(0,0,0,.4)';
+    b.innerHTML='<span style="flex:1">Bluetooth headphones may still be in call mode (quiet, mono).</span><button type="button" id="sndFixGo" style="min-height:40px;padding:0 12px;border-radius:10px;border:0;background:#F43F5E;color:#fff;font-weight:700">Restore sound</button><button type="button" id="sndFixX" aria-label="Close" style="min-width:40px;min-height:40px;border:0;background:none;color:#fff;font-size:18px">×</button>';
+    document.body.appendChild(b);$('#sndFixX').addEventListener('click',function(){b.hidden=true;});$('#sndFixGo').addEventListener('click',function(){b.hidden=true;sndRestore();});}
+  b.hidden=false;clearTimeout(sndFixShow.t);sndFixShow.t=setTimeout(function(){b.hidden=true;},15000);}
+/* Honest status: restartAudio() really closes the AudioContext and builds a new one (new output stream). With no mic
+   open that is what usually lets Android route the headphones back to A2DP, but the OS decides; it is best effort.
+   suspend()/resume() is a weaker fallback. Only reopening the app is guaranteed (the owner's observation). */
+function sndRestore(){if(micLive())releaseMics();
+  try{restartAudio();toast('Sound output rebuilt. If it still sounds quiet, close Ecou completely and open it again.',3200);return;}catch(e){}
+  try{ctx.suspend().then(function(){return ctx.resume();}).then(function(){toast('Audio output restarted. If it still sounds quiet, close Ecou completely and open it again.',3200);});}catch(e){toast('Close Ecou completely and open it again to get full Bluetooth sound back.',3200);}}
+/* tab switch: finish short takes that belong to the page you are leaving and drop every stream nobody owns */
+function micTabSwitch(from,to){if(from===to)return;
+  try{if(capture&&capture.target!=='IDEA')stopCapture();}catch(e){}try{if(ECHO.rec&&from==='t-home')echoStop();}catch(e){}
+  var TL={'t-gar':1,'t-daw':1,'t-song':1};try{if(arr.rec&&!(TL[from]&&TL[to]))transportStop();}catch(e){}
+  setTimeout(micSweep,0);}
+function micSweep(){var keep=[arr.rec&&arr.rec.stream,live&&live.stream,capture&&capture.stream].filter(Boolean);
+  openStreams.forEach(function(st){if(keep.indexOf(st)<0&&!st._keep){st.getTracks().forEach(function(t){t.stop();});openStreams.delete(st);}});updMic();}
 function micLive(){var on=false;openStreams.forEach(function(st){st.getAudioTracks().forEach(function(t){if(t.readyState==='live')on=true;});});return on;}
-function updMic(){var b=$('#micOn');if(b)b.hidden=!micLive();}
+function updMic(){var on=micLive(),b=$('#micOn');if(b)b.hidden=!on;if(MICBT.was&&!on)micClosed();MICBT.was=on;}
 function releaseMics(){
   try{if(capture)stopCapture();}catch(e){}try{if(live)liveStop();}catch(e){}try{if(arr.rec)transportStop();}catch(e){}
   openStreams.forEach(function(st){st.getTracks().forEach(function(t){t.stop();});});openStreams.clear();updMic();
@@ -9567,7 +9618,7 @@ function stGrid(){if(bandRunning()&&BR.marks.length){var m=BR.marks[0];BR.marks.
 function stGridT0(){if(bandRunning())return BR.t0;if(seq.on&&seq.mode==='arrange')return arr.tl0;return ctx.currentTime+0.05;}
 function lpSnap(t,G){var k=(t-G.t)/G.bar,f=Math.floor(k),frac=k-f;return G.t+(frac<0.12?f:f+1)*G.bar;}
 function lpMicOpen(cb){if(LP.mic){cb();return;}if(LP.opening)return;if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){micBlocked();return;}LP.opening=true;
-  var go=function(){var stream=null;navigator.mediaDevices.getUserMedia({audio:{echoCancellation:false,noiseSuppression:false,autoGainControl:false}}).then(function(s){stream=s;return loadInWorklet();}).then(function(){
+  var go=function(){var stream=null;navigator.mediaDevices.getUserMedia({audio:{echoCancellation:false,noiseSuppression:false,autoGainControl:false}}).then(function(s){stream=s;s._keep=1;/* Stage looper owns it until lpMicClose */return loadInWorklet();}).then(function(){
       var src=ctx.createMediaStreamSource(stream),M={stream:stream,s:src,ch:[],node:null},node;
       var push=function(c){M.ch.push(c);var keepF=c.f-ctx.sampleRate*4;if(LP.st!=='rec'&&LP.st!=='dub'&&!LP.pend)while(M.ch.length>2&&M.ch[0].f+M.ch[0].l.length<keepF)M.ch.shift();};
       if(inModOk){node=new AudioWorkletNode(ctx,'ecou-in',{numberOfInputs:1,numberOfOutputs:1,channelCount:2,channelCountMode:'explicit'});node.port.onmessage=function(e){push(e.data);};}
@@ -9988,11 +10039,36 @@ function lcdTick(){var p=lcdPos(),e;
   if(p.b!==LCD.b){LCD.b=p.b;$$('#lcdBeat i').forEach(function(x,i){x.className=i===p.b?(i===0?'on':'on dn'):'';});}
   var on=!!(seq.on||bandRunning()||(typeof llRunning==='function'&&llRunning())||prevPlaying());if(on!==LCD.play){LCD.play=on;var hp=$('#hPlay');hp.textContent=on?'■':'▶';hp.setAttribute('aria-label',on?'Stop':'Play');hp.classList.toggle('on',on);}
   var rc=!!((seq.on&&seq.rec)||arr.rec||wavRec||capture||ECHO.rec);if(rc!==LCD.rec){LCD.rec=rc;var r=$('#tRec');r.classList.toggle('on',rc);r.setAttribute('aria-label',rc?'Stop recording':'Record');r.setAttribute('aria-pressed',rc);}}
+/* Record routing (owner bug 2026-11-20): recording what you PLAY must never open the microphone. The mic opens
+   only for explicit audio targets (audio/vocal track, Capture, Echo Drop, Idea, Stage looper); when the target is
+   ambiguous a 2-choice sheet asks once per context and the answer is remembered (long-press ● to ask again). */
+var RECCHO={};try{RECCHO=JSON.parse(localStorage.getItem('ecou.recChoice')||'{}')||{};}catch(e){}
+function isInstTrack(ti){var t=tracks[ti];return !!t&&t.kind!=='audio';}
+function noteTrackFor(ti){if(ti!=null&&isInstTrack(ti)&&tracks[ti].kind!=='drums')return ti;if(isInstTrack(selTrack)&&tracks[selTrack].kind!=='drums')return selTrack;
+  for(var i=0;i<tracks.length;i++)if(tracks[i].kind==='keys')return i;for(i=0;i<tracks.length;i++)if(isInstTrack(i)&&tracks[i].kind!=='drums')return i;return isInstTrack(selTrack)?selTrack:-1;}
+function noteRecStart(ti){if(!ensureAudio())return;if(seq.bounce||stemsRunning){toast('An export is running.');return;}
+  ti=noteTrackFor(ti);if(ti<0){toast('Add an instrument track first, then record.',2200);return;}
+  if(seq.on)transportStop();if(ti!==selTrack)selectTrack(ti);
+  seq.rec=true;seq.src='arrange';jamSess++;jamTarget.warned=false;arr.pre=daw.count?16:0;transportStart('arrange');
+  try{updTransportUI();}catch(e){}try{garUpd();}catch(e){}
+  toast((daw.count?'Count-in, then recording notes':'Recording notes')+' on '+tracks[ti].name+'. Play the keyboard. (Microphone stays off.)',2400);}
+function noteRecStop(){seq.rec=false;recFlush();transportStop();try{updTransportUI();}catch(e){}try{garUpd();if(GAR.view==='tracks')garTl();}catch(e){}try{renderDaw();}catch(e){}}
+function recAsk(key,notes,audio){var c=RECCHO[key];if(c==='n'){notes();return;}if(c==='a'){audio();return;}
+  var sh=$('#recAsk');if(!sh){sh=document.createElement('div');sh.id='recAsk';sh.setAttribute('role','dialog');sh.setAttribute('aria-label','What do you want to record?');
+    sh.style.cssText='position:fixed;left:0;right:0;bottom:0;z-index:70;padding:16px 16px calc(16px + env(safe-area-inset-bottom));background:#151922;color:#fff;border-radius:18px 18px 0 0;box-shadow:0 -8px 30px rgba(0,0,0,.5);font:500 14px Inter,system-ui,sans-serif;display:flex;flex-direction:column;gap:10px';
+    var bs='min-height:52px;border-radius:12px;border:0;font:700 15px Inter,system-ui,sans-serif;color:#fff;text-align:left;padding:0 16px';
+    sh.innerHTML='<b style="font-size:15px">What do you want to record?</b><button type="button" data-rk="n" style="'+bs+';background:#F43F5E">Record notes (what you play)</button><button type="button" data-rk="a" style="'+bs+';background:#2a3140">Record audio (microphone)</button><button type="button" data-rk="x" style="min-height:40px;border:0;background:none;color:#aab">Cancel</button>';
+    document.body.appendChild(sh);}
+  sh.hidden=false;sh.onclick=function(e){var k=e.target&&e.target.getAttribute('data-rk');if(!k)return;sh.hidden=true;if(k==='x')return;RECCHO[key]=k;try{localStorage.setItem('ecou.recChoice',JSON.stringify(RECCHO));}catch(x){}(k==='n'?notes:audio)();};}
 function tRecGo(){var id=showTab.cur;
   if(ECHO.rec){echoStop();return;}if(capture){stopCapture();return;}
   if(wavRec&&id!=='t-fx'){$('#rec').click();return;}
   if(id==='t-gar'){garRecord();return;}if(id==='t-home'){echoStart();return;}
-  var m={'t-daw':'#dawRec','t-song':'#trRec','t-pad':'#jamRec','t-fx':'#rec','t-cap':'[data-cap="A"]','t-ins':'[data-cap="A"]','t-mod':'[data-cap="A"]'}[id],b=m&&$(m);if(b)b.click();}
+  var m={'t-song':'#trRec','t-pad':'#jamRec','t-fx':'#rec'}[id];if(m){$(m).click();return;}   /* note / output recorders, no mic */
+  if(arr.rec){transportStop();return;}if(seq.on&&seq.rec){noteRecStop();return;}
+  if(id==='t-daw'){dawRecord();return;}                                   /* routes by lane, see dawRecord */
+  if(id==='t-mod'){noteRecStart();return;}                                 /* synth/morph + keyboard: notes */
+  if(id==='t-ins'||id==='t-cap'){recAsk(id,function(){noteRecStart();},function(){startCapture('A');});return;}}
 /* ---------- design v2: Home, sounds & ideas shelf, Echo Drop ---------- */
 var SHELF=SHELF||[],ECHO={rec:false,down:0,pend:false,raf:0,pk:[],ci:0,item:null,on:true,ti:1,tap:false};
 try{ECHO.on=localStorage.getItem('ecou.echo')!=='0';}catch(e){}
@@ -10073,7 +10149,7 @@ function homeProj(){var w=$('#homeProj');if(!w)return;
 function homeShown(){renderShelf();homeProj();lnCardUI();}
 function initHome(){
   document.body.appendChild($('#garSheet'));
-  $('#lcd').addEventListener('click',garTempoSheet);$('#tRec').addEventListener('click',tRecGo);setInterval(lcdTick,60);lcdTick();
+  $('#lcd').addEventListener('click',garTempoSheet);$('#tRec').addEventListener('click',tRecGo);$('#tRec').addEventListener('contextmenu',function(e){e.preventDefault();RECCHO={};try{localStorage.removeItem('ecou.recChoice');}catch(x){}toast('Record will ask again: notes or microphone.',2000);});setInterval(lcdTick,60);lcdTick();
   var b=$('#echoBtn');
   b.addEventListener('pointerdown',function(e){if(e.button>0)return;e.preventDefault();try{b.setPointerCapture(e.pointerId);}catch(x){}if(ECHO.rec){ECHO.tap=true;echoStop();return;}ECHO.down=performance.now();echoStart();});
   b.addEventListener('pointerup',function(){if(ECHO.tap){ECHO.tap=false;return;}if(!ECHO.rec)return;if(performance.now()-ECHO.down>=400)echoStop();else echoSt('Recording… tap again to stop');});
@@ -10561,6 +10637,6 @@ $('#midiOn').addEventListener('click',midiConnect);
 $$('[data-exp]').forEach(function(b){b.addEventListener('click',function(){ensureAudio();var k=b.getAttribute('data-exp'),s=slots[k];if(!s.buf)return;saveWav(encodeWav([s.buf.getChannelData(0)],s.buf.sampleRate),'ecou-'+s.name.replace(/[^a-z0-9]+/gi,'-').toLowerCase()+'-'+nname(ftom(s.root)));});});
 })();
 </script>
-<div id="updBar" hidden><span>A new version of Ecou is ready.</span><button id="updGo">Update</button></div><style>#updBar{position:fixed;left:12px;right:12px;bottom:calc(84px + env(safe-area-inset-bottom));z-index:950;display:flex;align-items:center;gap:12px;padding:12px 12px 12px 16px;border-radius:16px;background:#1E1E28;border:1px solid #2B2B37;color:#E9E9F0;font:14px/1.4 system-ui,sans-serif;box-shadow:0 10px 30px rgba(0,0,0,.5)}#updBar[hidden]{display:none}#updBar span{flex:1}#updBar button{border:0;border-radius:999px;background:#D4FF3A;color:#0B0B10;font:700 14px system-ui,sans-serif;padding:9px 16px}</style><script>(function(){var V="8a26e98814",busy=false,last=0;function chk(){if(busy||Date.now()-last<60000)return;busy=true;last=Date.now();fetch("beta/version.txt?"+Date.now(),{cache:"no-store"}).then(function(r){return r.ok?r.text():"";}).then(function(t){t=(t||"").trim();if(t&&t!==V)document.getElementById("updBar").hidden=false;}).catch(function(){}).then(function(){busy=false;});}document.addEventListener("visibilitychange",function(){if(!document.hidden)chk();});setTimeout(chk,8000);document.addEventListener("click",function(e){if(e.target&&e.target.id==="updGo"){try{if(typeof saveProject==="function")saveProject(true);}catch(x){}location.reload();}});})();</script>
+<div id="updBar" hidden><span>A new version of Ecou is ready.</span><button id="updGo">Update</button></div><style>#updBar{position:fixed;left:12px;right:12px;bottom:calc(84px + env(safe-area-inset-bottom));z-index:950;display:flex;align-items:center;gap:12px;padding:12px 12px 12px 16px;border-radius:16px;background:#1E1E28;border:1px solid #2B2B37;color:#E9E9F0;font:14px/1.4 system-ui,sans-serif;box-shadow:0 10px 30px rgba(0,0,0,.5)}#updBar[hidden]{display:none}#updBar span{flex:1}#updBar button{border:0;border-radius:999px;background:#D4FF3A;color:#0B0B10;font:700 14px system-ui,sans-serif;padding:9px 16px}</style><script>(function(){var V="8291f9523f",busy=false,last=0;function chk(){if(busy||Date.now()-last<60000)return;busy=true;last=Date.now();fetch("beta/version.txt?"+Date.now(),{cache:"no-store"}).then(function(r){return r.ok?r.text():"";}).then(function(t){t=(t||"").trim();if(t&&t!==V)document.getElementById("updBar").hidden=false;}).catch(function(){}).then(function(){busy=false;});}document.addEventListener("visibilitychange",function(){if(!document.hidden)chk();});setTimeout(chk,8000);document.addEventListener("click",function(e){if(e.target&&e.target.id==="updGo"){try{if(typeof saveProject==="function")saveProject(true);}catch(x){}location.reload();}});})();</script>
 </body>
 </html>
