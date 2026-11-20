@@ -2,31 +2,11 @@ var dawKbDone=false,DAWCOL=['#D4FF3A','#5CE1E6','#FF8A5B','#B69CFF','#FFD166','#
 while(SPCOL.length<DAWCOL.length)SPCOL.push(DAWCOL[SPCOL.length]);
 var MAXAUD=8,DRH=36,DLH=64,abuf={},abufN=0,peakCache=new WeakMap(),dawClipboard=null,dawNeed=true;
 function abufAdd(b){var id='a'+(++abufN);abuf[id]=b;return id;}
-function dawDefaults(){return {clips:[],markers:[],loop:{on:false,a:0,b:64},ppx:4,sx:0,snap:4,sel:null,lane:1,auto:'off',play:0,nid:0,count:true,offMs:0,mon:false,init:false,msel:-1};}
+function dawDefaults(){return {clips:[],markers:[],loop:{on:false,a:0,b:64},ppx:4,sx:0,snap:4,sel:null,lane:1,auto:'off',play:0,nid:0,count:true,offMs:0,mon:false,init:false,msel:-1,mauto:{}};}
 var daw=dawDefaults();
 var AUTOP={vol:{label:'Volume',min:0,max:1.2,neutral:1},pan:{label:'Pan',min:-1,max:1,neutral:0},rev:{label:'Reverb send',min:0,max:1,neutral:1},dly:{label:'Delay send',min:0,max:1,neutral:1},cut:{label:'Filter cutoff',min:0,max:1,neutral:1}};
 var AUTOK=['vol','pan','rev','dly','cut'];
-function hasAuto(t,k){return !!(t&&t.auto&&t.auto[k]&&t.auto[k].length);}
-function autoBase(t,k){return k==='vol'?t.vol:k==='pan'?t.pan:k==='rev'?t.rev:k==='dly'?t.dly:1;}
-function autoNode(t,k){var n=t.n;if(!n)return null;return k==='vol'?n.av.gain:k==='pan'?(n.ap.pan||null):k==='rev'?n.ar.gain:k==='dly'?n.ad.gain:n.af.frequency;}
-function autoMap(k,v){return k==='cut'?Math.min(20000,normToHz(v)):v;}
-function autoVal(t,k,g){var a=t.auto[k];if(g<=a[0].s)return a[0].v;for(var i=0;i<a.length-1;i++){if(g<a[i+1].s){var p=a[i],q=a[i+1];return p.v+(q.v-p.v)*(g-p.s)/Math.max(1e-9,q.s-p.s);}}return a[a.length-1].v;}
-function fmtAuto(k,v){if(k==='vol')return v<0.001?'−∞ dB':dec(20*Math.log10(v),1)+' dB';if(k==='pan')return Math.abs(v)<0.02?'C':(v<0?'L':'R')+Math.round(Math.abs(v)*100);if(k==='cut')return Math.round(Math.min(20000,normToHz(v)))+' Hz';return fPct(v);}
-/* schedule automation from step g0 (at time t0) until step g1; cancel=true clears pending events first */
-function schedAuto(t0,g0,g1,cancel){
-  var sd=stepDur();
-  tracks.forEach(function(t){if(!t.n)return;AUTOK.forEach(function(k){var p=autoNode(t,k);if(!p)return;
-    if(cancel){try{p.cancelScheduledValues(Math.max(0,t0-0.001));}catch(e){}}
-    if(!hasAuto(t,k)){p.setValueAtTime(k==='cut'?20000:AUTOP[k].neutral,t0);return;}
-    var a=t.auto[k],prev={s:g0,v:autoVal(t,k,g0)};p.setValueAtTime(autoMap(k,prev.v),t0);
-    function ramp(s,v){if(k==='cut'){var n=Math.max(1,Math.ceil(s-prev.s));for(var j=1;j<=n;j++){var ss=prev.s+(s-prev.s)*j/n,vv=prev.v+(v-prev.v)*j/n;p.linearRampToValueAtTime(autoMap(k,vv),t0+(ss-g0)*sd);}}else p.linearRampToValueAtTime(v,t0+(s-g0)*sd);prev={s:s,v:v};}
-    for(var i=0;i<a.length;i++){if(a[i].s<=g0)continue;if(a[i].s>=g1)break;ramp(a[i].s,a[i].v);}
-    if(g1<1e8&&prev.s<g1)ramp(g1,autoVal(t,k,g1));
-  });});
-}
-function autoPreview(){if(!ctx||(seq.on&&seq.mode==='arrange'))return;var now=ctx.currentTime;
-  tracks.forEach(function(t){if(!t.n)return;AUTOK.forEach(function(k){var p=autoNode(t,k);if(!p)return;try{p.cancelScheduledValues(now);}catch(e){}
-    var v=hasAuto(t,k)?autoMap(k,autoVal(t,k,daw.play)):(k==='cut'?20000:AUTOP[k].neutral);p.setTargetAtTime(v,now,0.015);});});}
+/* automation engine (hasAuto, autoVal, schedAuto, autoPreview, ...): see 42a-automation-lanes.js */
 /* clips */
 function clipLen(c){return c.type==='pat'?c.l:c.dur/(tsActive(c)?tsSrcSd(c):stepDur());}
 function clipEnd(c){return c.s+clipLen(c);}
@@ -134,10 +114,11 @@ function arrTick(){
       schedAuto(tj,daw.loop.a,daw.loop.b,false);arrStartClipsAt(daw.loop.a,tj);fxStateAt(daw.loop.a,tj);
     }else if(!daw.loop.on&&!arr.rec&&!seq.rec&&!arr.jam&&arr.g>=arr.end+4){var wait=Math.max(0,arr.next-now);clearInterval(seq.timer);seq.timer=null;setTimeout(function(){if(seq.mode==='arrange'&&seq.on&&!seq.timer){transportStop();daw.play=0;daw.sx=0;dawNeed=true;}},wait*1000+600);return;}
   }
+  aPump();
 }
 function arrPosNow(){if(!ctx)return daw.play;var now=ctx.currentTime-(ctx.outputLatency||0),a=arr.anchors,k=a.length-1;while(k>0&&a[k].t>now)k--;return a[k].g+(now-a[k].t)/tmSd(a[k].g);}
 function arrStopCleanup(){
-  var now=ctx.currentTime,pos=arrPosNow();fxRecCloseAll();Object.keys(pfHeld).forEach(function(k){if(!pfUser[k])pfOff(k);});if(daw.fxf&&daw.fxf.length){pfFader=0;applyFader();fxFaderUI();}
+  var now=ctx.currentTime,pos=arrPosNow();aStop();fxRecCloseAll();Object.keys(pfHeld).forEach(function(k){if(!pfUser[k])pfOff(k);});if(daw.fxf&&daw.fxf.length){pfFader=0;applyFader();fxFaderUI();}
   arr.srcs.forEach(function(r){try{r.g.gain.cancelScheduledValues(now);r.g.gain.setTargetAtTime(0,now,0.006);r.src.stop(now+0.05);}catch(e){}});arr.srcs=[];
   if(arr.rec)arrRecFinish(now);
   else if(pos>=arr.startG)daw.play=daw.loop.on?clamp(pos,daw.loop.a,daw.loop.b):Math.max(0,pos);
@@ -186,7 +167,7 @@ function removeTrack(i){
   if(seq.on)transportStop();patterns.forEach(function(pt){if(pt.notes.length>i)pt.notes.splice(i,1);});if(selTrack===i){selTrack=1;loadSound(1);}if(songSel>=i)songSel=1;
   if(t.n){try{t.n.out.disconnect();t.n.sr.disconnect();t.n.sd.disconnect();t.n.ar.disconnect();t.n.ad.disconnect();}catch(e){}}
   daw.clips=daw.clips.filter(function(c){return c.ti!==i;});daw.clips.forEach(function(c){if(c.ti>i)c.ti--;});
-  if(t.n&&t.n.insN)insTear(t.n);mxKeyRemap(i);tracks.splice(i,1);if(daw.lane>=tracks.length)daw.lane=tracks.length-1;if(typeof spSel!=='undefined'&&spSel>=tracks.length)spSel=0;
+  if(t.n&&t.n.insN)insTear(t.n);mxKeyRemap(i);alTrackRemoved(i);tracks.splice(i,1);if(daw.lane>=tracks.length)daw.lane=tracks.length-1;if(typeof spSel!=='undefined'&&spSel>=tracks.length)spSel=0;
   daw.sel=null;tracks.forEach(function(x,j){trackRoute(j);});insRebuildAll();if(mxSel!=null&&mxSel!=='rA'&&mxSel!=='rB'&&mxSel!=='mst'&&!tracks[+mxSel])mxSel=null;
   renderMixer();renderSpUI();renderTrackSegs();renderDawHeads();renderInsp();dawNeed=true;markDirty();
 }

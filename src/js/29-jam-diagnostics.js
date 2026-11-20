@@ -96,13 +96,13 @@ document.addEventListener('visibilitychange',function(){if(!document.hidden&&ctx
 document.addEventListener('pointerdown',function(){if(ctx&&ctx.state!=='running'&&!offlineRender){try{ctx.resume();}catch(e){}}},true);
 /* serialization helpers (called from serialize / loadProjectData) */
 function dawSerialize(bid){return {clips:daw.clips.map(function(c){var o=JSON.parse(JSON.stringify(c));if(c.type==='aud'){o.buf=bid(abuf[c.buf]);o.takes=(c.takes||[c.buf]).map(function(id){return bid(abuf[id]);});if(c.vt){o.vt.src=bid(abuf[c.vt.src]);o.vt.out=c.vt.out?bid(abuf[c.vt.out]):null;}}return o;}),
-  markers:daw.markers,fx:daw.fx||[],fxf:daw.fxf||[],loop:daw.loop,ppx:daw.ppx,snap:daw.snap,play:daw.play,count:daw.count,offMs:daw.offMs,nid:daw.nid,init:daw.init,tmap:daw.tmap||null};}
+  markers:daw.markers,fx:daw.fx||[],fxf:daw.fxf||[],loop:daw.loop,ppx:daw.ppx,snap:daw.snap,play:daw.play,count:daw.count,offMs:daw.offMs,nid:daw.nid,init:daw.init,tmap:daw.tmap||null,mauto:daw.mauto&&Object.keys(daw.mauto).length?daw.mauto:undefined};}
 function dawLoad(d,gb){
   var keepView={ppx:daw.ppx,sx:daw.sx,lane:daw.lane,auto:daw.auto,sel:daw.sel};
   daw=dawDefaults();abuf={};
   if(d){var map={};function rid(i){if(i==null)return null;if(map[i])return map[i];var b=gb(i);if(!b)return null;map[i]=abufAdd(b);return map[i];}
     (d.clips||[]).forEach(function(c){if(!tracks[c.ti])return;if(c.type==='aud'){c.buf=rid(c.buf);c.takes=(c.takes||[]).map(rid).filter(Boolean);if(!c.buf)return;if(c.takes.indexOf(c.buf)<0)c.takes.push(c.buf);if(c.vt){c.vt.src=rid(c.vt.src);c.vt.out=rid(c.vt.out);if(!c.vt.src)delete c.vt;}}daw.clips.push(c);});
-    daw.markers=d.markers||[];daw.fx=fxMigrate(d.fx);daw.fxf=Array.isArray(d.fxf)?d.fxf:[];if(d.loop)daw.loop=d.loop;['snap','play','count','offMs','nid'].forEach(function(k){if(d[k]!=null)daw[k]=d[k];});daw.init=!!d.init;daw.tmap=Array.isArray(d.tmap)&&d.tmap.length?d.tmap:null;
+    daw.markers=d.markers||[];daw.fx=fxMigrate(d.fx);daw.fxf=Array.isArray(d.fxf)?d.fxf:[];if(d.loop)daw.loop=d.loop;['snap','play','count','offMs','nid'].forEach(function(k){if(d[k]!=null)daw[k]=d[k];});daw.init=!!d.init;daw.tmap=Array.isArray(d.tmap)&&d.tmap.length?d.tmap:null;daw.mauto=d.mauto&&typeof d.mauto==='object'?d.mauto:{};
     daw.clips.forEach(function(c){if(c.id>daw.nid)daw.nid=c.id;});}
   if(hist.lock){daw.ppx=keepView.ppx;daw.sx=keepView.sx;daw.lane=Math.min(keepView.lane,tracks.length-1);daw.auto=keepView.auto;if(clipById(keepView.sel))daw.sel=keepView.sel;}
   if($('#t-daw').classList.contains('active'))daw.init=true;
