@@ -38,7 +38,7 @@ var TABH={'t-home':'home','t-gar':'garage','t-cap':'capture','t-ins':'instrument
 function hideOverlayEls(name){if(name==='tab'){tabHide();return;}if(name==='score'){$('#scoreOv').hidden=true;$('#scoreInner').innerHTML='';}if(name==='take')$('#take').classList.remove('show');}
 function pushOverlay(name){overlay=name;try{if(location.hash!=='#'+name)location.hash=name;}catch(e){}}
 function closeOverlay(name){hideOverlayEls(name);if(overlay===name){overlay=null;try{if(location.hash==='#'+name)history.back();}catch(e){}}}
-function showTab(id,fromHash){if(!TABH[id])return;var tt=$('#toast');if(tt&&showTab.cur!==id){tt.classList.remove('show');}if(FLOW)FLOW.share=false;
+function showTab(id,fromHash){if(!TABH[id])return;try{if(showTab.cur&&showTab.cur!==id)micTabSwitch(showTab.cur,id);}catch(e){}var tt=$('#toast');if(tt&&showTab.cur!==id){tt.classList.remove('show');}if(FLOW)FLOW.share=false;
   $$('.tab').forEach(function(t){t.classList.toggle('active',t.id===id);});
   $('main').scrollTop=0;$('#kbwrap').hidden=id==='t-pad'||id==='t-home'||id==='t-fx';showTab.cur=id;var KBS=showTab.kb||(showTab.kb={});setKbCollapsed(id in KBS?KBS[id]:(id==='t-daw'||id==='t-song'||id==='t-fx'));
   if(id==='t-song'){renderSongUI();drawRoll();}if(id==='t-pad'){paintSteps();updJam();}if(id==='t-daw')dawShown();if(id==='t-home')homeShown();document.body.classList.toggle('on-gar',id==='t-gar');if(id==='t-gar')garShown();else if(GAR.apOn>=0)garApStop();navSync();

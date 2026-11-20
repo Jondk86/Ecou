@@ -223,10 +223,14 @@ function drawRecLive(g){var R=arr.rec;if(!R||R.tStart==null||R.pkF0==null||!R.pk
     for(var x=Math.max(0,Math.floor(x0));x<Math.min(dW,Math.ceil(x1));x++){var ta=cy.t+(x-x0)/ppx*sd,tb=ta+sd/ppx,i0=Math.floor(((ta+R.lat)*sr-R.pkF0)/RECBIN),i1=Math.max(i0+1,Math.floor(((tb+R.lat)*sr-R.pkF0)/RECBIN)),m=0;
       for(var i=Math.max(0,i0);i<i1&&i<R.pkL.length;i++){var v=recPk(R,ch,i);if(v>m)m=v;}var hh=Math.min(1,m)*hh0;g.fillRect(x,mid-hh,1,Math.max(1,hh*2));}
     g.restore();});}
-function dawRecord(){
-  if(seq.on&&seq.mode==='arrange'&&arr.rec){transportStop();return;}
+function dawRecord(force){
+  if(seq.on&&seq.mode==='arrange'&&arr.rec){transportStop();return;}if(seq.on&&seq.rec&&!arr.rec){noteRecStop();return;}
   if(!ensureAudio())return;if(seq.bounce||stemsRunning){toast('An export is running.');return;}
   var armed=[];tracks.forEach(function(t,i){if(t.kind==='audio'&&t.arm)armed.push(i);});
+  /* never auto-arm an audio lane (= open the mic) when the user is on an instrument lane: record notes instead */
+  if(!armed.length&&!force){var ln=tracks[daw.lane];
+    if(ln&&ln.kind!=='audio'&&ln.kind!=='drums'){noteRecStart(daw.lane);return;}
+    if(!ln||ln.kind!=='audio'){recAsk('daw',function(){noteRecStart();},function(){dawRecord(true);});return;}}
   if(!armed.length){var ti=daw.lane;if(!tracks[ti]||tracks[ti].kind!=='audio')ti=firstAudioLane();if(ti<0)return;tracks[ti].arm=true;armed=[ti];renderDawHeads();}
   if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){micBlocked();return;}
   var stream=null;
@@ -240,7 +244,7 @@ function dawRecord(){
     var lat=0;try{var st=stream.getAudioTracks()[0].getSettings();if(st&&typeof st.latency==='number')lat=st.latency;}catch(e){}
     R.lat=lat+recLatency()+daw.offMs/1000;
     arr.rec=R;arr.pre=daw.count?16:0;transportStart('arrange');recMeterStart();
-    toast((daw.count?'Count-in… recording starts on bar '+(Math.floor(arr.startG/16)+1)+'.':'Recording.')+(VT.hp?'':' Not monitoring (no headphones confirmed); metronome muted during the take.'),VT.hp?1800:3000);
+    toast((daw.count?'Count-in… recording starts on bar '+(Math.floor(arr.startG/16)+1)+'.':'Recording.')+(VT.hp?'':' Not monitoring (no headphones confirmed); metronome muted during the take.'),VT.hp?1800:3000);if(R.mon)btMonHint();
   }).catch(function(){if(stream)stream.getTracks().forEach(function(t){t.stop();});micBlocked();});
 }
 function arrRecFinish(tStop){

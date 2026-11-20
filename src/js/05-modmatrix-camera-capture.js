@@ -98,7 +98,7 @@ function startCapture(target){
   if(!ensureAudio())return;
   if(capture){var same=capture.target===target;stopCapture();if(same)return;}
   if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){micBlocked(target);return;}
-  navigator.mediaDevices.getUserMedia({audio:{echoCancellation:false,noiseSuppression:false,autoGainControl:false}}).then(function(stream){
+  var gst=null;navigator.mediaDevices.getUserMedia({audio:{echoCancellation:false,noiseSuppression:false,autoGainControl:false}}).then(function(stream){gst=stream;
     var s=ctx.createMediaStreamSource(stream),proc=ctx.createScriptProcessor(4096,1,1),mute=ctx.createGain();mute.gain.value=0;
     var chunks=[];
     proc.onaudioprocess=function(ev){chunks.push(new Float32Array(ev.inputBuffer.getChannelData(0)));};
@@ -107,7 +107,7 @@ function startCapture(target){
     capture={target:target,stream:stream,s:s,proc:proc,mute:mute,chunks:chunks,t0:performance.now(),timer:setTimeout(stopCapture,max*1000)};
     setCapUI(target,true);
     if(target!=='ECHO'&&target!=='IDEA')toast({IR:'Listening — clap now.',BB:'Recording — beatbox now (max 8 s).',PAD:'Recording — max 4 s.'}[target]||'Recording — max 10 s.',2200);
-  }).catch(function(){micBlocked(target);});
+  }).catch(function(){if(gst&&!(capture&&capture.stream===gst))gst.getTracks().forEach(function(t){t.stop();});micBlocked(target);});
 }
 function stopCapture(){
   var c=capture;if(!c)return;capture=null;clearTimeout(c.timer);

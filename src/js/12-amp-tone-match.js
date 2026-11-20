@@ -69,13 +69,13 @@ var live=null;
 function liveStart(){
   if(!ensureAudio())return;
   if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){toast('Live input isn’t available in this view. Use the full version (hosted ecou.html) in Chrome.',5500);return;}
-  navigator.mediaDevices.getUserMedia({audio:{echoCancellation:false,noiseSuppression:false,autoGainControl:false}}).then(function(stream){
+  var gst=null;navigator.mediaDevices.getUserMedia({audio:{echoCancellation:false,noiseSuppression:false,autoGainControl:false}}).then(function(stream){gst=stream;
     liveStop();var s=ctx.createMediaStreamSource(stream);N.liveIn=N.liveIn||G(1);N.liveIn.gain.value=P.liveGain.v;s.connect(N.liveIn);
     try{N.liveIn.disconnect();}catch(e){}N.liveIn.connect(N.chainIn);
     live={stream:stream,src:s};if(VTL.on)vtLiveAttach(live);var lat=Math.round(((ctx.baseLatency||0)+(ctx.outputLatency||0))*1000);
     $('#liveState').textContent='live'+(lat?' · ~'+lat+' ms output latency':'');$('#liveOn').disabled=true;$('#liveOff').disabled=false;
-    toast('Input is live through the insert chain. Use headphones to avoid feedback.',4000);
-  }).catch(function(){toast('Microphone access is blocked in this view. Use the full version (hosted ecou.html) in Chrome.',5500);});
+    toast('Input is live through the insert chain. Use headphones to avoid feedback.',4000);btMonHint();
+  }).catch(function(){if(gst&&!(live&&live.stream===gst))gst.getTracks().forEach(function(t){t.stop();});toast('Microphone access is blocked in this view. Use the full version (hosted ecou.html) in Chrome.',5500);});
 }
 function liveStop(){if(!live)return;try{live.src.disconnect();}catch(e){}vtLiveDrop(live.vox);live.stream.getTracks().forEach(function(t){t.stop();});live=null;$('#liveState').textContent='off';$('#liveOn').disabled=false;$('#liveOff').disabled=true;}
 function initAmp(){

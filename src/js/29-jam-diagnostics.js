@@ -45,10 +45,57 @@ function detectBpm(b){
 /* microphone hygiene: Android switches Bluetooth headphones to low-quality call mode while any mic is open,
    so every mic stream is tracked and released as soon as it is not needed (and whenever the page is hidden) */
 var openStreams=new Set();
+/* Bluetooth: on Android, opening ANY mic while Bluetooth headphones are connected can switch them from A2DP (music)
+   to HFP/SCO (call mode: mono, quiet, narrow-band). Chrome often only switches back when the page is torn down.
+   So (1) note recording never opens the mic (see recRoute/noteRecStart), (2) when the mic IS needed we prefer the
+   built-in phone mic over a headset mic (a headset mic forces SCO for sure; the built-in mic usually avoids it),
+   (3) every stream is tracked so nothing stays open, (4) after a Bluetooth take we offer "Restore sound". */
+var BTRE=/bluetooth|headset|hands-?free|\bbt\b|\bsco\b|\bhfp\b|airpods|buds/i,MICBT={seen:false,used:false,was:false,hint:false};
+function micPick(list){var ins=(list||[]).filter(function(d){return d.kind==='audioinput';});
+  if(!ins.some(function(d){return d.label;}))return null;           /* no labels before permission: decide after the first open */
+  if(!ins.some(function(d){return BTRE.test(d.label);}))return null; /* no Bluetooth mic around: leave the browser default alone */
+  MICBT.seen=true;var ok=ins.filter(function(d){return d.deviceId&&d.deviceId!=='communications'&&!BTRE.test(d.label);});
+  var pick=ok.filter(function(d){return d.deviceId!=='default';})[0]||ok[0];return pick?pick.deviceId:null;}
+function btScan(list){(list||[]).forEach(function(d){if(d.label&&BTRE.test(d.label))MICBT.seen=true;});}
+function micWithDev(c,id){if(!id)return c;var cc=Object.assign({},c);cc.audio=Object.assign({},c.audio===true?{}:c.audio,{deviceId:{exact:id}});return cc;}
 (function(){var md=navigator.mediaDevices;if(!md||!md.getUserMedia)return;var gum=md.getUserMedia.bind(md);
-  md.getUserMedia=function(c){if(c&&c.audio&&audioInId){if(c.audio===true)c={audio:{deviceId:{exact:audioInId}},video:c.video};else{c=Object.assign({},c);c.audio=Object.assign({},c.audio,{deviceId:{exact:audioInId}});}}return gum(c).then(function(st){if(c&&c.audio){openStreams.add(st);st.getTracks().forEach(function(t){t.addEventListener('ended',function(){if(!st.getTracks().some(function(x){return x.readyState==='live';}))openStreams.delete(st);});});}updMic();return st;});};})();
+  function en(){return md.enumerateDevices?md.enumerateDevices().catch(function(){return [];}):Promise.resolve([]);}
+  function track(st){openStreams.add(st);st.getAudioTracks().forEach(function(t){if(BTRE.test(t.label||''))MICBT.used=true;});
+    st.getTracks().forEach(function(t){t.addEventListener('ended',function(){if(!st.getTracks().some(function(x){return x.readyState==='live';}))openStreams.delete(st);updMic();});});updMic();return st;}
+  md.getUserMedia=function(c){if(!(c&&c.audio))return gum(c);
+    if(audioInId)return gum(micWithDev(c,audioInId)).then(track);   /* the user's own pick in the input picker always wins */
+    if(typeof c.audio==='object'&&c.audio.deviceId)return gum(c).then(track);
+    return en().then(function(l){btScan(l);var id=micPick(l);
+      return gum(micWithDev(c,id)).then(function(st){if(id)return st;
+        /* first open (labels were hidden): if the browser handed us a headset mic and a built-in one exists, swap */
+        return en().then(function(l2){btScan(l2);var id2=micPick(l2),tr=st.getAudioTracks()[0];
+          if(id2&&tr&&BTRE.test(tr.label||'')){st.getTracks().forEach(function(t){t.stop();});return gum(micWithDev(c,id2));}return st;});});
+    }).then(track);};})();
+window.__micOpen=function(){var n=0;openStreams.forEach(function(st){st.getAudioTracks().forEach(function(t){if(t.readyState==='live')n++;});});return n;};
+/* live-monitor hint: Bluetooth audio adds ~200 ms, so monitoring yourself through it is unusable */
+function btMonHint(){var md=navigator.mediaDevices;if(MICBT.hint||!md||!md.enumerateDevices)return;md.enumerateDevices().then(function(l){btScan(l);
+  if(MICBT.seen&&!MICBT.hint){MICBT.hint=true;toast('Bluetooth adds ~200 ms delay; use wired headphones or the phone speaker for live monitoring.',3200);}}).catch(function(){});}
+function micClosed(){var deg=ctx&&ctx.sampleRate<32000;if(!(MICBT.seen||MICBT.used||deg))return;MICBT.used=false;sndFixShow();}
+function sndFixShow(){var b=$('#sndFix');if(!b){b=document.createElement('div');b.id='sndFix';b.setAttribute('role','status');
+    b.style.cssText='position:fixed;left:12px;right:12px;bottom:calc(84px + env(safe-area-inset-bottom));z-index:60;display:flex;gap:8px;align-items:center;padding:10px 12px;border-radius:14px;background:#1f2430;color:#fff;font:500 13px Inter,system-ui,sans-serif;box-shadow:0 6px 24px rgba(0,0,0,.4)';
+    b.innerHTML='<span style="flex:1">Bluetooth headphones may still be in call mode (quiet, mono).</span><button type="button" id="sndFixGo" style="min-height:40px;padding:0 12px;border-radius:10px;border:0;background:#F43F5E;color:#fff;font-weight:700">Restore sound</button><button type="button" id="sndFixX" aria-label="Close" style="min-width:40px;min-height:40px;border:0;background:none;color:#fff;font-size:18px">×</button>';
+    document.body.appendChild(b);$('#sndFixX').addEventListener('click',function(){b.hidden=true;});$('#sndFixGo').addEventListener('click',function(){b.hidden=true;sndRestore();});}
+  b.hidden=false;clearTimeout(sndFixShow.t);sndFixShow.t=setTimeout(function(){b.hidden=true;},15000);}
+/* Honest status: restartAudio() really closes the AudioContext and builds a new one (new output stream). With no mic
+   open that is what usually lets Android route the headphones back to A2DP, but the OS decides; it is best effort.
+   suspend()/resume() is a weaker fallback. Only reopening the app is guaranteed (the owner's observation). */
+function sndRestore(){if(micLive())releaseMics();
+  try{restartAudio();toast('Sound output rebuilt. If it still sounds quiet, close Ecou completely and open it again.',3200);return;}catch(e){}
+  try{ctx.suspend().then(function(){return ctx.resume();}).then(function(){toast('Audio output restarted. If it still sounds quiet, close Ecou completely and open it again.',3200);});}catch(e){toast('Close Ecou completely and open it again to get full Bluetooth sound back.',3200);}}
+/* tab switch: finish short takes that belong to the page you are leaving and drop every stream nobody owns */
+function micTabSwitch(from,to){if(from===to)return;
+  try{if(capture&&capture.target!=='IDEA')stopCapture();}catch(e){}try{if(ECHO.rec&&from==='t-home')echoStop();}catch(e){}
+  var TL={'t-gar':1,'t-daw':1,'t-song':1};try{if(arr.rec&&!(TL[from]&&TL[to]))transportStop();}catch(e){}
+  setTimeout(micSweep,0);}
+function micSweep(){var keep=[arr.rec&&arr.rec.stream,live&&live.stream,capture&&capture.stream].filter(Boolean);
+  openStreams.forEach(function(st){if(keep.indexOf(st)<0&&!st._keep){st.getTracks().forEach(function(t){t.stop();});openStreams.delete(st);}});updMic();}
 function micLive(){var on=false;openStreams.forEach(function(st){st.getAudioTracks().forEach(function(t){if(t.readyState==='live')on=true;});});return on;}
-function updMic(){var b=$('#micOn');if(b)b.hidden=!micLive();}
+function updMic(){var on=micLive(),b=$('#micOn');if(b)b.hidden=!on;if(MICBT.was&&!on)micClosed();MICBT.was=on;}
 function releaseMics(){
   try{if(capture)stopCapture();}catch(e){}try{if(live)liveStop();}catch(e){}try{if(arr.rec)transportStop();}catch(e){}
   openStreams.forEach(function(st){st.getTracks().forEach(function(t){t.stop();});});openStreams.clear();updMic();
