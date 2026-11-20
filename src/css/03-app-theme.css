@@ -1,0 +1,149 @@
+/* ===== App-wide theme, aligned with Garage ===== */
+/* v2: surface/text tokens live in the first :root */
+body{font-feature-settings:"tnum" 0}
+/* header */
+header{gap:8px;padding:8px 14px;border-bottom:1px solid var(--ln);background:#0D0D13}
+.logo{font-size:17px;letter-spacing:.16em}
+.hbtn{min-width:40px;height:40px;border-radius:12px;border:1px solid var(--ln);background:var(--s2);font-size:16px}
+#mPro{padding:0 12px;font-weight:700}
+#mPro[aria-pressed="true"]{background:var(--ac);border-color:var(--ac);color:var(--bg)}
+#hPlay{width:44px;height:40px;border-radius:12px;background:var(--tx);color:var(--bg);font-size:15px}
+#rec{min-height:40px;border-radius:12px;border:1px solid var(--ln);background:var(--s2);color:var(--or);padding:0 12px}
+#rec.on{background:var(--rec);color:var(--ink);border-color:var(--rec)}
+/* page */
+main{padding:14px 14px 24px}
+.tab{gap:12px}
+h2{font-size:24px;font-weight:700;letter-spacing:-.02em}
+.sub,.note{color:var(--mu)}
+.card{background:var(--s1);border:1px solid var(--ln);border-radius:20px;padding:14px;gap:12px}
+.card[style*="solid var(--ac)"],.loopb{border:1px solid color-mix(in srgb,var(--ac) 45%,var(--ln))!important}
+.kicker{font-size:14px;font-weight:600;letter-spacing:0;text-transform:none;color:var(--tx)}
+.row>.mu,.row .mu{font-size:12px}
+/* buttons */
+.btn{min-height:46px;border-radius:14px;border:1px solid var(--ln);background:var(--s2);font-size:14px;font-weight:600}
+.btn:active,.chips button:active,.mv:active{transform:scale(.98)}
+.btn.primary{background:var(--tx);border-color:var(--tx);color:var(--bg)}
+.btn.rec{background:var(--rec);border-color:var(--rec);color:var(--ink)}
+.btn.rec.live{background:var(--rec);border-color:var(--rec);color:var(--ink);animation:gxpulse 1s ease-in-out infinite}
+.btn:disabled{opacity:.4}
+.mv{width:40px;height:40px;border-radius:12px;border:1px solid var(--ln);background:var(--s2)}
+.ms{width:40px;height:40px}
+.tgl[aria-pressed="true"],.ms[aria-pressed="true"]{background:var(--ac);border-color:var(--ac);color:var(--bg)}
+#dawCount[aria-pressed="true"]{background:var(--ac);border-color:var(--ac);color:var(--bg)}
+/* segmented controls */
+.seg{padding:3px;border-radius:13px;background:var(--s1);border:1px solid var(--ln)}
+.seg button{min-height:34px;border-radius:10px;padding:0 12px;color:var(--mu)}
+.seg button[aria-pressed="true"]{background:var(--s2);color:var(--tx);box-shadow:inset 0 0 0 1px var(--ln)}
+header .seg button[aria-pressed="true"]{background:var(--ac);color:var(--bg);box-shadow:none}
+/* chips */
+.chips{gap:6px}
+.chips button{min-height:34px;border-radius:17px;border:1px solid var(--ln);background:var(--s1);color:var(--mu)}
+.chips button.has{color:var(--tx);border-color:color-mix(in srgb,var(--ac) 50%,var(--ln))}
+.chips button[aria-pressed="true"]{background:var(--ac);border-color:var(--ac);color:var(--bg)}
+/* controls */
+.ctl{background:var(--s1);border:1px solid var(--ln);border-radius:14px}
+.card .ctl,.fx .ctl{background:var(--hl);border-color:transparent}
+.ctl .row span:first-child{color:var(--mu);font-size:13px}
+.chk{justify-content:space-between;font-size:14px;gap:14px}
+.chk>span{flex:1;min-width:0}
+input[type=checkbox]{-webkit-appearance:none;appearance:none;position:relative;flex-shrink:0;width:46px;height:28px;border-radius:14px;background:var(--ln);margin:0;cursor:pointer;transition:background .15s}
+input[type=checkbox]::before{content:"";position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:11px;background:var(--tx);transition:left .15s}
+input[type=checkbox]:checked{background:var(--ac)}
+input[type=checkbox]:checked::before{left:21px;background:var(--bg)}
+input[type=checkbox]:focus-visible{outline:2px solid var(--tx);outline-offset:2px}
+.dsel,.tin,.nin,#fsId,main select{border-radius:12px;border:1px solid var(--ln);background:var(--s2);color:var(--tx)}
+.tbpm{border-radius:12px;border:1px solid var(--ln);background:var(--s2);height:40px}
+.wave{background:#101016;border-radius:12px}
+.strip summary{color:var(--mu);font-weight:600}
+details>summary{list-style-position:inside}
+/* effects + lists */
+.fx{border:1px solid var(--ln);border-radius:16px;background:var(--s1)}
+.fx.on{border-color:color-mix(in srgb,var(--ac) 55%,var(--ln))}
+.librow,.lbr,.mtr div,.mqb{background:var(--s2);border-color:var(--ln)}
+.fxl{border-color:var(--ln)}
+/* pads + steps */
+.pad{border-radius:16px;border:1px solid var(--ln);background:var(--s2)}
+.pad.sel{border:2px solid var(--tx)}
+.pad.hit{background:var(--ac);color:var(--bg)}
+.steps button{border-radius:10px;border:1px solid var(--ln);background:var(--s2)}
+.steps button.beat{background:var(--hl);border-color:#3A3A48}
+.steps button.beat.on,.steps button.on{background:var(--ac);border-color:var(--ac);color:var(--bg)}
+.pfx button{border-radius:12px;border:1px solid var(--ln);background:var(--s2)}
+#pads.keys .pad{background:#17202A;border-color:#26394D}
+/* studio */
+#dawWrap{border:1px solid var(--ln);border-radius:16px;background:#101016}
+#dawHeads{background:var(--s1);border-right-color:var(--ln)}
+.lh .lb button{border-radius:7px;border:1px solid var(--ln);background:var(--s2)}
+/* keyboard dock */
+#kbwrap{background:#0D0D13;border-top:1px solid var(--ln)}
+#kbbar button{border-radius:10px;border:1px solid var(--ln);background:var(--s2)}
+.wk{border-radius:0 0 9px 9px}
+/* bottom navigation */
+nav{background:#0D0D13;border-top:1px solid var(--ln);padding:2px 2px 0}
+nav button{gap:4px;color:var(--mu);font-weight:600}
+nav button svg{width:44px;height:28px;padding:3px 11px;border-radius:14px;transition:background .15s}
+nav button[aria-selected="true"]{color:var(--tx)}
+nav button[aria-selected="true"] svg{background:color-mix(in srgb,var(--ac) 18%,transparent);color:var(--ac)}
+@media (max-width:360px){nav button svg{width:36px;padding:3px 7px}}
+/* overlays */
+#take{border:1px solid var(--ln);border-radius:20px;background:var(--s1);box-shadow:0 12px 40px rgba(0,0,0,.5)}
+#toast{border-radius:14px;box-shadow:0 10px 30px rgba(0,0,0,.4)}
+#start{gap:16px;background:radial-gradient(120% 70% at 50% 0%,#1A1A24 0%,var(--bg) 60%)}
+#start h1{font-size:46px;letter-spacing:.18em;font-weight:700}
+#start p{color:var(--mu)}
+#start button{min-height:54px;border-radius:16px;background:var(--tx);color:var(--bg);font-size:17px;padding:0 28px;min-width:260px}
+#start #startFresh{background:transparent!important;border:1px solid var(--ln)!important;color:var(--tx)!important;min-height:50px!important;font-size:15px!important;border-radius:16px!important}
+@media (prefers-reduced-motion:reduce){.btn.rec.live{animation:none}}
+.row[style*="flex-wrap"]>.chk{flex:1 1 100%;min-height:40px}
+#trxOv{position:fixed;inset:0;z-index:70;background:rgba(5,5,8,.72);display:flex;align-items:center;justify-content:center;padding:24px}
+#trxOv[hidden]{display:none}
+.trx-p{width:min(420px,100%);background:var(--s1);border:1px solid var(--ln);border-radius:22px;padding:20px;display:flex;flex-direction:column;gap:12px;box-shadow:0 20px 50px rgba(0,0,0,.5)}
+.trx-p>b{font-size:18px}.trx-p>span{font-size:13px;color:var(--mu);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.trx-bar{height:8px;border-radius:4px;background:var(--ln);overflow:hidden}.trx-bar i{display:block;height:100%;width:0;background:var(--ac);border-radius:4px;transition:width .3s}
+/* follow the score */
+#scPlay{border-top:1px solid var(--ln);background:#0D0D13;padding:8px 12px calc(10px + env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:8px}
+#scPlay[hidden]{display:none}
+#scKb{width:100%;height:56px;display:block;border-radius:8px;background:#EDEDF2}
+.sc-row{display:flex;align-items:center;gap:12px}
+.sc-pp{width:52px;height:52px;border-radius:26px;border:0;background:var(--tx);color:var(--bg);font-size:18px;font-weight:700;flex-shrink:0}
+.sc-mid{flex:1;min-width:0;display:flex;flex-direction:column;gap:4px}
+.sc-sub{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:12px;color:var(--mu);font-variant-numeric:tabular-nums}
+.sc-sub .seg button{min-height:28px;padding:0 9px;font-size:12px}
+#scCursor{position:absolute;width:3px;border-radius:2px;background:rgba(11,11,16,.55);box-shadow:0 0 0 4px rgba(92,225,230,.35);pointer-events:none;transition:left .06s linear}
+#scoreInner .scf-hl,#scoreInner .scf-hl path{fill:var(--scc)!important;stroke:var(--scc)}
+#keysRow{display:grid;grid-template-columns:auto minmax(0,1fr) minmax(0,1fr);gap:8px;align-items:center}#keysRow .dsel{max-width:none;width:100%;min-width:0;text-overflow:ellipsis}#keysRow #keysBtn{min-height:40px}
+/* W1-2: tap targets >=40px in Studio, Mix and the pattern selector (layout only; lane/ruler heights DLH=64/DRH stay JS-owned) */
+#dawLoop,#dawMetro,#dawCount{width:auto;min-width:44px;padding:0 10px;font-size:12px;white-space:nowrap}
+#t-daw .mv,#t-fx .mv{min-width:44px;min-height:44px}
+#t-daw .seg button,#t-fx .seg button{min-height:40px}
+#t-daw .chips button,#t-fx .chips button{min-height:40px}
+#t-daw .btn,#t-fx .btn,#t-daw .dsel,#t-fx .dsel,#t-daw .tin,#t-fx .tin,#t-daw input[type=number],#t-daw input[type=text]{min-height:44px!important}
+#t-daw .tbpm{height:44px}
+#t-daw input[type=range],#t-fx input[type=range]{height:40px}
+#t-daw .ctl,#t-fx .ctl{gap:0;padding-top:6px;padding-bottom:4px}
+#t-daw .chk,#t-fx .chk{min-height:40px!important}
+#t-daw input[type=checkbox]::after,#t-fx input[type=checkbox]::after{content:"";position:absolute;left:-1px;right:-1px;top:-7px;bottom:-7px}
+.patSeg{gap:4px}
+#t-fx .grid2,#t-daw .grid2{grid-template-columns:repeat(2,minmax(0,1fr))}
+#t-fx .mqsel{min-height:40px;min-width:40px;align-self:stretch}
+.patSeg button{min-width:40px;min-height:44px;padding:0 6px}
+/* Studio lane headers: rows are 64px (DLH) and 36px (DRH), so M/S/arm get 40px-tall buttons in a wider column and the name fills the rest of the header */
+#dawWrap{grid-template-columns:130px minmax(0,1fr)}
+#dawHeads .lhr{gap:4px!important;padding:0 3px}
+#dawHeads .lhr .mv{position:relative;min-width:0;min-height:0;height:32px!important;flex:1;padding:0 4px!important}
+#dawHeads .lhr .mv::after{content:"";position:absolute;left:-1px;right:-1px;top:-5px;bottom:-5px}
+.lh{position:relative;padding:1px 3px 1px 5px;gap:2px}
+.lh .ln{min-height:18px;line-height:18px;position:static}
+.lh .ln::before{content:"";position:absolute;inset:0}
+.lh .lb{position:relative;z-index:1;gap:4px;pointer-events:none}
+.lh .lb button{pointer-events:auto}
+.lh .lb button{width:36px;height:40px;font-size:12px;position:relative}
+.lh .lb button::after{content:"";position:absolute;left:-3px;right:-3px;top:-1px;bottom:-1px}
+/* header: Advanced toggle and stacked "Rec / output" label fit at 360px */
+#mPro{padding:0 8px;font-size:12px}
+#rec{display:inline-flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.05;padding:0 8px}
+#rec small{font-size:10px;font-weight:600;letter-spacing:.02em}
+@media (min-width:521px){#rec{flex-direction:row;gap:5px}#rec small{font-size:inherit;font-weight:inherit}}
+@media (max-width:400px){header .logo{font-size:15px;letter-spacing:.1em}}
+@media (max-width:370px){header{gap:6px;padding-left:10px;padding-right:10px}}
+

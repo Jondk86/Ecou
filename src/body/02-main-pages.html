@@ -1,0 +1,575 @@
+<main>
+  <!-- HOME: Idea capture, Echo Drop, sounds & ideas, quick start, projects -->
+  <section class="tab" id="t-home" aria-labelledby="homeT">
+    <div class="hm-hero" id="echoHero">
+      <p class="hm-eye">Every sound has a story</p>
+      <h2 class="hm-title" id="homeT">Catch a sound</h2>
+      <div class="hm-cap">
+        <div class="hm-rings" aria-hidden="true"><i></i><i></i></div>
+        <div class="hm-rip" id="echoRip" aria-hidden="true"></div>
+        <canvas id="echoWave" aria-hidden="true"></canvas>
+        <button id="echoBtn" aria-pressed="false" aria-describedby="echoSt" aria-label="Echo Drop: hold to record a sound and release, or tap to start and tap again to stop"><span class="hm-lvl" id="echoLvl" aria-hidden="true"></span><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21"/></svg></button>
+      </div>
+      <p class="hm-hint" id="echoSt" role="status" aria-live="polite">Hold to capture anything: a kettle, your voice, a door</p>
+      <div class="hm-denied" id="echoDenied" hidden role="alert"><p id="echoDenMsg">Ecou can’t use the microphone here. Allow it in your browser’s site settings, or import a recording instead.</p><div class="hm-row2"><label class="btn primary" for="f-ECHO" id="echoImp">Import a sound</label><button class="btn" id="echoRetry">Try the mic again</button></div></div>
+      <div class="hm-modes" id="hmModes" role="group" aria-label="Catch an idea"></div>
+      <div class="hm-echo"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v4M12 17v4M3 12h4M17 12h4M5.6 5.6l2.8 2.8M15.6 15.6l2.8 2.8M5.6 18.4l2.8-2.8M15.6 8.4l2.8-2.8"/></svg><div><b id="echoOnT">Echo Drop is on</b><span>It sings back in key, instantly playable</span></div><button class="hm-sw" id="echoOn" role="switch" aria-checked="true" aria-labelledby="echoOnT"></button></div>
+    </div>
+    <div class="hm-card" id="echoCard" hidden role="region" aria-label="Captured sound"></div>
+    <div class="hm-qs" role="group" aria-label="Quick start">
+      <button data-qs="band"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="15" r="4"/><path d="M12 15V4l7 2v4l-7-2"/></svg><b>Backing Band</b><span>jam along</span></button>
+      <button data-qs="inst"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="M9 4v9M15 4v9M3 13h18"/></svg><b>Instruments</b><span>play</span></button>
+      <button data-qs="pads"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="7" height="7" rx="2"/><rect x="13" y="4" width="7" height="7" rx="2"/><rect x="4" y="13" width="7" height="7" rx="2"/><rect x="13" y="13" width="7" height="7" rx="2"/></svg><b>Pads</b><span>beats</span></button>
+      <button data-qs="song"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="9" height="4" rx="1.5"/><rect x="8" y="10.5" width="13" height="4" rx="1.5"/><rect x="5" y="16" width="8" height="4" rx="1.5"/></svg><b>Song</b><span>build it</span></button>
+      <button data-qs="sing"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0 0 14 0M12 17v4"/></svg><b>Sing</b><span>auto-tune</span></button>
+      <button data-qs="morph"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="12" r="5"/><circle cx="16" cy="12" r="5"/></svg><b>Morph</b><span>blend 2 sounds</span></button>
+    </div>
+    <button class="hm-learn" id="lnCard" aria-describedby="lnCardS"><span class="ic" aria-hidden="true">?</span><span class="tx"><b>Learn to make music</b><span id="lnCardS">3–5 min lessons</span></span><span class="go" aria-hidden="true">›</span></button>
+    <div class="hm-h"><h3>Sounds &amp; ideas</h3><button class="hm-link" id="shelfLib">Library ›</button></div>
+    <div class="hm-shelf" id="shelf" role="list" aria-label="Sounds and ideas, newest first"></div>
+    <div class="hm-h"><h3>Projects</h3><button class="hm-link" id="homeAllProj">All ›</button></div>
+    <div id="homeProj" class="hm-proj"></div>
+    <div class="hm-ts" role="group" aria-label="Text size"><b><span aria-hidden="true">Aa</span> Text size</b><div class="seg"><button data-ts-set="100" aria-pressed="true">100%</button><button data-ts-set="115" aria-pressed="false">115%</button><button data-ts-set="130" aria-pressed="false">130%</button></div></div>
+    <input type="file" id="f-ECHO" accept="audio/*,video/*" class="vh">
+  </section>
+  <!-- GARAGE -->
+  <section class="tab" id="t-gar">
+    <div class="gx-bar" id="garBar">
+      <div class="gx-trans">
+        <button class="gx-ib" id="garHome" aria-label="Go to the start"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 5v14M19 5l-10 7 10 7z"/></svg></button>
+        <button class="gx-ib gx-play" id="garPlay" aria-label="Play"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4.5v15l12.5-7.5z"/></svg></button>
+        <button class="gx-ib gx-rec" id="garRec" aria-label="Record"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="6.5"/></svg></button>
+      </div>
+      <button class="gx-pos" id="garPosBtn" aria-label="Tempo, metronome and count-in"><b id="garPos">1.1</b><span><em id="garBpm">120</em> bpm<i id="garClick" hidden> · click</i></span></button>
+      <label class="gx-keyp"><span class="vh">Song key</span><select id="garKey" aria-label="Song key"></select></label>
+    </div>
+    <div class="gx-tabs" role="tablist" aria-label="Garage" id="garViews">
+      <button role="tab" data-gv="inst" aria-selected="true">Instruments</button>
+      <button role="tab" data-gv="loops" aria-selected="false">Live Loops</button>
+      <button role="tab" data-gv="tracks" aria-selected="false">Tracks</button>
+    </div>
+    <p class="gx-st" id="garSt" aria-live="polite"></p>
+
+    <!-- instrument browser -->
+    <div id="gv-sounds" class="gx-v">
+      <div id="garBrowse"></div>
+    </div>
+
+    <!-- instrument surface -->
+    <div id="gv-play" class="gx-v" hidden>
+      <div class="gx-ihead">
+        <button class="gx-back" id="garBack" aria-label="All instruments"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button>
+        <div class="gx-iname"><i id="garInstDot"></i><b id="garInstName">Smart Keys</b></div>
+        <div class="harm-badge gx-hb" aria-live="polite"></div>
+        <select id="garTrack" class="gx-pill" aria-label="Track"></select>
+      </div>
+      <div class="gx-iopts" id="garOpts">
+        <select id="garSnd" class="gx-pill gx-snd" aria-label="Sound"></select>
+        <div class="gx-seg2" id="garMode" role="group" aria-label="Instrument or amp"><button data-md="play" aria-pressed="true">Play</button><button data-md="amp" aria-pressed="false">Amp</button></div>
+        <div class="gx-ap" id="garApRow"><span>Autoplay</span><div id="garAp" role="group" aria-label="Autoplay pattern"></div></div>
+      </div>
+      <div class="gx-banner" id="garBanner" hidden></div>
+      <div id="garInst" class="gx-surface"></div>
+      <p class="gx-hint" id="garHint"></p>
+    </div>
+
+    <!-- live loops -->
+    <div id="gv-loops" class="gx-v" hidden>
+      <div id="garGrid" class="gx-grid" role="grid" aria-label="Live Loops"></div>
+      <div class="gx-lfoot">
+        <button class="gx-btn" id="garStopAll">Stop all</button>
+        <button class="gx-btn gx-cap" id="garPerf" aria-pressed="false"><i></i>Capture to Tracks</button>
+      </div>
+      <p class="gx-hint" id="garLoopHint">Tap a loop to start it on the next bar. Tap an empty cell to record into it, or hold a loop for more options.</p>
+    </div>
+
+    <!-- tracks -->
+    <div id="gv-tracks" class="gx-v" hidden>
+      <div id="garTl" class="gx-tl"></div>
+      <div class="gx-tfoot"><button class="gx-btn" id="garAddTr">Add instrument</button><button class="gx-btn" id="garToStudio">Open in Studio</button></div>
+    </div>
+
+    <div class="gx-sheet" id="garSheet" hidden><div class="gx-scrim" data-close="1"></div><div class="gx-panel" role="dialog" aria-modal="true" aria-labelledby="garSheetT"><div class="gx-grab"></div><h3 id="garSheetT"></h3><div id="garSheetB"></div></div></div>
+  </section>
+
+  <!-- CAPTEAZĂ -->
+  <section class="tab" id="t-cap">
+    <h2>Capture</h2>
+    <p class="sub">Record or import a short source — a tapped glass, a sung note, a creaking door. Ecou maps it across the keyboard.</p>
+    <div class="card">
+      <div class="row"><span class="kicker">Source A</span><span class="mu" id="note-A"></span></div>
+      <div class="octRow" id="oct-A" hidden><span class="mu">Root octave</span><button class="octB" data-oct="A" data-d="-1" aria-label="Root note one octave down">Oct −</button><button class="octB" data-oct="A" data-d="1" aria-label="Root note one octave up">Oct +</button></div>
+      <div class="row"><strong id="name-A">Glass Tap</strong><span class="mu" id="dur-A"></span></div>
+      <canvas class="wave" id="wave-A" aria-hidden="true"></canvas>
+      <div class="btns"><button class="btn rec" data-cap="A">● Record sample</button><label class="btn" for="f-A" data-up="A">Import</label></div>
+      <button class="btn slot-sc" data-scslot="A" aria-label="Open the sound card for Source A: play, transform, send">Sound card · play, transform, send</button>
+      <button class="btn" data-slice="A" aria-label="Slice Source A into a kit on the pads">✂ Slice to pads</button>
+      <button class="btn pro" data-exp="A">Export sample (WAV)</button>
+    </div>
+    <div class="card">
+      <div class="row"><span class="kicker">Source B</span><span class="mu" id="note-B"></span></div>
+      <div class="octRow" id="oct-B" hidden><span class="mu">Root octave</span><button class="octB" data-oct="B" data-d="-1" aria-label="Root note one octave down">Oct −</button><button class="octB" data-oct="B" data-d="1" aria-label="Root note one octave up">Oct +</button></div>
+      <div class="row"><strong id="name-B">Choir Pad</strong><span class="mu" id="dur-B"></span></div>
+      <canvas class="wave" id="wave-B" aria-hidden="true"></canvas>
+      <div class="btns"><button class="btn rec" data-cap="B">● Record sample</button><label class="btn" for="f-B" data-up="B">Import</label></div>
+      <button class="btn slot-sc" data-scslot="B" aria-label="Open the sound card for Source B: play, transform, send">Sound card · play, transform, send</button>
+      <button class="btn" data-slice="B" aria-label="Slice Source B into a kit on the pads">✂ Slice to pads</button>
+      <button class="btn pro" data-exp="B">Export sample (WAV)</button>
+    </div>
+    <div class="card">
+      <div class="row"><span class="kicker">Live input</span><span class="mu" id="liveState">off</span></div>
+      <p class="note">Play guitar, bass or vocals live through the insert chain — turn on the Amp module in Mix. Use headphones. Expect some latency on Android.</p>
+      <div class="btns"><button class="btn" id="liveOn">Monitor input</button><button class="btn" id="liveOff" disabled>Stop</button><button class="btn vt-chip" id="vtLiveCap" aria-pressed="false">Auto-tune: off</button></div>
+      <label data-p="liveGain"></label>
+    </div>
+    <p class="note">For best results, record 20–30 cm from the mic: one clean hit or a sustained note. Silence is trimmed, gain normalized and the root note detected automatically. Video files are accepted — the audio track is used.</p>
+    <input type="file" id="f-A" accept="audio/*,video/*" class="vh">
+    <input type="file" id="f-B" accept="audio/*,video/*" class="vh">
+    <input type="file" id="f-IR" accept="audio/*,video/*" class="vh">
+    <input type="file" id="f-VID" accept="video/*" class="vh">
+    <input type="file" id="f-CAB" accept="audio/*" class="vh">
+    <input type="file" id="f-REF" accept="audio/*,video/*" class="vh">
+    <div class="card" style="gap:10px">
+      <div class="row"><span class="kicker">Voice characters</span><span class="mu">speak-style, on sound A</span></div>
+      <div class="chips" id="spkChips"></div>
+      <p class="note">Record your voice into A, then pick a character. Robot and Vocoder chord turn speech into a playable synth; the others reshape it. Play it on the keys or use Record to pad.</p>
+    </div>
+  </section>
+
+  <!-- INSTRUMENT -->
+  <section class="tab" id="t-ins">
+    <h2>Instrument</h2>
+    <div class="trackSeg seg" role="group" aria-label="Track" style="align-self:flex-start;flex-wrap:wrap"></div>
+    <p class="mu" id="editing" style="margin:-6px 0 0"></p>
+    <div class="card"><div class="row"><span class="kicker">Sound library</span><span class="mu">tap to load on this track</span></div><div class="chips" id="stockChips"></div><p class="note">Recorded instruments (piano, guitars, basses, strings, winds, brass) load the first time you choose them. The rest are synthesized on your phone. <a href="samples/CREDITS.md" target="_blank" rel="noopener" style="color:var(--tx)">Sound credits</a></p></div>
+    <div class="card" style="border:2px solid var(--ac)">
+      <div class="row"><span class="kicker" style="color:var(--ac)">Describe the sound</span><span class="mu" id="aiEngine"></span></div>
+      <form id="aiForm" style="display:flex;gap:8px"><label for="aiText" class="vh">Describe the sound</label><input id="aiText" type="text" autocomplete="off" placeholder="e.g. darker, wide and dreamy" style="flex:1;min-width:0;min-height:48px;border-radius:14px;border:1px solid #3A3A48;background:var(--s2);color:var(--tx);font:inherit;font-size:16px;padding:0 14px"><button class="btn primary" id="aiGo" type="submit">Apply</button></form>
+      <div class="seg" role="group" aria-label="Apply to" style="align-self:flex-start"><button data-aisc="track" aria-pressed="true">This track only</button><button data-aisc="mix" aria-pressed="false">Whole mix</button></div>
+      <div class="chips" id="aiChips"></div>
+      <p class="note" id="aiOut" style="color:var(--tx)"></p>
+      <button class="btn" id="aiUndo" hidden>Undo</button>
+    </div>
+    <div class="seg" role="group" aria-label="Sound engine" style="align-self:flex-start">
+      <button data-engine="sampler" aria-pressed="true">Sampler</button>
+      <button data-engine="granular" aria-pressed="false">Granular</button>
+      <button data-engine="fm" aria-pressed="false">FM (DX7)</button>
+    </div>
+    <div class="card" id="fmCard" hidden>
+      <div class="row"><span class="kicker">FM voice</span><div class="row" style="gap:6px"><strong id="fmName">Tine Piano</strong><button class="mv" id="fmRename" aria-label="Rename voice" style="width:auto;padding:0 8px;font-size:12px">Rename</button></div></div>
+      <div class="chips" id="fmLib"></div>
+      <div class="btns"><label class="btn" for="fmImp">Import .syx</label><button class="btn" id="fmExp">Save .syx</button><button class="btn primary" id="fmMatch">Sound Match</button></div>
+      <input type="file" id="fmImp" accept=".syx,application/octet-stream" class="vh">
+      <p class="note">DX7-compatible 6-operator FM. Import single voices or 32-voice banks. <strong>Sound Match</strong> turns the sound in Capture slot A into an editable FM voice that also plays on an FM-1.</p>
+      <div class="grid2"><label class="ctl"><span class="row"><span>Algorithm</span><output id="fmAlgO">5</output></span><input type="range" id="fmAlg" min="1" max="32" step="1" value="5" aria-label="Algorithm"></label><label class="ctl"><span class="row"><span>Feedback</span><output id="fmFbO">6</output></span><input type="range" id="fmFb" min="0" max="7" step="1" value="6" aria-label="Feedback"></label></div>
+      <div class="fmops" id="fmOps" role="group" aria-label="Operator"></div>
+      <div id="fmOpEd"></div>
+      <details class="strip"><summary>LFO · pitch · transpose</summary><div class="grid2" id="fmLfo"></div></details>
+      <div class="btns"><button class="btn" id="fmSend" disabled>Send voice to FM-1</button><button class="btn" id="fmSendBank" disabled>Send bank to FM-1</button></div>
+    </div>
+    <div class="card smp-only">
+      <span class="kicker">Morph · blend two sounds (A ↔ B)</span>
+      <div class="row" style="font-size:15px;font-weight:600"><span id="mA">Glass Tap</span><span id="mB" style="text-align:right">Choir Pad</span></div>
+      <div class="seg" role="group" aria-label="Morph mode" style="align-self:flex-start;flex-wrap:wrap"><button data-mm="blend" aria-pressed="true">Crossfade</button><button data-mm="transfer" aria-pressed="false">Timbre transfer</button><button data-mm="spectral" aria-pressed="false">Spectral blend</button></div>
+      <label data-p="morph"></label>
+      <p class="note" id="morphState">Crossfade: both sources play, mixed by level.</p>
+      <p class="note pro">Timbre transfer keeps A’s pitch and articulation and paints it with B’s spectral envelope. Spectral blend interpolates both spectra frame by frame (B is pitch-aligned and time-stretched to A). Both re-render a new source when you move the slider.</p>
+    </div>
+    <div class="grid2">
+      <label data-p="attack"></label>
+      <label data-p="release"></label>
+      <label data-p="cutoff"></label>
+      <label data-p="space"></label>
+      <label data-p="fenv"></label>
+      <label data-p="fdec"></label>
+      <label data-p="glide"></label>
+      <label data-p="mono"></label>
+    </div>
+    <div class="card pro">
+      <span class="kicker">Sampler</span>
+      <label class="chk"><span>Sustain loop</span><input type="checkbox" id="loop"></label>
+      <label data-p="reso"></label>
+    </div>
+    <div class="card pro" id="granCard">
+      <span class="kicker">Granular</span>
+      <div class="grid2">
+        <label data-p="gpos"></label>
+        <label data-p="gsize"></label>
+        <label data-p="gdens"></label>
+        <label data-p="gspray"></label>
+        <label data-p="gjit"></label>
+      </div>
+    </div>
+    <div class="card">
+      <div class="row"><span class="kicker">MIDI input</span><span class="mu" id="midiState">not connected</span></div>
+      <button class="btn" id="midiOn">Connect MIDI controller</button>
+      <p class="note">USB or Bluetooth controllers (Chrome). Velocity, pitch bend (±2 st) and mod wheel are supported — the mod wheel is a source in the mod matrix.</p>
+    </div>
+    <div class="card" id="fm1Card">
+      <div class="row"><span class="kicker">M-VAVE FM-1</span><span class="mu" id="fm1State">not connected</span></div>
+      <div class="btns"><button class="btn primary" id="fm1Usb">Connect USB</button><button class="btn" id="fm1Ble">Connect Bluetooth</button></div>
+      <label class="chk" style="justify-content:space-between"><span>FM-1 keys play the Ecou track (channel 10 → pads)</span><input type="checkbox" id="fm1Keys" checked></label>
+      <label class="chk" style="justify-content:space-between"><span>FM-1 faders (CC 7) set Ecou track volumes</span><input type="checkbox" id="fm1Fad"></label>
+      <label class="chk" style="justify-content:space-between"><span>Send clock + start/stop to FM-1</span><input type="checkbox" id="fm1Clock"></label>
+      <label class="chk" style="justify-content:space-between"><span>Follow FM-1 clock (tempo, start, stop)</span><input type="checkbox" id="fm1Follow2"></label>
+      <label class="chk" style="justify-content:space-between"><span>Send voice edits live to FM-1</span><input type="checkbox" id="fm1Follow"></label>
+      <details class="strip"><summary>Play tracks on the FM-1</summary><p class="note">0 = Ecou plays it. 1–16 = the notes go to that FM-1 MIDI channel instead (FM-1 Open: channels 1–7 = tracks 1–7, 10 = track 8; V16: each Voice's receive channel).</p><div class="grid2" id="fm1Routes"></div>
+        <label class="ctl"><span class="row"><span>Timing offset</span><output id="fm1LatO">12 ms</output></span><input type="range" id="fm1Lat" min="0" max="80" step="1" value="12" aria-label="FM-1 timing offset"></label></details>
+      <div class="btns"><button class="btn fm1on" id="fm1ReqV" disabled>Get voice</button><button class="btn fm1on" id="fm1ReqB" disabled>Get bank</button><button class="btn fm1on" id="fm1Panic" disabled>All notes off</button><button class="btn" id="fm1LogBtn">Monitor</button></div>
+      <pre id="fm1Log" class="fm1log" hidden></pre>
+      <details class="strip"><summary>FM-1 setup (firmware, effect channel)</summary>
+        <div class="seg" role="group" aria-label="FM-1 firmware"><button data-f1fw="16" aria-pressed="true">V16</button><button data-f1fw="15" aria-pressed="false">V15 or older</button></div>
+        <label class="ctl"><span class="row"><span>Effect channel (GLOBAL → Effect Ch)</span><output id="f1EcO">2</output></span><input type="range" id="f1Ec" min="1" max="16" step="1" value="2"></label>
+        <p class="note">Effect CCs: V16 uses CC 70–93, V15 uses CC 0–23, both on the Effect channel. Keep the Effect channel different from the voice channels.</p></details>
+      <details class="strip"><summary>FM-1 effects (remote)</summary><div id="f1Fx"></div></details>
+      <details class="strip"><summary>FM-1 voices 1–8 (V16 multitimbral)</summary><p class="note">Set each Voice's MIDI Ch on the FM-1 to match. Preset sends Program Change; Level sends Expression (CC 11) on that channel.</p><div id="f1Voices"></div>
+        <label class="ctl"><span class="row"><span>FM-1 master volume (CC 7)</span><output id="f1MvO">100</output></span><input type="range" id="f1Mv" min="0" max="127" step="1" value="100"></label></details>
+      <details class="strip"><summary>Motion → FM-1 (phone, camera, pads)</summary><p class="note">Tilt the phone, wave at the camera or drag the XY pad to play the FM-1's filter, effects or expression. Enable Motion or Camera on the Mod tab first.</p><div id="f1Map"></div></details>
+      <details class="strip"><summary>Record the FM-1 into Ecou (USB audio)</summary><p class="note">Over USB the FM-1 is also an audio input. Choose it here, then use Capture or an armed audio track as usual: FM-1 sounds become Ecou samples and Sound Match sources.</p>
+        <div class="row"><select id="f1In" class="dsel" aria-label="Audio input"><option value="">Phone microphone (default)</option></select><button class="mv" id="f1InScan" style="width:auto;padding:0 10px">Find inputs</button></div></details>
+      <p class="note">USB: Chrome on Android (USB-C/OTG) or desktop. Bluetooth: Chrome connects to the FM-1 directly, no pairing app needed. For playing FM-1 keys into Ecou without double sound, set LOCAL off on the FM-1 (MIDI ROUTING page).</p>
+    </div>
+    <p class="note simple-only">Switch to <strong>Advanced</strong> (top bar) for sustain looping, filter resonance and full granular control.</p>
+  </section>
+
+  <!-- MODULEAZĂ -->
+  <section class="tab" id="t-mod">
+    <h2>Motion &amp; modulation</h2>
+    <p class="sub">Play with one hand, shape with the other. Camera and motion sources stack on top of the XY pad.</p>
+    <div id="xy" aria-label="XY pad">
+      <span class="xylab" style="left:10px;top:8px">Y → Cutoff</span>
+      <span class="xylab" style="right:10px;bottom:8px">X → Grain position</span>
+      <span id="xydot"></span>
+    </div>
+    <div class="card">
+      <span class="kicker">Live sources</span>
+      <div id="srcList" style="display:flex;flex-direction:column;gap:9px"></div>
+    </div>
+    <div class="card">
+      <div class="row"><span class="kicker">Camera input</span><span class="mu" id="camState">off</span></div>
+      <video id="vid" playsinline muted></video>
+      <div class="btns"><button class="btn" id="camLive">Live camera</button><label class="btn" for="f-VID" id="camUp">Import video</label></div>
+      <button class="btn" id="camOff" hidden>Stop camera</button>
+      <p class="note">Frame motion drives cutoff; brightness drives reverb. Point it at rain, traffic or a candle flame.</p>
+    </div>
+    <div class="card">
+      <div class="row"><span class="kicker">Motion sensors</span><span class="mu" id="motState">off</span></div>
+      <div class="btns"><button class="btn" id="motOn">Enable</button><button class="btn" id="motCal">Recalibrate</button></div>
+      <p class="note">Tilt → cutoff. Roll → pitch bend.</p>
+    </div>
+    <div class="card pro">
+      <span class="kicker">Mod matrix</span>
+      <p class="note">Tap a cell to cycle depth: 25 → 50 → 100 → −50 → off.</p>
+      <div class="mx" id="mx"></div>
+      <label data-p="lfo"></label>
+    </div>
+    <p class="note simple-only">Routing is preset. Switch to <strong>Advanced</strong> (top bar) to edit the mod matrix.</p>
+  </section>
+
+  <!-- PADS -->
+  <section class="tab active" id="t-pad">
+    <div class="card loopb" id="loopCard">
+      <div class="row"><span class="kicker" style="color:var(--ac)">Loop builder</span><span class="mu" id="lbInfo"></span></div>
+      <p class="note" id="lbHow">1 · Pick a layer below. 2 · Press <strong>● Record layer</strong> and play pads or keys over the loop. 3 · When the loop sounds right, pick the next layer and record again. Then <strong>Add to song</strong>.</p>
+      <div class="row" style="flex-wrap:wrap;gap:6px"><div class="seg" role="group" aria-label="Loop length"><button data-lbl="16">1 bar</button><button data-lbl="32">2 bars</button><button data-lbl="64">4 bars</button></div>
+        <div class="row" style="gap:4px"><button class="mv" id="lbBpmD" aria-label="Slower">−</button><strong id="lbBpm" style="min-width:56px;text-align:center">120</strong><button class="mv" id="lbBpmU" aria-label="Faster">+</button></div></div>
+      <div id="lbLayers" class="lbl" role="list" aria-label="Layers"></div>
+      <div class="btn3"><button class="btn primary" id="lbPlay">▶ Loop</button><button class="btn rec" id="lbRec">● Record layer</button><button class="btn" id="lbUndo" disabled>↶ Undo take</button></div>
+      <div class="row" style="flex-wrap:wrap;gap:8px"><label class="chk"><span>Click</span><input type="checkbox" id="lbMetro" checked></label><label class="chk"><span>Count-in</span><input type="checkbox" id="lbCount" checked></label><label class="chk"><span>Stop rec after 1 loop</span><input type="checkbox" id="lbOne" checked></label><label class="chk"><span>Snap to grid</span><input type="checkbox" id="lbQ" checked></label></div>
+      <details class="strip" id="lbFix"><summary>Fix timing (put what you played on the beat)</summary>
+        <div class="row" style="flex-wrap:wrap;gap:6px"><span class="mu">Grid</span><div class="seg" role="group" aria-label="Timing grid"><button data-lbg="1" aria-pressed="true">1/16</button><button data-lbg="2" aria-pressed="false">1/8</button><button data-lbg="4" aria-pressed="false">1/4</button><button data-lbg="1.3333" aria-pressed="false">1/8 triplet</button></div></div>
+        <label class="ctl"><span class="row"><span>Strength</span><output id="lbStrO">80%</output></span><input type="range" id="lbStr" min="10" max="100" step="5" value="80" aria-label="Timing correction strength"></label>
+        <div class="btns"><button class="btn primary" id="lbFixOne">Fix selected layer</button><button class="btn" id="lbFixAll">Fix all layers</button></div>
+        <p class="note">100% = exactly on the grid. 50–80% keeps some of your feel. Drums sit on 1/16 steps, so triplets apply to the melodic layers only. Undo with ↶ Undo take.</p></details>
+      <div class="btns"><button class="btn" id="lbNext">Next part →</button><button class="btn" id="lbSong">Add to song ×2</button></div>
+    </div>
+    <div class="row"><h2>Pads</h2><label class="chk" style="min-height:0;font-size:13px;color:var(--mu)"><span>Through insert FX</span><input type="checkbox" id="padFx" checked></label></div>
+    <div class="card" style="gap:8px">
+      <div class="row"><button class="mv tgl wide" id="nrBtn" aria-pressed="false">Note repeat</button><div class="seg" role="group" aria-label="Repeat rate"><button data-nr="2">1/8</button><button data-nr="4" aria-pressed="true">1/16</button><button data-nr="8">1/32</button></div></div>
+      <div class="row"><span class="mu">Kit</span><div class="chips" id="kitChips" style="justify-content:flex-end"></div></div>
+      <div class="row" id="keysRow"><button class="mv tgl wide" id="keysBtn" aria-pressed="false">Keys mode</button><select id="keysSrc" class="dsel" aria-label="What the pads play in Keys mode"></select><select id="keysScale" class="dsel" aria-label="Scale"><option value="minor" selected>Minor</option><option value="major">Major</option><option value="penta">Penta</option><option value="chrom">Chrom</option></select></div>
+    </div>
+    <div id="pads" class="pads" aria-label="Drum pads"></div>
+    <div class="card" style="gap:10px">
+      <div class="row"><span class="kicker">Punch-in FX</span><span class="mu">hold while it plays · lower = stronger</span></div>
+      <div id="pfxGrid" class="pfx"></div>
+      <label class="ctl"><span class="row"><span>Performance filter (low-pass ← → high-pass)</span><output id="pfFo">open</output></span><input type="range" id="pfFader" min="-1" max="1" step="0.01" value="0" aria-label="Performance filter"></label>
+      <button class="btn" id="pfReset" style="min-height:38px;font-size:13px">Center the filter</button>
+      <label class="chk" style="justify-content:space-between"><span>Record punch-ins + filter onto the timeline (Studio playing) — they replay and export</span><input type="checkbox" id="pfRec"></label>
+    </div>
+    <div class="card" style="gap:10px">
+      <div class="row"><span class="kicker">Play along</span><span class="mu" id="jamInfo"></span></div>
+      <div class="seg" role="group" aria-label="What plays" style="align-self:flex-start"><button data-js="pattern" aria-pressed="true">Pattern loop</button><button data-js="arrange" aria-pressed="false">Timeline / beat</button></div>
+      <div class="btns"><button class="btn primary" id="jamPlay">▶ Play</button><button class="btn rec" id="jamRec">● Record performance</button></div>
+      <p class="note" id="jamNote">Tap the pads in time. With Record on, every hit is written to the grid (quantized to 1/16) — on the timeline it goes into a 4-bar pattern clip at the playhead.</p>
+    </div>
+    <div class="card" style="gap:10px">
+      <div class="row"><span class="kicker">Riddims</span><span class="mu">reggae · dub · dancehall</span></div>
+      <div class="chips" id="ridChips"></div>
+      <div class="chips" id="hornChips"></div>
+      <p class="note">Loads a reggae kit, a dub bass line and a skank organ into the current pattern at the right tempo. Then play the Dub siren, Dub echo and Tape stop punch-ins.</p>
+    </div>
+    <div class="card">
+      <div class="row"><span class="kicker">Step sequencer</span><span class="mu" id="seqInfo"></span></div>
+      <div class="patSeg chips" aria-label="Patterns"></div>
+      <div class="pageSeg seg" style="align-self:flex-start"></div>
+      <div class="btns"><button class="btn primary" id="seqPlay">▶ Play</button><button class="btn" id="seqClear">Clear this pad (all bars)</button></div>
+      <button class="btn" id="seqCopyBar" hidden>Copy this bar (all pads) to the other bars</button>
+      <div id="steps" class="steps" aria-label="Steps for selected pad"></div>
+      <p class="note">Hold a step to lock its pitch, level or ratchet (×2–×4 repeats inside the step).</p>
+      <div id="lockEd" class="fx" hidden style="padding:10px;display:flex;flex-direction:column;gap:8px">
+        <div class="row"><strong id="lockT"></strong><div class="row" style="gap:6px"><button class="mv" id="lkTry" aria-label="Preview" style="width:auto;padding:0 10px">▶</button><button class="mv" id="lkClose" aria-label="Close" style="width:auto;padding:0 10px">Done</button></div></div>
+        <label class="ctl"><span class="row"><span>Pitch</span><output id="lkPo">0 st</output></span><input type="range" id="lkP" min="-12" max="12" step="1" value="0"></label>
+        <label class="ctl"><span class="row"><span>Level</span><output id="lkLo">100%</output></span><input type="range" id="lkL" min="0" max="1" step="0.01" value="1"></label>
+        <div class="row"><span class="mu">Ratchet</span><div class="seg" role="group" aria-label="Ratchet"><button data-lkr="1">×1</button><button data-lkr="2">×2</button><button data-lkr="3">×3</button><button data-lkr="4">×4</button></div></div>
+      </div>
+      <button class="btn" id="commitBtn">Commit → next pattern</button>
+      <div class="grid2"><label data-p="bpm"></label><label data-p="swing"></label></div>
+    </div>
+    <div class="card" style="border:2px solid var(--ac)">
+      <span class="kicker" style="color:var(--ac)">AI Beatbox → kit</span>
+      <p class="note">Beatbox a groove (up to 8 s). Ecou slices every hit, classifies it as kick, snare, hat or perc, loads the best take of each onto the pads, detects the tempo and writes the pattern into the sequencer.</p>
+      <div class="btns"><button class="btn rec" id="bbRec">● Beatbox</button><label class="btn" for="f-BB" id="bbUp">Import</label></div>
+      <p class="note" id="bbResult" style="color:var(--tx)"></p>
+    </div>
+    <div class="card">
+      <div class="row"><span class="kicker">Selected pad</span><strong id="padName"></strong></div>
+      <canvas class="wave" id="padWave" aria-hidden="true"></canvas>
+      <div class="btns"><button class="btn rec" id="padRec">● Record to pad</button><label class="btn" for="f-PAD" id="padUp">Import</label></div>
+      <button class="btn" id="padSlice" aria-label="Slice this pad’s sound into a kit on the pads">✂ Slice to pads</button>
+      <div class="btns pro"><button class="btn" id="padFromA">Use Source A</button><button class="btn" id="padFromB">Use Source B</button></div>
+      <div class="grid2"><label data-p="padLevel"></label><label data-p="padTune"></label><label data-p="padDecay"></label><label data-p="padPan"></label></div>
+      <div class="row"><span class="mu">Choke group</span><div class="seg" role="group" aria-label="Choke group" id="chokeSeg"><button data-ch="0">Off</button><button data-ch="1">1</button><button data-ch="2">2</button></div></div>
+      <button class="btn pro" id="padExp">Export pad sample (WAV)</button>
+    </div>
+    <button class="btn" id="kitDemo">Reload demo kit</button>
+    <input type="file" id="f-BB" accept="audio/*,video/*" class="vh">
+    <input type="file" id="f-PAD" accept="audio/*,video/*" class="vh">
+  </section>
+
+  <!-- SONG -->
+  <section class="tab" id="t-song">
+    <h2 class="vh">Song</h2>
+    <div id="secView"></div>
+    <div class="card">
+      <div class="row"><span class="kicker">Transport</span><span class="mu" id="trInfo"></span></div>
+      <div class="seg" role="group" aria-label="Play mode" style="align-self:flex-start"><button data-mode="pattern" aria-pressed="true">Pattern loop</button><button data-mode="song" aria-pressed="false">Song</button></div>
+      <div class="btns"><button class="btn primary" id="trPlay">▶ Play</button><button class="btn rec" id="trRec">● Record notes</button></div>
+      <div class="grid2"><label class="chk"><span>Quantize 1/16</span><input type="checkbox" id="trQuant" checked></label><label class="chk"><span>Metronome</span><input type="checkbox" id="trMetro"></label></div>
+      <label data-p="bpm"></label>
+    </div>
+    <div class="card">
+      <div class="row"><span class="kicker">Track</span><button class="btn" id="goSound" style="min-height:36px;font-size:13px">Edit sound</button></div>
+      <div class="trackSeg seg" data-all="1" role="group" aria-label="Track" style="align-self:flex-start;flex-wrap:wrap"></div>
+      <div id="rollWrap" style="display:flex;flex-direction:column;gap:10px">
+        <div class="row" style="flex-wrap:wrap"><div class="seg" role="group" aria-label="Tool"><button data-rtool="note" aria-pressed="true">Note</button><button data-rtool="chord" aria-pressed="false">Chord</button><button data-rtool="select" aria-pressed="false">Select</button></div><select id="rInv" class="dsel" hidden aria-label="Chord inversion"><option value="auto">Auto voicing</option><option value="0">Root position</option><option value="1">1st inversion</option><option value="2">2nd inversion</option><option value="3">3rd inversion</option><option value="open">Open (spread)</option></select><select id="rChordType" class="dsel" hidden aria-label="Chord type"><option value="triad">Triad</option><option value="sev">7th</option><option value="nine">9th</option><option value="sus4">sus4</option><option value="sus2">sus2</option><option value="power">Power</option></select></div>
+        <div class="row" style="flex-wrap:wrap"><span class="mu">Key</span><select id="rKey" class="dsel" aria-label="Key"></select><div class="seg" role="group" aria-label="Mode"><button data-rmode="minor" aria-pressed="true">Minor</button><button data-rmode="major" aria-pressed="false">Major</button></div><label class="chk" id="rHmWrap"><span>Major V in minor</span><input type="checkbox" id="rHm" checked></label></div>
+        <div class="row" id="rSelBar" hidden style="flex-wrap:wrap;gap:6px"><span class="mu" id="rSelN"></span><button class="mv" data-rsel="-12" aria-label="Selected octave down" style="width:auto;padding:0 8px">−oct</button><button class="mv" data-rsel="-1" aria-label="Selected down a semitone">▼</button><button class="mv" data-rsel="1" aria-label="Selected up a semitone">▲</button><button class="mv" data-rsel="12" aria-label="Selected octave up" style="width:auto;padding:0 8px">+oct</button><button class="mv" data-rsel="dup" style="width:auto;padding:0 8px">Duplicate →</button><button class="mv" data-rsel="del" style="width:auto;padding:0 8px">Delete</button></div>
+        <div><span class="mu">Progressions — fill the pattern, voiced smoothly:</span><div class="chips" id="rProgs" style="margin-top:6px"></div></div>
+        <div class="row"><div class="pageSeg seg"></div><div class="row" style="gap:6px;margin-left:auto"><button class="mv" id="rollDn" aria-label="Octave down">↓</button><button class="mv" id="rollUp" aria-label="Octave up">↑</button></div></div>
+        <canvas id="roll" aria-label="Piano roll: tap to add, tap a note to delete, drag a note to move it, drag its right edge to change length" style="width:100%;display:block;border-radius:10px;touch-action:none"></canvas>
+        <canvas id="rollVel" aria-label="Velocity: drag the bars up or down" style="width:100%;height:56px;display:block;border-radius:10px;touch-action:none"></canvas>
+        <p class="note" style="margin:0">Tap to add · tap a note to delete · drag a note to move · drag its right edge to resize · drag in the lane below for velocity. In-key rows are lighter, the key note is green.</p>
+        <div class="row"><span class="mu">Draw</span><div class="seg" role="group" aria-label="Note length" style="flex-wrap:wrap"><button data-nl="1">1/16</button><button data-nl="2">1/8</button><button data-nl="4">1/4</button><button data-nl="8">1/2</button><button data-nl="16">Whole</button><button data-nl="3">1/8.</button><button data-nl="6">1/4.</button></div></div>
+        <div class="btn3"><button class="btn" data-bar="copy">Copy bar</button><button class="btn" data-bar="paste">Paste bar</button><button class="btn" data-bar="all">Bar → all bars</button></div>
+        <div class="row" style="gap:6px"><span class="mu">Transpose bar</span><div class="row" style="gap:6px"><button class="mv" data-bar="-12">−12</button><button class="mv" data-bar="-1">−1</button><button class="mv" data-bar="1">+1</button><button class="mv" data-bar="12">+12</button></div></div>
+        <button class="btn" id="rollClear">Clear this track in the pattern</button>
+      </div>
+      <p class="note" id="drumNote" hidden>Drums are programmed in the <strong>Pads</strong> tab — step sequencer, or finger drumming with Record notes on.</p>
+    </div>
+    <div class="card">
+      <div class="row"><span class="kicker">Patterns</span><span class="mu" id="patInfo"></span></div>
+      <div class="patSeg chips" aria-label="Patterns"></div>
+      <div class="row"><span class="mu">Length</span><div class="seg" role="group" aria-label="Pattern length"><button data-len="16">1 bar</button><button data-len="32">2 bars</button><button data-len="64">4 bars</button></div></div>
+      <div class="btns"><button class="btn" id="patCopy">Duplicate →</button><button class="btn" id="patClear">Clear pattern</button></div>
+    </div>
+    <div class="card" id="trxCard">
+      <div class="row"><span class="kicker">Audio to sheet music</span><span class="mu" id="trxInfo"></span></div>
+      <p class="note">Choose an MP3 or WAV and Ecou writes out the notes, right on your phone. It works best with one instrument or a voice, recorded clearly.</p>
+      <div class="seg" role="group" aria-label="What to transcribe" id="trxMode" style="display:grid;grid-template-columns:repeat(3,1fr)"><button data-tm="melody" aria-pressed="true">Lead melody</button><button data-tm="song" aria-pressed="false">Full song</button><button data-tm="poly" aria-pressed="false">Every note</button></div>
+      <p class="note" id="trxModeNote">Lead melody: the tune you would sing (top voice). Full song: lead, chords and bass on separate staves. Every note: one instrument such as a piano.</p>
+      <p class="note" id="trxStemNote" hidden>For a full song: Ecou splits it into vocals, bass, other instruments and drums, and writes a staff for each. The first time, it downloads the stem splitter (about 175 MB, kept on the phone). Splitting is slow on phones without GPU support, so you pick a section first.</p>
+      <label class="btn primary" for="f-TRX" id="trxPick">Choose a recording</label>
+      <button class="btn" id="trxProj" hidden>Score from my project (exact notes)</button>
+      <input type="file" id="f-TRX" accept="audio/*,.mp3,.wav,.m4a" class="vh">
+      <div id="trxRes" hidden style="display:flex;flex-direction:column;gap:10px">
+        <div class="row"><b id="trxName" style="font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"></b><button class="btn" id="trxPlay" style="min-height:38px;font-size:13px">Listen</button></div>
+        <div class="row"><span class="mu">Tempo</span><div class="tempo"><button class="mv" id="trxHalf" aria-label="Half the tempo" style="width:auto;padding:0 8px;font-size:12px">½</button><button class="mv" id="trxBpmDn" aria-label="Slower">−</button><span class="tbpm"><b id="trxBpm">120</b><small>BPM</small></span><button class="mv" id="trxBpmUp" aria-label="Faster">+</button><button class="mv" id="trxDbl" aria-label="Double the tempo" style="width:auto;padding:0 8px;font-size:12px">×2</button></div></div>
+        <div class="chips" id="trxParts" hidden></div>
+        <div class="btns"><button class="btn primary" id="trxView">View score</button><button class="btn" id="trxPdf">Export PDF</button></div>
+        <button class="btn" id="trxTab">Guitar &amp; bass tabs</button>
+        <button class="btn" id="trxXml">Export MusicXML + MIDI</button>
+        <p class="note" id="trxApprox" hidden></p>
+        <p class="note">If the notes look rushed or stretched, adjust the tempo. The key follows the Key setting under Sheet music.</p>
+      </div>
+    </div>
+    <div class="card">
+      <div class="row"><span class="kicker">Sheet music</span><span class="mu" id="scoreKeyInfo"></span></div>
+      <p class="note">Notation of the whole arrangement (or the current pattern if the arrangement is empty): each melodic track on its own staff, drums on a percussion staff. Notes are quantized to 1/16.</p>
+      <div class="row"><label class="mu" for="scoreKey">Key</label><select id="scoreKey" style="min-height:40px;border-radius:10px;border:1px solid #3A3A48;background:var(--s2);color:var(--tx);font:inherit;padding:0 8px"></select><label class="chk" style="min-height:0;gap:8px"><span>Drums</span><input type="checkbox" id="scoreDrums" checked></label></div>
+      <div class="btns"><button class="btn primary" id="scoreView">Score from my project</button><button class="btn" id="scorePdf">Export PDF</button></div>
+      <button class="btn" id="scoreXml">Export MusicXML + MIDI</button>
+    </div>
+    <div class="card">
+      <div class="row"><span class="kicker">Arrangement</span><span class="mu" id="songInfo"></span></div>
+      <p class="note">Patterns play in this order in Song mode. Tap one twice to remove it.</p>
+      <div id="songList" class="chips"></div>
+      <div class="btns"><button class="btn" id="songAdd">+ Add pattern</button><button class="btn" id="songClear">Clear</button></div>
+      <button class="btn primary" id="bounceBtn">Export song (WAV)</button>
+      <p class="note">Exports the patterns in this arrangement (notes and steps you programmed or recorded with Record notes). To capture something you play live without recording it, use <strong>● Rec output</strong> at the top.</p>
+    </div>
+    <div class="card">
+      <div class="row"><span class="kicker">Project</span><span class="mu" id="saveState">Not saved yet</span></div>
+      <label class="vh" for="projName">Project name</label>
+      <input id="projName" type="text" autocomplete="off" value="Untitled beat" style="min-height:46px;border-radius:12px;border:1px solid #3A3A48;background:var(--s2);color:var(--tx);font:inherit;font-size:16px;font-weight:600;padding:0 12px">
+      <div class="btns"><button class="btn primary" id="projSave">Save</button><button class="btn" id="projOpen">Open…</button></div>
+      <div id="projList" hidden style="display:flex;flex-direction:column;gap:6px"></div>
+      <p class="mu" id="storeUse" hidden style="margin:0;font-size:12px"></p>
+      <div class="btns"><button class="btn" id="projExport">Back up to file</button><label class="btn" for="f-PROJ" id="projImport">Restore from file</label></div>
+      <button class="btn" id="projNew">New</button>
+      <div class="btns"><button class="btn" id="diagBtn">Sound diagnostics</button><button class="btn" id="diagRestart">Restart audio engine</button></div>
+      <label class="chk" style="justify-content:space-between"><span>Stable playback — fixes crackling on slower phones (adds a little latency)</span><input type="checkbox" id="stableAudio"></label>
+      <pre id="diagOut" hidden style="white-space:pre-wrap;font-size:12px;line-height:1.45;background:var(--s2);border-radius:12px;padding:10px;margin:0;color:var(--tx)"></pre>
+      <p class="note">Projects auto-save on this device. Back up to file saves a portable copy with all samples, patterns and settings; Restore from file opens one.</p>
+    </div>
+    <input type="file" id="f-PROJ" accept=".zip,.ecou,application/zip" class="vh">
+  </section>
+
+  <!-- STUDIO -->
+  <section class="tab" id="t-daw">
+    <div class="row"><h2>Studio</h2><span class="mu" id="dawPos" aria-live="off">1.1.1 · 0:00.0</span></div>
+    <div class="card" style="gap:10px">
+      <div class="dawbar">
+        <button class="mv" id="dawHome" aria-label="Go to start">⏮</button>
+        <button class="btn primary" id="dawPlay" style="flex:1">▶ Play</button>
+        <button class="btn rec" id="dawRec" style="flex:1">● Record</button>
+      </div>
+      <div class="rlvl" id="dawLvl" hidden role="img" aria-label="Input level"><i></i></div>
+      <div class="dawbar">
+        <button class="mv ms tgl" id="dawLoop" aria-pressed="false" aria-label="Loop region" title="Loop the region set on the ruler">⟲ Loop</button>
+        <button class="mv ms tgl" id="dawMetro" aria-pressed="false" aria-label="Metronome" title="Metronome click">♩ Click</button>
+        <button class="mv ms tgl" id="dawCount" aria-pressed="true" aria-label="One-bar count-in before recording" title="One-bar count-in before recording">Count-in</button>
+        <div class="tempo" role="group" aria-label="Tempo"><button class="mv" id="dawBpmDn" aria-label="Tempo down">−</button><button class="tbpm" id="dawTap" aria-label="Tap tempo"><b id="dawBpm">120</b><small>BPM · tap</small></button><button class="mv" id="dawBpmUp" aria-label="Tempo up">+</button></div>
+        <div class="seg" role="group" aria-label="Snap to grid" style="margin-left:auto"><button data-snap="16">Bar</button><button data-snap="4" aria-pressed="true">Beat</button><button data-snap="1">1/16</button><button data-snap="0">Off</button></div>
+      </div>
+      <div class="dawbar">
+        <label class="mu" for="dawAuto">Automation</label>
+        <select id="dawAuto" class="dsel"><option value="off">Off — edit clips</option><option value="vol">Volume</option><option value="pan">Pan</option><option value="rev">Reverb send</option><option value="dly">Delay send</option><option value="cut">Filter cutoff</option></select>
+        <div class="row" style="gap:6px;margin-left:auto"><button class="mv" id="dawFit" aria-label="Fit the whole song" style="width:auto;padding:0 10px;font-size:12px">Fit</button><button class="mv" id="dawZo" aria-label="Zoom out">−</button><button class="mv" id="dawZi" aria-label="Zoom in">+</button></div>
+      </div>
+    </div>
+    <div id="dawWrap"><div id="dawHeads"></div><canvas id="dawMini" aria-label="Song overview: drag to scroll" style="grid-column:1 / span 2;width:100%;height:30px;display:block;touch-action:none;border-top:1px solid var(--ln);order:3"></canvas><canvas id="dawCv" aria-label="Timeline. Tap a clip to select it, drag to move, drag its edges to trim. Drag the ruler to set the loop."></canvas></div>
+    <div class="card" id="dawInsp"></div>
+    <div class="btn3"><button class="btn" id="dawLibBtn">Loop library</button><label class="btn" for="f-DAW">Import audio</label><button class="btn" id="dawFromSong">Song → timeline</button></div>
+    <input type="file" id="f-DAW" accept="audio/*,video/*" class="vh">
+    <div class="card" id="dawLib" hidden>
+      <div class="row"><span class="kicker">Loop library</span><span class="mu">royalty-free · made in Ecou</span></div>
+      <p class="note">Generated at the project tempo, so every loop locks to the grid. Added at the playhead's bar on the selected audio track.</p>
+      <div id="dawLibList" style="display:flex;flex-direction:column;gap:8px"></div>
+    </div>
+    <div class="card">
+      <div class="row"><span class="kicker">Markers</span><button class="btn" id="dawMkAdd" style="min-height:36px;font-size:13px">+ Marker at playhead</button></div>
+      <div class="chips" id="dawMk"></div>
+      <div id="dawMkEd" class="row" hidden><input id="dawMkName" type="text" class="tin" aria-label="Marker name" style="flex:1"><button class="btn" id="dawMkDel" style="min-height:44px">Delete</button></div>
+    </div>
+    <div class="card">
+      <div class="row"><span class="kicker">Export timeline</span></div>
+      <div class="btns"><button class="btn primary" id="dawWav">Export WAV</button><button class="btn" id="dawBin">Binaural WAV</button></div>
+      <button class="btn" id="dawScore">Score from my project</button>
+      <p class="note">Rendered offline from bar 1 to the end of the last clip, with automation. Stems in Mix → Export use the timeline whenever it has clips.</p>
+    </div>
+    <div class="card pro">
+      <div class="row"><span class="kicker">Recording</span></div>
+      <label class="chk"><span>Monitor input through the armed track (use headphones)</span><input type="checkbox" id="dawMon"></label>
+      <label class="chk"><span>Auto-tune the monitor (live, ~12.5 ms; the take is tuned again offline)</span><input type="checkbox" id="dawVt"></label>
+      <label class="ctl"><span class="row"><span>Latency offset</span><output id="dawOffO">0 ms</output></span><input type="range" id="dawOff" min="-150" max="150" step="1" value="0" aria-label="Recording latency offset"></label>
+      <p class="note">Recordings are aligned automatically using the reported input and output latency. If takes still land early or late on this device, nudge the offset. With a multichannel interface, give each armed track its own input (In 1, In 2 or Stereo) and record them together. In a loop, every pass becomes a take.</p>
+      <p class="note"><strong>Bluetooth headphones:</strong> while the mic is open, Android switches them to call mode (muffled, mono). Record with wired headphones or the phone speaker; Ecou releases the mic the moment recording stops.</p>
+    </div>
+  </section>
+
+  <!-- EFECTE -->
+  <section class="tab" id="t-fx">
+    <h2>Mix &amp; effects</h2>
+    <div id="doctor">
+      <div class="card" id="docSrc"><span class="kicker">Song Doctor</span><p class="note">Check any song (an imported file or your project) for loudness, tone, stereo and song shape, then master it. Everything runs on this device.</p>
+        <div class="btns"><label class="btn primary dfile">Import a song<input type="file" id="docFile" accept="audio/*,.wav,.mp3,.m4a,.ogg,.flac,.aac" hidden></label><button class="btn" id="docProj">Check my project</button></div>
+        <div id="docProg" hidden><div class="dbar"><i id="docProgB"></i></div><div class="row"><span class="mu" id="docProgT"></span><button class="btn" id="docCancel" style="min-height:40px">Cancel</button></div></div></div>
+      <div id="docOut" style="display:flex;flex-direction:column;gap:12px"></div>
+    </div>
+    <div class="card mx-card" id="mxCard">
+      <div class="row"><div><span class="kicker">Console · loudness target</span><div class="mxlu" style="text-align:left"><b id="mxLu">—</b><small id="mxTp">LUFS-S</small></div></div><button class="btn" id="mxAuto" style="min-height:40px;flex:none">Auto-mix</button></div>
+      <div class="mxlt"><div class="seg" id="mxTg" role="group" aria-label="Loudness target"></div><input type="number" id="mxCu" min="-30" max="-5" step="0.5" aria-label="Custom LUFS target" style="width:72px;min-height:40px" hidden></div>
+      <div class="mxr" id="mxR" aria-label="Channel strips: swipe sideways"></div>
+      <label class="chk"><span>Match target on export (clean gain, limiter −1 dBTP)</span><input type="checkbox" id="mxMatch"></label>
+      <p class="mu" id="mxLast" style="margin:0"></p>
+    </div>
+    <div class="card"><div class="row"><div><span class="kicker">Finish &amp; share · Song Doctor</span><p class="note">Loudness, tone, stereo and song shape in plain words, plus one-tap mastering.</p></div><button class="btn primary" id="docOpen" style="flex:none">Check song</button></div></div>
+    <div class="card hm-recout"><div><span class="kicker">Capture output</span><p class="note">Record everything you hear (live playing, punch-in FX) to a WAV.</p></div><button id="rec" aria-label="Record the app's output to a WAV" title="Record the app's output to a WAV">● Rec<small>output</small></button></div>
+    <div class="card">
+      <span class="kicker">Mixer</span>
+      <div id="mixer" style="display:flex;flex-direction:column;gap:10px"></div>
+    </div>
+    <div class="card pro" style="border:2px solid var(--cy)">
+      <div class="row"><span class="kicker" style="color:var(--cy)">Spatial 3D</span><label class="chk" style="min-height:0;gap:8px"><span>On (headphones)</span><input type="checkbox" id="spOn"></label></div>
+      <p class="note">Each track becomes an object in 3D space, rendered binaurally (HRTF) for headphones. Drag a dot to set direction and distance.</p>
+      <div class="seg" id="spSeg" role="group" aria-label="Spatial track" style="align-self:flex-start;flex-wrap:wrap"></div>
+      <canvas id="radar" aria-label="3D position radar: drag a track dot" style="width:100%;max-width:340px;align-self:center;display:block;touch-action:none"></canvas>
+      <p class="mu" id="spInfo" style="margin:0;text-align:center"></p>
+      <div class="grid2">
+        <label class="ctl"><span class="row"><span>Elevation</span><output id="spElO"></output></span><input type="range" id="spEl" min="-40" max="90" step="1" aria-label="Elevation"></label>
+        <label class="ctl"><span class="row"><span>Orbit</span><output id="spOrO"></output></span><input type="range" id="spOr" min="-0.5" max="0.5" step="0.01" aria-label="Orbit speed"></label>
+      </div>
+      <div class="row"><label class="chk" style="min-height:0;gap:8px"><span>Follow phone motion</span><input type="checkbox" id="spFollow"></label><button class="btn" id="spReset" style="min-height:36px;font-size:13px">Reset</button></div>
+      <button class="btn primary" id="binBtn">Export binaural song (WAV)</button>
+      <div class="seg" id="stemFmt" role="group" aria-label="Stem format"><button data-sf="mix" aria-pressed="true">Mix stems (stereo, with FX)</button><button data-sf="atmos" aria-pressed="false">Atmos objects (dry mono)</button></div>
+      <button class="btn" id="stemsBtn">Export stems</button>
+      <p class="note" id="stemNote"></p>
+    </div>
+    <p class="sub">Tracks with Insert FX on pass through the chain below, top to bottom. Reverb and delay are sends: set each track’s amount in the mixer, the return level here.</p>
+    <div class="card">
+      <div class="row"><span class="kicker">Insert chain</span><span class="mu" id="fxCount">0 active</span></div>
+      <div id="fxChain" style="display:flex;flex-direction:column;gap:8px"></div>
+    </div>
+    <div class="card" style="border:2px solid var(--ac)">
+      <span class="kicker" style="color:var(--ac)">Convolution reverb · captured space</span>
+      <div class="row"><strong id="irName" style="font-size:18px">Hall</strong><span class="mu" id="irRt">RT60 ≈ 2.4 s</span></div>
+      <p class="note">Tap Capture IR, then clap once. Ecou records the room’s impulse response and uses it as your reverb.</p>
+      <div class="btns"><button class="btn rec" id="capIR">● Capture IR</button><label class="btn" for="f-IR" id="upIR">Import IR</label></div>
+      <div class="chips" id="verbChips"></div>
+      <label data-p="space"></label>
+      <div class="grid2 pro"><label data-p="rvPre"></label><label data-p="rvSize"></label><label data-p="rvLo"></label><label data-p="rvHi"></label><label data-p="rvRet"></label></div>
+    </div>
+    <div class="card pro">
+      <span class="kicker">Stereo delay · send</span>
+      <div class="seg" role="group" aria-label="Delay sync" id="dsync" style="flex-wrap:wrap;align-self:flex-start"></div>
+      <div class="grid2">
+        <label data-p="bpm"></label>
+        <label data-p="dtime" id="dtimeCtl"></label>
+        <label data-p="dfb"></label>
+        <label data-p="dmix"></label>
+      </div>
+    </div>
+    <div class="card">
+      <div class="row"><span class="kicker">Master</span><div class="seg" role="group" aria-label="Loudness target"><button data-tgt="-14" aria-pressed="true">Stream −14</button><button data-tgt="-11">Loud −11</button><button data-tgt="-9">Club −9</button></div></div>
+      <div class="mtr"><div><small>Momentary</small><b id="mtMom">—</b></div><div><small>Short-term LUFS</small><b id="mtSt">—</b></div><div><small>Peak dBFS</small><b id="mtPk">—</b></div><div><small>Stereo corr.</small><b id="mtCor">—</b></div><div><small>Limiter GR</small><b id="mtGr">—</b></div><div><small>Song (export)</small><b id="mtSong">—</b></div></div>
+      <div class="btns"><button class="btn primary" id="hitTgt">Hit target loudness</button></div><p class="note" id="hitNote" style="margin:0">Renders the song once and sets Master so the export lands on the chosen target, and tells you how hard the limiter works.</p>
+      <div class="meter" style="height:10px"><i id="mtBar"></i></div><p class="mu" id="mtTgt" style="margin:0">play something…</p>
+      <label data-p="vol"></label>
+      <label data-p="ceil"></label>
+      <div class="pro" style="display:flex;flex-direction:column;gap:8px">
+        <div class="row"><span class="kicker">Master EQ</span><button class="mv" id="mqFlat" style="width:auto;padding:0 10px;font-size:12px">Flat</button></div>
+        <div id="mqUI" class="mqg"></div>
+        <div class="row"><span class="kicker">Reference track</span><label class="btn" for="f-MREF" style="min-height:36px;font-size:13px">Import reference</label></div>
+        <input type="file" id="f-MREF" accept="audio/*" class="vh">
+        <p class="mu" id="refInfo" style="margin:0">Load a finished song you want to sound like.</p>
+        <div id="refBars" class="rbs"></div>
+        <p class="note" id="refNote"></p>
+        <div class="btns"><button class="btn" id="refCmp" disabled>Compare</button><button class="btn primary" id="refMatch" disabled>Match EQ (70%)</button></div>
+      </div>
+      <p class="note">True-peak-safe limiter: exports stay under the ceiling (−1 dBTP is the streaming standard). Every export reports integrated loudness and true peak. Tap <strong>● Rec output</strong> (top bar) to record a live performance with punch-in FX.</p>
+    </div>
+  </section>
+  <p class="note" style="text-align:center;margin:24px 0 8px">Ecou · <a href="help.html" target="_blank" rel="noopener" style="color:var(--tx)">Help</a> · <a href="privacy.html" target="_blank" rel="noopener" style="color:var(--tx)">Privacy</a> · <a href="samples/CREDITS.md" target="_blank" rel="noopener" style="color:var(--tx)">Credits</a></p>
+</main>
+

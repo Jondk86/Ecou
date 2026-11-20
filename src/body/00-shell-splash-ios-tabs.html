@@ -1,0 +1,51 @@
+<body>
+<div id="splash" aria-hidden="true"><img src="icons/icon-512.png" alt=""><div class="sw">ECOU</div></div>
+<style>
+#splash{position:fixed;inset:0;z-index:1000;background:#0B0B10;display:none;flex-direction:column;align-items:center;justify-content:center;gap:18px;transition:opacity .45s ease}
+html.splash #splash{display:flex}
+#splash img{width:132px;height:132px;border-radius:30px;animation:spIn .9s cubic-bezier(.2,.8,.2,1) both,spPulse 2.2s ease-in-out .9s infinite}
+#splash .sw{font:700 28px/1 system-ui,sans-serif;letter-spacing:.32em;margin-right:-.32em;color:#F4F4F7;animation:spTx .9s .25s ease both}
+#splash.out{opacity:0;pointer-events:none}
+@keyframes spIn{from{opacity:0;transform:scale(.86)}to{opacity:1;transform:none}}
+@keyframes spTx{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@keyframes spPulse{50%{transform:scale(1.04)}}
+@media (prefers-reduced-motion:reduce){#splash img,#splash .sw{animation:none}}
+</style>
+<script>(function(){var app=false;try{app=matchMedia('(display-mode: standalone)').matches||matchMedia('(display-mode: fullscreen)').matches||document.referrer.indexOf('android-app://')===0||navigator.standalone===true||/[?&]splash=1/.test(location.search);}catch(e){}if(!app)return;var d=document.documentElement;d.classList.add('splash');var t0=(performance&&performance.now)?performance.now():0;function done(){var s=document.getElementById('splash');if(!s){d.classList.remove('splash');return;}s.classList.add('out');setTimeout(function(){d.classList.remove('splash');},500);}setTimeout(done,Math.max(0,3000-t0));})();</script>
+<div id="iosHint" hidden><div class="ih-t"><b>Install Ecou on your iPhone</b><span>Tap <svg viewBox="0 0 24 24" width="16" height="16" aria-label="Share" style="vertical-align:-3px"><path d="M12 3v12M7 8l5-5 5 5M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> Share, then <b>Add to Home Screen</b>.</span></div><button id="iosHintX" aria-label="Close">✕</button></div>
+<style>
+#iosHint{position:fixed;left:12px;right:12px;bottom:calc(12px + env(safe-area-inset-bottom));z-index:900;display:flex;gap:12px;align-items:center;padding:14px 14px 14px 16px;border-radius:16px;background:#1E1E28;border:1px solid #2B2B37;color:#E9E9F0;font:14px/1.4 system-ui,sans-serif;box-shadow:0 10px 30px rgba(0,0,0,.5)}
+#iosHint[hidden]{display:none}
+#iosHint .ih-t{flex:1;display:flex;flex-direction:column;gap:2px}
+#iosHint .ih-t span{color:#B9B9C6}
+#iosHintX{flex:none;width:32px;height:32px;border-radius:50%;border:0;background:#2B2B37;color:#E9E9F0;font-size:14px}
+</style>
+<script>(function(){try{var ua=navigator.userAgent,ios=/iPhone|iPad|iPod/.test(ua)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);var standalone=navigator.standalone===true||matchMedia('(display-mode: standalone)').matches;if(!ios||standalone||localStorage.getItem('ecou.iosHint')==='x')return;var h=document.getElementById('iosHint');h.hidden=false;document.getElementById('iosHintX').addEventListener('click',function(){h.hidden=true;try{localStorage.setItem('ecou.iosHint','x');}catch(e){}});}catch(e){}})();</script>
+<div id="tabOv" hidden role="dialog" aria-modal="true" aria-label="Tabs">
+  <div class="tab-hd">
+    <div class="row"><strong>Tabs</strong><div class="row" style="gap:8px"><select id="tabExp" class="dsel" aria-label="Export the tab"><option value="">Export…</option><option value="txt">Text tab (.txt)</option><option value="pdf">PDF</option><option value="xml">MusicXML (Guitar Pro, MuseScore)</option></select><button class="btn" id="tabClose" style="min-height:40px">Close</button></div></div>
+    <div class="tab-set"><div class="seg" role="group" aria-label="Instrument" id="tabInst"><button data-ti="g" aria-pressed="true">Guitar</button><button data-ti="b" aria-pressed="false">Bass</button></div><select id="tabTun" class="dsel" aria-label="Tuning"></select><select id="tabCapo" class="dsel" aria-label="Capo"></select></div>
+    <p class="mu" id="tabInfo" style="margin:0;font-size:12px"></p>
+  </div>
+  <div id="tabPaper"><div id="tabInner"></div></div>
+  <div class="tab-pl"><button id="tabPP" class="sc-pp" aria-label="Play">▶</button><div class="sc-mid"><input type="range" id="tabSeek" min="0" max="1" step="0.1" value="0" aria-label="Position"><div class="sc-sub"><span id="tabT">0:00 / 0:00</span><div class="seg" role="group" aria-label="What to hear" id="tabMode"><button data-tbm="rec" aria-pressed="true">Recording</button><button data-tbm="notes" aria-pressed="false">Notes</button></div></div></div></div>
+</div>
+<style>
+#tabOv{position:fixed;inset:0;z-index:26;background:var(--bg);display:flex;flex-direction:column;padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom)}
+#tabOv[hidden]{display:none}
+#tabOv .tab-hd{padding:10px 14px;border-bottom:1px solid var(--ln);display:flex;flex-direction:column;gap:8px}
+#tabOv .tab-set{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:8px;align-items:center}
+#tabOv .tab-set .dsel{max-width:none;min-width:0;width:100%}
+#tabOv #tabCapo{width:auto}
+#tabOv #tabCapo[hidden]{display:none}
+#tabOv #tabExp{max-width:150px}
+#tabPaper{flex:1;overflow:auto;background:#fff;margin:10px;border-radius:8px;padding:8px}
+#tabInner svg{display:block;max-width:100%;height:auto;margin:0 auto 6px}
+#tabInner .tc{cursor:pointer}
+#tabInner .tc.on text{fill:#0B0B10}
+#tabInner .tc.on rect{fill:#D4FF3A}
+#tabOv .tab-pl{display:flex;gap:12px;align-items:center;padding:8px 14px 12px;border-top:1px solid var(--ln)}
+#tabOv .tab-pl .sc-mid{flex:1;min-width:0}
+#tabOv .tab-pl input[type=range]{width:100%}
+#tabOv .tab-pl .sc-sub{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:12px;color:var(--mu)}
+</style>
