@@ -15,7 +15,7 @@ function initDrums2(){
 var MQB=[{f:60,t:'lowshelf',lbl:'60'},{f:160,t:'peaking',lbl:'160'},{f:400,t:'peaking',lbl:'400'},{f:1000,t:'peaking',lbl:'1k'},{f:3000,t:'peaking',lbl:'3k'},{f:10000,t:'highshelf',lbl:'10k'}];
 var MQG=[0,0,0,0,0,0],MQF=MQB.map(function(b){return b.f;}),MQQ=MQB.map(function(b){return b.t==='peaking'?0.9:0.7;}),mqSel=3;
 function mqReset(){MQG=[0,0,0,0,0,0];MQF=MQB.map(function(b){return b.f;});MQQ=MQB.map(function(b){return b.t==='peaking'?0.9:0.7;});}
-function buildMasterEq(){N.mq=MQB.map(function(b,i){var q=BQ(b.t,MQF[i],MQQ[i]);q.gain.value=MQG[i];return q;});for(var i=0;i<N.mq.length-1;i++)N.mq[i].connect(N.mq[i+1]);N.master.connect(N.mq[0]);N.mOut=N.mq[N.mq.length-1];}
+function buildMasterEq(){N.mq=MQB.map(function(b,i){var q=BQ(b.t,MQF[i],MQQ[i]);q.gain.value=MQG[i];return q;});for(var i=0;i<N.mq.length-1;i++)N.mq[i].connect(N.mq[i+1]);N.mAv=ctx.createGain();N.mAf=BQ('lowpass',ctx.sampleRate/2,0.707);N.master.connect(N.mAv);N.mAv.connect(N.mAf);N.mAf.connect(N.mq[0]);N.mOut=N.mq[N.mq.length-1];}
 function applyMasterEq(){if(!N.mq)return;N.mq.forEach(function(q,i){q.gain.setTargetAtTime(MQG[i],ctx.currentTime,0.03);q.frequency.setTargetAtTime(MQF[i],ctx.currentTime,0.03);q.Q.setTargetAtTime(MQQ[i],ctx.currentTime,0.03);});}
 /* RBJ biquads in JS (so the offline reverb tail gets the same master EQ) */
 function rbj(type,f,q,gdb,sr){var A=Math.pow(10,gdb/40),w=2*Math.PI*f/sr,c=Math.cos(w),sn=Math.sin(w),al=sn/(2*q),b0,b1,b2,a0,a1,a2;

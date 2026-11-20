@@ -30,7 +30,7 @@ function buildTrackNode(t,i){
   n.eqL=BQ('lowshelf',120,0.7);n.eqM=BQ('peaking',1000,0.8);n.eqH=BQ('highshelf',8000,0.7);n.cmp=ctx.createDynamicsCompressor();n.cmk=G(1);n.duck=G(1);
   var mv=mixVals(t);n.vol=G(mv.vol);n.pan=PAN(mv.pan);n.sr=G(mv.rev);n.sd=G(mv.dly);n.post=G(1);
   n.sp=ctx.createPanner();n.sp.panningModel='HRTF';n.sp.distanceModel='inverse';n.sp.refDistance=1;n.sp.maxDistance=50;n.sp.rolloffFactor=0.6;
-  rigBuild(n,t.rig);n.trim.connect(n.f);n.f.connect(n.rigIn);n.rigOut.connect(n.af);n.af.connect(n.eqL);n.eqL.connect(n.eqM);n.eqM.connect(n.eqH);n.eqH.connect(n.cmp);n.cmp.connect(n.cmk);n.cmk.connect(n.duck);n.insIn=G(1);n.keyT=G(1);n.preM=G(mxOn(t,tracks.some(function(x){return x.solo;}))?1:0);n.insN=[];n.duck.connect(n.insIn);n.duck.connect(n.keyT);n.insIn.connect(n.av);n.av.connect(n.preM);n.av.connect(n.vol);n.vol.connect(spatialOn?n.sp:n.pan);buildWidth(n);n.pan.connect(n.wIn);n.wOut.connect(n.ap);n.ap.connect(n.post);if(spatialOn)n.sp.connect(n.post);
+  rigBuild(n,t.rig);n.trim.connect(n.f);n.f.connect(n.rigIn);n.rigOut.connect(n.af);n.af.connect(n.eqL);n.eqL.connect(n.eqM);n.eqM.connect(n.eqH);n.eqH.connect(n.cmp);n.cmp.connect(n.cmk);n.cmk.connect(n.duck);n.insIn=G(1);n.keyT=G(1);n.preM=G(mxOn(t,tracks.some(function(x){return x.solo;}))?1:0);n.insN=[];n.duck.connect(n.insIn);n.duck.connect(n.keyT);n.insIn.connect(n.av);n.am=G(1);n.av.connect(n.am);n.am.connect(n.preM);n.am.connect(n.vol);n.vol.connect(spatialOn?n.sp:n.pan);buildWidth(n);n.pan.connect(n.wIn);n.wOut.connect(n.ap);n.ap.connect(n.post);if(spatialOn)n.sp.connect(n.post);
   n.sr.connect(n.ar);n.ar.connect(N.revIn);n.sd.connect(n.ad);n.ad.connect(N.dlyIn);mxSendRoute(t,n);
   n.out=n.post;n.dest=null;t.n=n;trackRoute(i);applyStrip(t);if(!mxBulk)insBuild(t,i);if(!offlineRender&&N.mL){n.an=ctx.createAnalyser();n.an.fftSize=256;n.out.connect(n.an);n.anB=new Float32Array(256);}
 }
@@ -44,7 +44,7 @@ function applyWidth(t,set){var n=t.n;if(!n||!n.wLL)return;var w=t.width==null?1:
   set(n.wLL.gain,d);set(n.wRR.gain,d);set(n.wRL.gain,x);set(n.wLR.gain,x);set(n.wHg.gain,h);set(n.wHn.gain,-h);}
 function buildTracks(){mxBulk=true;try{tracks.forEach(function(t,i){buildTrackNode(t,i);});}finally{mxBulk=false;}insRebuildAll();applyMix();spUpdate(true);}
 function trackRoute(i){var t=tracks[i],n=t.n;if(!n)return;if(n.dest){try{n.out.disconnect(n.dest);}catch(e){}}n.dest=t.fx?N.chainIn:N.post;n.out.connect(n.dest);}
-function mixVals(t){var any=tracks.some(function(x){return x.solo;}),on=any?t.solo:!t.mute;if(hasAuto(t,'vol')){if(t.volRef==null)t.volRef=t.vol||1;}else t.volRef=null;return {vol:on?(hasAuto(t,'vol')?t.vol/(t.volRef||1):t.vol):0,pan:hasAuto(t,'pan')?0:t.pan,rev:hasAuto(t,'rev')?1:t.rev,dly:hasAuto(t,'dly')?1:t.dly};}
+function mixVals(t){var any=tracks.some(function(x){return x.solo;}),on=any?t.solo:!t.mute;if(hasAuto(t,'vol')){if(t.volRef==null)t.volRef=t.vol||1;}else t.volRef=null;var A=function(k){return hasAuto(t,k)&&!aIsOvr(t,k);};return {vol:on?(A('vol')?t.vol/(t.volRef||1):t.vol):0,pan:A('pan')?0:t.pan,rev:A('rev')?1:t.rev,dly:A('dly')?1:t.dly};}
 function applyMix(){
   if(!ctx)return;var any=tracks.some(function(t){return t.solo;}),now=ctx.currentTime;
   tracks.forEach(function(t){if(!t.n)return;var mv=mixVals(t);t.n.vol.gain.setTargetAtTime(mv.vol,now,0.02);if(t.n.pan.pan)t.n.pan.pan.setTargetAtTime(mv.pan,now,0.02);t.n.sr.gain.setTargetAtTime(mv.rev,now,0.02);if(!t._thr)t.n.sd.gain.setTargetAtTime(mv.dly,now,0.02);if(t.n.preM)t.n.preM.gain.setTargetAtTime(mxOn(t,any)?1:0,now,0.02);});

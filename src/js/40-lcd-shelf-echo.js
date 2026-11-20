@@ -13,11 +13,36 @@ function lcdTick(){var p=lcdPos(),e;
   if(p.b!==LCD.b){LCD.b=p.b;$$('#lcdBeat i').forEach(function(x,i){x.className=i===p.b?(i===0?'on':'on dn'):'';});}
   var on=!!(seq.on||bandRunning()||(typeof llRunning==='function'&&llRunning())||prevPlaying());if(on!==LCD.play){LCD.play=on;var hp=$('#hPlay');hp.textContent=on?'■':'▶';hp.setAttribute('aria-label',on?'Stop':'Play');hp.classList.toggle('on',on);}
   var rc=!!((seq.on&&seq.rec)||arr.rec||wavRec||capture||ECHO.rec);if(rc!==LCD.rec){LCD.rec=rc;var r=$('#tRec');r.classList.toggle('on',rc);r.setAttribute('aria-label',rc?'Stop recording':'Record');r.setAttribute('aria-pressed',rc);}}
+/* Record routing (owner bug 2026-11-20): recording what you PLAY must never open the microphone. The mic opens
+   only for explicit audio targets (audio/vocal track, Capture, Echo Drop, Idea, Stage looper); when the target is
+   ambiguous a 2-choice sheet asks once per context and the answer is remembered (long-press ● to ask again). */
+var RECCHO={};try{RECCHO=JSON.parse(localStorage.getItem('ecou.recChoice')||'{}')||{};}catch(e){}
+function isInstTrack(ti){var t=tracks[ti];return !!t&&t.kind!=='audio';}
+function noteTrackFor(ti){if(ti!=null&&isInstTrack(ti)&&tracks[ti].kind!=='drums')return ti;if(isInstTrack(selTrack)&&tracks[selTrack].kind!=='drums')return selTrack;
+  for(var i=0;i<tracks.length;i++)if(tracks[i].kind==='keys')return i;for(i=0;i<tracks.length;i++)if(isInstTrack(i)&&tracks[i].kind!=='drums')return i;return isInstTrack(selTrack)?selTrack:-1;}
+function noteRecStart(ti){if(!ensureAudio())return;if(seq.bounce||stemsRunning){toast('An export is running.');return;}
+  ti=noteTrackFor(ti);if(ti<0){toast('Add an instrument track first, then record.',2200);return;}
+  if(seq.on)transportStop();if(ti!==selTrack)selectTrack(ti);
+  seq.rec=true;seq.src='arrange';jamSess++;jamTarget.warned=false;arr.pre=daw.count?16:0;transportStart('arrange');
+  try{updTransportUI();}catch(e){}try{garUpd();}catch(e){}
+  toast((daw.count?'Count-in, then recording notes':'Recording notes')+' on '+tracks[ti].name+'. Play the keyboard. (Microphone stays off.)',2400);}
+function noteRecStop(){seq.rec=false;recFlush();transportStop();try{updTransportUI();}catch(e){}try{garUpd();if(GAR.view==='tracks')garTl();}catch(e){}try{renderDaw();}catch(e){}}
+function recAsk(key,notes,audio){var c=RECCHO[key];if(c==='n'){notes();return;}if(c==='a'){audio();return;}
+  var sh=$('#recAsk');if(!sh){sh=document.createElement('div');sh.id='recAsk';sh.setAttribute('role','dialog');sh.setAttribute('aria-label','What do you want to record?');
+    sh.style.cssText='position:fixed;left:0;right:0;bottom:0;z-index:70;padding:16px 16px calc(16px + env(safe-area-inset-bottom));background:#151922;color:#fff;border-radius:18px 18px 0 0;box-shadow:0 -8px 30px rgba(0,0,0,.5);font:500 14px Inter,system-ui,sans-serif;display:flex;flex-direction:column;gap:10px';
+    var bs='min-height:52px;border-radius:12px;border:0;font:700 15px Inter,system-ui,sans-serif;color:#fff;text-align:left;padding:0 16px';
+    sh.innerHTML='<b style="font-size:15px">What do you want to record?</b><button type="button" data-rk="n" style="'+bs+';background:#F43F5E">Record notes (what you play)</button><button type="button" data-rk="a" style="'+bs+';background:#2a3140">Record audio (microphone)</button><button type="button" data-rk="x" style="min-height:40px;border:0;background:none;color:#aab">Cancel</button>';
+    document.body.appendChild(sh);}
+  sh.hidden=false;sh.onclick=function(e){var k=e.target&&e.target.getAttribute('data-rk');if(!k)return;sh.hidden=true;if(k==='x')return;RECCHO[key]=k;try{localStorage.setItem('ecou.recChoice',JSON.stringify(RECCHO));}catch(x){}(k==='n'?notes:audio)();};}
 function tRecGo(){var id=showTab.cur;
   if(ECHO.rec){echoStop();return;}if(capture){stopCapture();return;}
   if(wavRec&&id!=='t-fx'){$('#rec').click();return;}
   if(id==='t-gar'){garRecord();return;}if(id==='t-home'){echoStart();return;}
-  var m={'t-daw':'#dawRec','t-song':'#trRec','t-pad':'#jamRec','t-fx':'#rec','t-cap':'[data-cap="A"]','t-ins':'[data-cap="A"]','t-mod':'[data-cap="A"]'}[id],b=m&&$(m);if(b)b.click();}
+  var m={'t-song':'#trRec','t-pad':'#jamRec','t-fx':'#rec'}[id];if(m){$(m).click();return;}   /* note / output recorders, no mic */
+  if(arr.rec){transportStop();return;}if(seq.on&&seq.rec){noteRecStop();return;}
+  if(id==='t-daw'){dawRecord();return;}                                   /* routes by lane, see dawRecord */
+  if(id==='t-mod'){noteRecStart();return;}                                 /* synth/morph + keyboard: notes */
+  if(id==='t-ins'||id==='t-cap'){recAsk(id,function(){noteRecStart();},function(){startCapture('A');});return;}}
 /* ---------- design v2: Home, sounds & ideas shelf, Echo Drop ---------- */
 var SHELF=SHELF||[],ECHO={rec:false,down:0,pend:false,raf:0,pk:[],ci:0,item:null,on:true,ti:1,tap:false};
 try{ECHO.on=localStorage.getItem('ecou.echo')!=='0';}catch(e){}
@@ -98,7 +123,7 @@ function homeProj(){var w=$('#homeProj');if(!w)return;
 function homeShown(){renderShelf();homeProj();lnCardUI();}
 function initHome(){
   document.body.appendChild($('#garSheet'));
-  $('#lcd').addEventListener('click',garTempoSheet);$('#tRec').addEventListener('click',tRecGo);setInterval(lcdTick,60);lcdTick();
+  $('#lcd').addEventListener('click',garTempoSheet);$('#tRec').addEventListener('click',tRecGo);$('#tRec').addEventListener('contextmenu',function(e){e.preventDefault();RECCHO={};try{localStorage.removeItem('ecou.recChoice');}catch(x){}toast('Record will ask again: notes or microphone.',2000);});setInterval(lcdTick,60);lcdTick();
   var b=$('#echoBtn');
   b.addEventListener('pointerdown',function(e){if(e.button>0)return;e.preventDefault();try{b.setPointerCapture(e.pointerId);}catch(x){}if(ECHO.rec){ECHO.tap=true;echoStop();return;}ECHO.down=performance.now();echoStart();});
   b.addEventListener('pointerup',function(){if(ECHO.tap){ECHO.tap=false;return;}if(!ECHO.rec)return;if(performance.now()-ECHO.down>=400)echoStop();else echoSt('Recording… tap again to stop');});

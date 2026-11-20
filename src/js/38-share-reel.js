@@ -174,7 +174,7 @@ function stGrid(){if(bandRunning()&&BR.marks.length){var m=BR.marks[0];BR.marks.
 function stGridT0(){if(bandRunning())return BR.t0;if(seq.on&&seq.mode==='arrange')return arr.tl0;return ctx.currentTime+0.05;}
 function lpSnap(t,G){var k=(t-G.t)/G.bar,f=Math.floor(k),frac=k-f;return G.t+(frac<0.12?f:f+1)*G.bar;}
 function lpMicOpen(cb){if(LP.mic){cb();return;}if(LP.opening)return;if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){micBlocked();return;}LP.opening=true;
-  var go=function(){var stream=null;navigator.mediaDevices.getUserMedia({audio:{echoCancellation:false,noiseSuppression:false,autoGainControl:false}}).then(function(s){stream=s;return loadInWorklet();}).then(function(){
+  var go=function(){var stream=null;navigator.mediaDevices.getUserMedia({audio:{echoCancellation:false,noiseSuppression:false,autoGainControl:false}}).then(function(s){stream=s;s._keep=1;/* Stage looper owns it until lpMicClose */return loadInWorklet();}).then(function(){
       var src=ctx.createMediaStreamSource(stream),M={stream:stream,s:src,ch:[],node:null},node;
       var push=function(c){M.ch.push(c);var keepF=c.f-ctx.sampleRate*4;if(LP.st!=='rec'&&LP.st!=='dub'&&!LP.pend)while(M.ch.length>2&&M.ch[0].f+M.ch[0].l.length<keepF)M.ch.shift();};
       if(inModOk){node=new AudioWorkletNode(ctx,'ecou-in',{numberOfInputs:1,numberOfOutputs:1,channelCount:2,channelCountMode:'explicit'});node.port.onmessage=function(e){push(e.data);};}

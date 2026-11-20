@@ -181,7 +181,7 @@ function renderDawHeads(){
   var w=$('#dawHeads');if(!w)return;
   w.innerHTML='<div class="lhr" style="gap:4px"><button class="mv" id="dawAddTrk" aria-label="Add audio track" style="width:auto;padding:0 6px;height:28px;font-size:11px">+ Audio</button><button class="mv" id="dawAddInst" aria-label="Add instrument track" style="width:auto;padding:0 6px;height:28px;font-size:11px">+ Inst</button></div>'+tracks.map(function(t,i){var col=DAWCOL[i%DAWCOL.length];return '<div class="lh'+(i===daw.lane?' sel':'')+'" style="--c:'+col+'"><button class="ln" data-lane="'+i+'">'+t.name+'</button><div class="lb">'+
     '<button data-lm="'+i+'" aria-pressed="'+t.mute+'" aria-label="Mute '+t.name+'">M</button><button data-ls="'+i+'" aria-pressed="'+t.solo+'" aria-label="Solo '+t.name+'">S</button>'+
-    (t.kind==='audio'?'<button class="arm" data-la="'+i+'" aria-pressed="'+!!t.arm+'" aria-label="Arm '+t.name+' for recording">●</button>':'<span class="kind">'+(t.kind==='drums'?'pads':'inst')+'</span>')+'</div></div>';}).join('');
+    '<button class="mx-adv alA" data-lal="'+i+'" aria-pressed="'+alHas(i)+'" aria-label="Automation lanes for '+t.name+'">A</button>'+(t.kind==='audio'?'<button class="arm" data-la="'+i+'" aria-pressed="'+!!t.arm+'" aria-label="Arm '+t.name+' for recording">●</button>':'<span class="kind">'+(t.kind==='drums'?'pads':'inst')+'</span>')+'</div></div>';}).join('');
   $('#dawAddInst').addEventListener('click',function(){ensureAudio();addInstTrack();renderInsp();});
   $('#dawAddTrk').addEventListener('click',function(){ensureAudio();var i=addAudioTrack();if(i>=0){renderInsp();toast('Audio track added. Arm ● it and press Record, or add a loop.',2400);}});
   $$('[data-lane]').forEach(function(b){b.addEventListener('click',function(){daw.lane=+b.getAttribute('data-lane');daw.sel=null;renderDawHeads();renderInsp();dawNeed=true;});});
@@ -302,7 +302,7 @@ function pasteClip(){
 /* transport bar */
 function updDawTr(){
   var pl=$('#dawPlay');if(!pl)return;var on=seq.on&&seq.mode==='arrange';
-  pl.textContent=on?'■ Stop':'▶ Play';$('#dawRec').classList.toggle('live',!!arr.rec);$('#dawRec').textContent=arr.rec?'■ Stop rec':'● Record';
+  pl.textContent=on?'■ Stop':'▶ Play';var drc=!!arr.rec||!!(seq.on&&seq.rec);$('#dawRec').classList.toggle('live',drc);$('#dawRec').textContent=drc?'■ Stop rec':'● Record';
   $('#dawLoop').setAttribute('aria-pressed',daw.loop.on);$('#dawMetro').setAttribute('aria-pressed',!!seq.metro);$('#dawCount').setAttribute('aria-pressed',daw.count);
   $$('[data-snap]').forEach(function(b){b.setAttribute('aria-pressed',+b.getAttribute('data-snap')===daw.snap);});
   $('#dawAuto').value=daw.auto;var bb=$('#dawBpm');if(bb)bb.textContent=Math.round(P.bpm.v);
@@ -431,7 +431,7 @@ function dawKeys(e){
 function initDaw(){
   dcv=$('#dawCv');dg=dcv.getContext('2d');initDawPointer();
   $('#dawPlay').addEventListener('click',function(){if(arr.rec){transportStop();return;}seq.src='arrange';transportToggle('arrange');});
-  $('#dawRec').addEventListener('click',dawRecord);
+  $('#dawRec').addEventListener('click',function(){dawRecord();});
   $('#dawHome').addEventListener('click',function(){setPlayhead(daw.loop.on?daw.loop.a:0);daw.sx=Math.max(0,daw.play-4);dawNeed=true;});
   $('#dawLoop').addEventListener('click',function(){daw.loop.on=!daw.loop.on;if(daw.loop.b<=daw.loop.a){daw.loop.a=Math.floor(daw.play/16)*16;daw.loop.b=daw.loop.a+64;}updDawTr();dawNeed=true;markDirty();});
   $('#dawMetro').addEventListener('click',function(){seq.metro=!seq.metro;$('#trMetro').checked=seq.metro;updDawTr();});
