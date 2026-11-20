@@ -29,7 +29,9 @@ function scheduleSong(t0){
   return t;
 }
 function renderOffline(opts){
-  opts=opts||{};if(ctx)saveSound(selTrack);
+  opts=opts||{};
+  /* stretched audio clips must be rendered (async, cached) before the offline graph is built: export == playback */
+  if(!opts.tsOk&&typeof tsPending==='function'&&tsPending()){return tsWait().then(function(){opts.tsOk=1;return renderOffline(opts);});}if(ctx)saveSound(selTrack);
   var src=opts.src||'song',sr=ctx.sampleRate,sd=stepDur(),steps=src==='arrange'?(opts.range?opts.range[1]-opts.range[0]:Math.ceil(arrEnd())):songOrder().reduce(function(a,pi){return a+patterns[pi].len;},0),dur=(src==='arrange'&&daw.tmap?(function(){var a=0,g0=opts.range?opts.range[0]:0;for(var g=g0;g<g0+steps;g++)a+=tmSd(g);return a;})():steps*sd)*1.02,tail=opts.tail||8,len=Math.ceil((dur+tail+0.1)*sr);
   var OAC=window.OfflineAudioContext||window.webkitOfflineAudioContext;
   var M={pf:PF,pfh:pfHeld,pff:pfFader,ctx:ctx,N:N,FX:FX,nodes:tracks.map(function(t){return t.n;}),pv:padVoices,sv:svoices,fq:flashQ,sp:spatialOn,ps:pitchSemi,gp:grainPos,orb:tracks.map(function(t){return t.sp?t.sp.orbit:0;})};

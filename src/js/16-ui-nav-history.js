@@ -5,8 +5,8 @@ function histCommit(){
   hist.stack=hist.stack.slice(0,hist.idx+1);hist.stack.push({data:JSON.parse(key),bufs:sv.bufs,key:key,ck:ck});
   if(hist.stack.length>80)hist.stack.shift();hist.idx=hist.stack.length-1;hist.last=ck;updUndoUI();
 }
-/* comparison key: the selected track is view state, and a stock sound's root changes when its recorded samples finish loading; neither is an edit */
-function histCk(key){return key.replace(/"selTrack":\d+,?/,'').replace(/"root":[^,]+,"det":true,"buf":null,"stock"/g,'"stock"');}
+/* comparison key: the selected track and the timeline zoom (ppx, refitted after a load) are view state, and a stock sound's root changes when its recorded samples finish loading; neither is an edit */
+function histCk(key){return key.replace(/"selTrack":\d+,?/,'').replace(/"ppx":[-\d.e]+,?/,'').replace(/"root":[^,]+,"det":true,"buf":null,"stock"/g,'"stock"');}
 /* automatic changes (Garage preparing an instrument) are folded into the current undo entry: no new step, undo is never blocked */
 function histQuiet(fn){
   if(hist.lock||!ctx||offlineRender||hist.idx<0)return fn();

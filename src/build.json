@@ -55,6 +55,7 @@
     "js/34-garage-instruments.js",
     "js/35-band-engine.js",
     "js/36-song-sections.js",
+    "js/36a-audio-stretch.js",
     "js/37-band-ui.js",
     "js/38-share-reel.js",
     "js/39-garage-view-tempo.js",

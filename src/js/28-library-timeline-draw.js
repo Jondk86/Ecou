@@ -84,7 +84,7 @@ function importAudioToLane(file){if(!file||!ensureAudio())return;
     var first=!daw.clips.some(function(c){return c.type==='aud';}),bpmD=b.duration>=4?detectBpm(b):0,tmsg='';
     if(first&&bpmD&&Math.abs(bpmD-P.bpm.v)>=1){if(SEC.list.length||(daw.tmap&&daw.tmap.length)){SEC.bpmSug={bpm:bpmD,name:(file.name||'Audio').replace(/\.[^.]+$/,'').slice(0,40)};tmsg=' It sounds like '+bpmD+' BPM; your song tempo is unchanged (Song › Sections offers to use it).';}else{setParam('bpm',bpmD);tmsg=' Tempo set to '+bpmD+' BPM to match it.';}}
     var s=dawSnap(daw.play),pl=placeAudio(s,b.duration/stepDur()),ti=pl.ti;s=pl.s;if(ti<0)return;seq.src='arrange';updTransportUI();
-    var c=newClip({type:'aud',ti:ti,s:s,off:0,dur:b.duration,buf:abufAdd(b),imp:1,name:(file.name||'Audio').replace(/\.[^.]+$/,'').slice(0,40)});daw.sel=c.id;markDirty();renderInsp();dawNeed=true;
+    var c=newClip({type:'aud',ti:ti,s:s,off:0,dur:b.duration,buf:abufAdd(b),imp:1,st:{f:'auto',b0:bpmD>0&&!/voc|voice|vox|sing|mic|lead|choir|rap|speech|talk/i.test(file.name||'')?bpmD:(daw.tmap&&daw.tmap.length?tmBpm(s):P.bpm.v),bd:bpmD||0,k0:tsKeyAt(s)},name:(file.name||'Audio').replace(/\.[^.]+$/,'').slice(0,40)});daw.sel=c.id;markDirty();renderInsp();dawNeed=true;
     toast('Imported '+dec(b.duration,1)+' s at bar '+(Math.floor(s/16)+1)+'.'+tmsg+(bpmD?'':' Set the project tempo to the beat’s BPM so pads and loops line up.'),4500);
   }).catch(function(){toast('That file couldn’t be decoded in this browser.');});
 }
@@ -165,7 +165,7 @@ function drawPatClip(g,c,x0,y,w,h,col){
     for(var k2=0;k2*pt.len-o<c.l;k2++){ns.forEach(function(n){var st=k2*pt.len+n.s-o;if(st<0||st>=c.l)return;var x=x0+st*ppx,len=Math.min(n.l,c.l-st)*ppx;if(x>dW||x+len<0)return;g.fillRect(x,y+h-((n.m-lo+1)/span)*h,Math.max(1.5,len-1),Math.max(2,h/span));});}}
 }
 function drawAudClip(g,c,x0,y,w,h,col){
-  var b=abuf[c.buf];if(!b)return;var pk=peaksOf(b),sr=b.sampleRate,sd=stepDur(),ppx=daw.ppx,mid=y+h/2,amp=dbg(c.gain||0);
+  var b=abuf[c.buf];if(!b)return;var pk=peaksOf(b),sr=b.sampleRate,sd=tsActive(c)?tsSrcSd(c):stepDur(),ppx=daw.ppx,mid=y+h/2,amp=dbg(c.gain||0);
   var xa=Math.max(0,Math.floor(x0)),xb=Math.min(dW,Math.ceil(x0+w));g.fillStyle=hexA(col,0.8);
   for(var x=xa;x<xb;x++){var t0=(x-x0)/ppx*sd,t1=(x+1-x0)/ppx*sd;var a=c.off+t0,bb=c.off+t1;if(c.loop){a=((a%b.duration)+b.duration)%b.duration;bb=a+(t1-t0);}if(a>=b.duration)break;
     var i0=Math.floor(a*sr/256),i1=Math.max(i0+1,Math.ceil(bb*sr/256)),m=0;for(var i=i0;i<i1&&i<pk.length;i++)if(pk[i]>m)m=pk[i];
@@ -217,7 +217,7 @@ function renderInsp(){
         '<label class="ctl"><span class="row"><span>Fade in</span><output id="ciFio">'+dec(c.fi,2)+' s</output></span><input type="range" id="ciFi" min="0" max="'+maxF+'" step="0.005" value="'+Math.min(c.fi,maxF)+'"></label>'+
         '<label class="ctl"><span class="row"><span>Fade out</span><output id="ciFoo">'+dec(c.fo,2)+' s</output></span><input type="range" id="ciFo" min="0" max="'+maxF+'" step="0.005" value="'+Math.min(c.fo,maxF)+'"></label></div>';
       if(c.takes&&c.takes.length>1)h+='<div class="row"><span class="mu">Takes</span><div class="row" style="gap:6px"><button class="mv" id="ciTp" aria-label="Previous take">◀</button><strong>'+(c.takes.indexOf(c.buf)+1)+' / '+c.takes.length+'</strong><button class="mv" id="ciTn" aria-label="Next take">▶</button><button class="btn" id="ciTk" style="min-height:36px;font-size:13px">Keep only this</button></div></div>';
-      h+='<div class="btn3"><button class="btn" id="ciNorm">Normalize</button><button class="btn" id="ciRev">Reverse</button><button class="btn" id="ciLoopSel">Loop this</button></div>'+vtInspRow(c)+(b?'<p class="note">Source '+dec(b.duration,2)+' s · '+(b.numberOfChannels>1?'stereo':'mono')+' · '+Math.round(b.sampleRate/100)/10+' kHz</p>':'');}
+      h+='<div class="btn3"><button class="btn" id="ciNorm">Normalize</button><button class="btn" id="ciRev">Reverse</button><button class="btn" id="ciLoopSel">Loop this</button></div>'+vtInspRow(c)+tsInspRow(c)+(b?'<p class="note">Source '+dec(b.duration,2)+' s · '+(b.numberOfChannels>1?'stereo':'mono')+' · '+Math.round(b.sampleRate/100)/10+' kHz</p>':'');}
     el.innerHTML=h;bindInsp(c);return;
   }
   var t=tracks[daw.lane]||tracks[0],ti=tracks.indexOf(t),k=daw.auto;
@@ -274,6 +274,7 @@ function bindInsp(c){
     $('#ciEdit').addEventListener('click',function(){setPattern(c.p);if(c.ti===0)showTab('t-pad');else{songSel=c.ti;selectTrack(c.ti);renderTrackSegs();showTab('t-song');}});
   }else{
     $('#ciGain').addEventListener('input',function(e){c.gain=+e.target.value;$('#ciGo').textContent=dec(c.gain,1)+' dB';dawNeed=true;markDirty();});
+    tsBindInsp(c,done);
     $('#ciLoop').addEventListener('change',function(e){c.loop=e.target.checked;var b=abuf[c.buf];if(!c.loop&&b)c.dur=Math.min(c.dur,b.duration-c.off);done();});
     $('#ciFi').addEventListener('input',function(e){c.fi=+e.target.value;$('#ciFio').textContent=dec(c.fi,2)+' s';dawNeed=true;markDirty();});
     $('#ciFo').addEventListener('input',function(e){c.fo=+e.target.value;$('#ciFoo').textContent=dec(c.fo,2)+' s';dawNeed=true;markDirty();});
@@ -286,7 +287,7 @@ function bindInsp(c){
   }
 }
 function splitClip(c,at){
-  var sd=stepDur();if(c.type==='pat')at=Math.round(at);
+  var sd=tsActive(c)?tsSrcSd(c):stepDur();if(c.type==='pat')at=Math.round(at);
   if(at<=c.s+0.01||at>=clipEnd(c)-0.01){toast('Move the playhead inside the clip to split it.');return;}
   var R=JSON.parse(JSON.stringify(c));R.id=++daw.nid;var d=at-c.s;
   if(c.type==='pat'){R.s=at;R.l=c.l-d;R.o=(c.o||0)+d;c.l=d;}else{R.s=at;R.off=c.off+d*sd;R.dur=c.dur-d*sd;c.dur=d*sd;c.fo=0.005;R.fi=0.005;}
@@ -358,7 +359,7 @@ function initDawPointer(){
   dcv.addEventListener('pointermove',function(e){if(!dptrs.has(e.pointerId))return;var p=cvXY(e);dptrs.set(e.pointerId,p);if(!dp)return;
     if(dp.kind==='pinch'){var a=Array.from(dptrs.values());if(a.length<2)return;var d=Math.abs(a[0].x-a[1].x)||1,mid=(a[0].x+a[1].x)/2;daw.ppx=clamp(dp.ppx0*d/dp.d0,0.25,48);daw.sx=Math.max(0,dp.cs-mid/daw.ppx);dawNeed=true;return;}
     var dx=p.x-dp.x0,dy=p.y-dp.y0;if(!dp.moved&&Math.abs(dx)+Math.abs(dy)>6)dp.moved=true;if(!dp.moved)return;
-    var sd=stepDur(),dSteps=dx/daw.ppx;
+    var sd=dp.c&&tsActive(dp.c)?tsSrcSd(dp.c):stepDur(),dSteps=dx/daw.ppx;
     if(dp.kind==='empty'||dp.kind==='none'||dp.kind==='autoNew'){daw.sx=clamp(dp.sx0-dSteps,0,Math.max(0,totalSteps()-dW/daw.ppx));main.scrollTop=dp.st0-dy;dawNeed=true;return;}
     if(dp.kind==='fxseg'){var sg=dp.seg,o2=dp.orig,u2=daw.snap||0,len2=o2.e-o2.s;if(dp.h.op==='move'){var ns4=dawSnap(o2.s+dSteps,u2);sg.s=Math.max(0,ns4);sg.e=sg.s+len2;}else if(dp.h.op==='trimR'){sg.e=Math.max(sg.s+0.25,dawSnap(o2.e+dSteps,u2));}else{sg.s=clamp(dawSnap(o2.s+dSteps,u2),0,sg.e-0.25);}dawNeed=true;return;}
     if(dp.kind==='fxlane'){daw.sx=clamp(dp.sx0-dSteps,0,Math.max(0,totalSteps()-dW/daw.ppx));dawNeed=true;return;}

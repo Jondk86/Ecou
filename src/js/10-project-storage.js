@@ -83,18 +83,31 @@ function fmtBytes(b){b=+b||0;if(b<1024*1024)return Math.max(0,Math.round(b/1024)
 function showStorageUse(){var el=$('#storeUse');if(!el)return;
   try{if(!navigator.storage||typeof navigator.storage.estimate!=='function'){el.hidden=true;return;}
     navigator.storage.estimate().then(function(e){if(!e||!e.quota){el.hidden=true;return;}el.textContent='Storage: '+fmtBytes(e.usage)+' used of '+fmtBytes(e.quota)+(persistOK===true?' · protected':'');el.hidden=false;}).catch(function(){el.hidden=true;});}catch(e){el.hidden=true;}}
+/* audio goes to IndexedDB as Blobs (cloned by reference, no long main-thread copy of minutes of audio on every autosave).
+   A channel's Blob is reused only when a full-content hash (every sample's bits, two independent 32-bit hashes + length) is
+   unchanged; the hash runs in ~8 ms slices. Anything else is rewritten. Records with plain Float32Arrays still load. */
+var IDBB=typeof WeakMap!=='undefined'?new WeakMap():null;
+function idbBufsA(bufs){if(!IDBB||typeof Blob==='undefined')return Promise.resolve(bufs);var out=bufs.map(function(b){return {id:b.id,sr:b.sr,chs:b.chs.slice()};}),todo=[],cur=null;
+  out.forEach(function(b){b.chs.forEach(function(d,i){todo.push([b,i]);});});
+  return new Promise(function(res){(function nx(){var t0=Date.now();
+    while(todo.length||cur){if(!cur){var it=todo.shift(),d=it[0].chs[it[1]];cur={it:it,d:d,u:new Uint32Array(d.buffer,d.byteOffset,d.length),i:0,h1:2166136261,h2:5381};}
+      var u=cur.u,n=u.length,e=Math.min(n,cur.i+262144),h1=cur.h1,h2=cur.h2,k;for(k=cur.i;k<e;k++){var v=u[k];h1=Math.imul(h1^v,16777619);h2=(Math.imul(h2,33)+v)|0;}cur.h1=h1;cur.h2=h2;cur.i=e;
+      if(e>=n){var key=n+':'+(h1>>>0)+':'+(h2>>>0),en=IDBB.get(cur.d);if(!(en&&en.k===key)){en={k:key,b:new Blob([cur.d])};IDBB.set(cur.d,en);}cur.it[0].chs[cur.it[1]]=en.b;cur=null;}
+      if(Date.now()-t0>8)break;}
+    if(todo.length||cur)setTimeout(nx,0);else res(out);})();});}
+function idbHydrate(rec){var jobs=[];(rec.bufs||[]).forEach(function(b){(b.chs||[]).forEach(function(d,i){if(typeof Blob!=='undefined'&&d instanceof Blob)jobs.push(d.arrayBuffer().then(function(a){b.chs[i]=new Float32Array(a);}));});});return Promise.all(jobs).then(function(){return rec;});}
 function saveProject(auto){
   if(!ctx||saving)return Promise.resolve();saving=true;askPersist();
   project.name=($('#projName').value||'').trim()||project.name||'Untitled beat';
   if(!project.id)project.id='p'+Date.now();
-  var s=serialize();s.data=JSON.parse(JSON.stringify(s.data));dirty=false;var rec={id:project.id,name:project.name,updated:Date.now(),data:s.data,bufs:s.bufs},bars=Math.max(song.reduce(function(a,pi){return a+patterns[pi].len/16;},0),Math.ceil(arrEnd()/16));
-  return idbReq('projects','readwrite',function(st){return st.put(rec);}).then(function(){return idbReq('meta','readwrite',function(st){return st.put({id:rec.id,name:rec.name,updated:rec.updated,bars:bars,bpm:Math.round(P.bpm.v)});});})
+  var s=serialize();s.data=JSON.parse(JSON.stringify(s.data));dirty=false;var rec={id:project.id,name:project.name,updated:Date.now(),data:s.data,bufs:null},bars=Math.max(song.reduce(function(a,pi){return a+patterns[pi].len/16;},0),Math.ceil(arrEnd()/16));
+  return idbBufsA(s.bufs).then(function(bb){rec.bufs=bb;return idbReq('projects','readwrite',function(st){return st.put(rec);});}).then(function(){return idbReq('meta','readwrite',function(st){return st.put({id:rec.id,name:rec.name,updated:rec.updated,bars:bars,bpm:Math.round(P.bpm.v)});});})
   .then(function(){try{localStorage.setItem('ecou.last',project.id);}catch(e){}$('#saveState').textContent=(auto?'Auto-saved ':'Saved ')+new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});if(!auto)toast('Project saved on this device.');})
   .catch(function(){dirty=true;$('#saveState').textContent='Device storage unavailable — use Back up to file';if(!auto||!storageWarned){storageWarned=true;toast('This view can’t save on the device. Use Back up to file to keep your project.',5000);}})
   .then(function(){saving=false;});
 }
 function openProject(id){
-  return idbReq('projects','readonly',function(st){return st.get(id);}).then(function(rec){if(!rec){toast('Project not found.');return;}project.id=rec.id;try{loadProjectData(rec.data,rec.bufs);}catch(e){errLog.push('load: '+e.message+' '+((e.stack||'').split('\n')[1]||''));throw e;}$('#saveState').textContent='Opened '+rec.name;try{localStorage.setItem('ecou.last',rec.id);}catch(e){}$('#projList').hidden=true;$('#storeUse').hidden=true;toast('Opened “'+rec.name+'”.');}).catch(function(){toast('Couldn’t open the project.');});
+  return idbReq('projects','readonly',function(st){return st.get(id);}).then(function(rec){return rec?idbHydrate(rec):rec;}).then(function(rec){if(!rec){toast('Project not found.');return;}project.id=rec.id;try{loadProjectData(rec.data,rec.bufs);}catch(e){errLog.push('load: '+e.message+' '+((e.stack||'').split('\n')[1]||''));throw e;}$('#saveState').textContent='Opened '+rec.name;try{localStorage.setItem('ecou.last',rec.id);}catch(e){}$('#projList').hidden=true;$('#storeUse').hidden=true;toast('Opened “'+rec.name+'”.');}).catch(function(){toast('Couldn’t open the project.');});
 }
 function listProjects(){
   var w=$('#projList');showStorageUse();

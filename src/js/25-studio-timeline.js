@@ -28,10 +28,10 @@ function autoPreview(){if(!ctx||(seq.on&&seq.mode==='arrange'))return;var now=ct
   tracks.forEach(function(t){if(!t.n)return;AUTOK.forEach(function(k){var p=autoNode(t,k);if(!p)return;try{p.cancelScheduledValues(now);}catch(e){}
     var v=hasAuto(t,k)?autoMap(k,autoVal(t,k,daw.play)):(k==='cut'?20000:AUTOP[k].neutral);p.setTargetAtTime(v,now,0.015);});});}
 /* clips */
-function clipLen(c){return c.type==='pat'?c.l:c.dur/stepDur();}
+function clipLen(c){return c.type==='pat'?c.l:c.dur/(tsActive(c)?tsSrcSd(c):stepDur());}
 function clipEnd(c){return c.s+clipLen(c);}
 function arrEnd(){var e=0;daw.clips.forEach(function(c){e=Math.max(e,clipEnd(c));});return e;}
-function newClip(o){o.id=++daw.nid;if(o.type==='aud'){o.gain=o.gain||0;o.fi=o.fi==null?0.005:o.fi;o.fo=o.fo==null?0.01:o.fo;o.takes=o.takes||[o.buf];o.loop=!!o.loop;}daw.clips.push(o);return o;}
+function newClip(o){o.id=++daw.nid;if(o.type==='aud'){o.gain=o.gain||0;o.fi=o.fi==null?0.005:o.fi;o.fo=o.fo==null?0.01:o.fo;o.takes=o.takes||[o.buf];o.loop=!!o.loop;if(!o.st)o.st={f:'auto',b0:daw.tmap&&daw.tmap.length?tmBpm(o.s||0):P.bpm.v,k0:tsKeyAt(o.s||0)};}daw.clips.push(o);return o;}
 function clipById(id){for(var i=0;i<daw.clips.length;i++)if(daw.clips[i].id===id)return daw.clips[i];return null;}
 function selClip(){return daw.sel!=null?clipById(daw.sel):null;}
 function clipName(c){if(c.type==='pat')return PATN[c.p]+(clipLen(c)*daw.ppx>90?' · pattern':'');return c.name||'Audio';}
@@ -41,13 +41,15 @@ var arrCtx=arr;
 function tlAt(g){if(daw.tmap&&g>arrCtx.g0){var t=arrCtx.tl0,f=Math.floor(g);for(var x=arrCtx.g0;x<f;x++)t+=tmSd(x);return t+(g-f)*tmSd(f);}return arrCtx.tl0+(g-arrCtx.g0)*stepDur();}
 function startAudioClip(c,when,into){
   if(roSkip(c.ti))return;var b=abuf[c.buf],tr=tracks[c.ti];if(!b||!tr||!tr.n||c.mute)return;
-  var rem=c.dur-into;if(rem<=0.004)return;
-  var pos=c.off+into;if(c.loop)pos=((pos%b.duration)+b.duration)%b.duration;else{if(pos>=b.duration)return;rem=Math.min(rem,b.duration-pos);}
-  var src=ctx.createBufferSource();src.buffer=b;if(c.loop){src.loop=true;src.loopStart=0;src.loopEnd=b.duration;}
+  /* stretched/pitched clips play their rendered buffer (same buffer live and in every export); until it is ready, the original */
+  var cd=c.dur,co=c.off,lp=c.loop,X=tsActive(c)?tsUse(c,into):null;if(X){b=X.b;cd=X.dur;co=0;lp=false;into=X.into;}else if(tsActive(c))into=into/stepDur()*tsSrcSd(c);
+  var rem=cd-into;if(rem<=0.004)return;
+  var pos=co+into;if(lp)pos=((pos%b.duration)+b.duration)%b.duration;else{if(pos>=b.duration)return;rem=Math.min(rem,b.duration-pos);}
+  var src=ctx.createBufferSource();src.buffer=b;if(lp){src.loop=true;src.loopStart=0;src.loopEnd=b.duration;}
   var g=ctx.createGain(),gv=dbg(c.gain||0),fi=Math.max(0.003,c.fi||0),fo=Math.max(0.003,c.fo||0),end=when+rem,fiEnd=when+Math.max(0,fi-into);
   if(into<fi){g.gain.setValueAtTime(gv*into/fi,when);g.gain.linearRampToValueAtTime(gv,fiEnd);}else g.gain.setValueAtTime(gv,when);
-  var foS=when+(c.dur-into)-fo;if(foS>fiEnd)g.gain.setValueAtTime(gv,foS);
-  g.gain.linearRampToValueAtTime(0,when+(c.dur-into));
+  var foS=when+(cd-into)-fo;if(foS>fiEnd)g.gain.setValueAtTime(gv,foS);
+  g.gain.linearRampToValueAtTime(0,when+(cd-into));
   src.connect(g);g.connect(tr.n.in);src.start(when,pos);src.stop(end+0.02);if(offlineRender)offNodes.push({e:end+0.05,n:g});
   var rec={src:src,g:g,end:end};(arrCtx.srcs||(arrCtx.srcs=[])).push(rec);
   src.onended=function(){try{g.disconnect();}catch(e){}};

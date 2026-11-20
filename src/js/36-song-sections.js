@@ -90,7 +90,7 @@ function secBuild(quiet){if(!ensureAudio())return false;if(!SEC.list.length&&!SE
     if(touched)keep.push(c);else drop.push(c);});
   var kept=daw.clips.filter(function(c){return c.gen&&(c.user||keep.indexOf(c)>=0);});
   function blocked(ti,s,l,gk){return kept.some(function(c){return c.ti===ti&&((gk&&gk.charAt(0)==='t'&&c.gen===gk)||(c.s<s+l&&clipEnd(c)>s));});}
-  var Lay=secLayout(),mats=[],clips=[],sig={},tcur=null,bassT=bandTrack('bass'),keysT=bandTrack('keys'),tm=[],anyT=false,warn=[];
+  var Lay=secLayout(),mats=[],clips=[],sig={},tcur=null,bassT=bandTrack('bass'),keysT=bandTrack('keys'),tm=[],anyT=false,warn=[],wc=[];
   function mat(len){var m={pt:secTmpPat(len)};mats.push(m);return m;}
   function add(o){if(o.l<=0||blocked(o.ti,o.s,o.l,o.tx?o.gen:null))return;clips.push(o);}
   Lay.forEach(function(Ly,i){var s=Ly.sec,nx=Lay[i+1],span=nx?secTxSpan(s,nx.sec):0,tx=nx?secTr(nx.sec):null,mode=nx?secTxMode(s,nx.sec):'off',gk='s'+s.id;
@@ -109,7 +109,7 @@ function secBuild(quiet){if(!ensureAudio())return false;if(!SEC.list.length&&!SE
     if(s.bpm)anyT=true;
     if(!tm.length||tm[tm.length-1].s<Ly.s)tm.push({s:Ly.s,b:s.bpm||null,gen:gk});
     if(nx&&secBpm(s)!==secBpm(nx.sec)){var bnd=Ly.s+Ly.l,rs=mode==='off'||mode==='cut'?bnd:Math.max(Ly.s,bnd-Math.max(span,Ly.N));tm.push({s:rs,b:s.bpm||null,gen:'t'+nx.sec.id});tm.push({s:bnd,b:nx.sec.bpm||null,ramp:rs<bnd?1:0,gen:'t'+nx.sec.id});}
-    if(nx&&(secKey(s)!==secKey(nx.sec)||secBpm(s)!==secBpm(nx.sec))){var bnd2=Ly.s+Ly.l;daw.clips.forEach(function(c){if(c.type==='aud'&&!c.gen&&c.s<bnd2&&clipEnd(c)>bnd2)warn.push((tracks[c.ti]?tracks[c.ti].name:'Audio')+' at bar '+(Math.floor(bnd2/16)+1));});}});
+    if(nx&&(secKey(s)!==secKey(nx.sec)||secBpm(s)!==secBpm(nx.sec))){var bnd2=Ly.s+Ly.l;daw.clips.forEach(function(c){if(c.type==='aud'&&!c.gen&&c.s<bnd2&&clipEnd(c)>bnd2){warn.push((tracks[c.ti]?tracks[c.ti].name:'Audio')+' at bar '+(Math.floor(bnd2/16)+1));if(wc.indexOf(c.id)<0)wc.push(c.id);}});}});
   /* patterns: reuse the ones this feature owns, then empty ones (from H down), never one a remaining clip uses */
   var lock={};daw.clips.forEach(function(c){if(c.type==='pat'&&drop.indexOf(c)<0)lock[c.p]=1;});
   var avail=[];for(var pi=patterns.length-1;pi>=0;pi--){var own=SEC.own[pi]!=null&&!lock[pi]&&SEC.own[pi]===secHash(patterns[pi]);if(own||(!lock[pi]&&!patHas(patterns[pi])&&SEC.own[pi]==null))avail.push(pi);}
@@ -124,7 +124,9 @@ function secBuild(quiet){if(!ensureAudio())return false;if(!SEC.list.length&&!SE
   used.forEach(function(m){SEC.own[m.p]=secHash(patterns[m.p]);});
   daw.tmap=anyT?tm:null;
   SEC.reg=Lay.map(function(Ly,i){var nx=Lay[i+1];return {id:Ly.sec.id,s:Ly.s,l:Ly.l,name:Ly.sec.name,col:secCol(Ly.sec),tx:nx?secTxSpan(Ly.sec,nx.sec):0,txm:nx?secTxMode(Ly.sec,nx.sec):'off',key:secKey(Ly.sec),bpm:secBpm(Ly.sec),lyric:Ly.sec.lyric||''};});
-  SEC.warn=warn.length?'Audio spans a key/tempo change ('+warn.join(', ')+'). It will play unchanged: no time-stretch or transposition in this version.':'';
+  /* new audio clips (st.f 'auto') get their default the first time they cross a change: loops/drums follow the tempo, vocals stay fixed */
+  wc.forEach(function(id){var c=clipById(id);if(c&&c.st&&c.st.f==='auto')tsSet(c,tsDefault(c));});SEC.wc=wc;
+  SEC.warn=warn.length?'Audio spans a key/tempo change ('+warn.join(', ')+'). Choose per clip: follow the tempo, the key, both, or keep it fixed (plays unchanged).':'';
   SEC.built=SEC.list.length>0;dawNeed=true;if(typeof renderPatSegs==='function')renderPatSegs();markDirty();
   if(!quiet)toast('Song built: '+SEC.list.length+' sections, '+clips.filter(function(c){return c.tx;}).length+' transition clips on the timeline.'+(warn.length?' Check the audio warning.':''),3200);
   if(warn.length&&quiet)toast(SEC.warn,3600);
@@ -160,13 +162,16 @@ function secLoad(d){SEC.list=d&&Array.isArray(d.list)?d.list:[];SEC.nid=d&&d.nid
 function secChanged(rebuild){if(SEC.built&&rebuild!==false)secBuild(true);markDirty();secRender();}
 function secPlayFrom(s){if(!ensureAudio())return;if(!SEC.built&&!secBuild(true))return;if(seq.on)transportStop();daw.play=s||0;seq.src='arrange';transportToggle('arrange');}
 /* ---- UI ---- */
+/* one-tap follow choice for each audio clip that crosses a key/tempo change */
+function secTsRows(){return (SEC.wc||[]).map(function(id){var c=clipById(id);if(!c)return '';var m=tsMode(c),bg=tsBig(c),nm=xesc((c.name||(tracks[c.ti]?tracks[c.ti].name:'Audio')).slice(0,28));
+  return '<div class="sc-undo" style="flex-wrap:wrap;gap:6px"><span>'+nm+(bg?' · <b>⚠ big change: lower quality</b>':'')+'</span><span style="display:flex;gap:4px;flex-wrap:wrap">'+['tempo','key','both','fixed'].map(function(f){return '<button class="btn" data-sec="tsf" data-id="'+c.id+'" data-v="'+f+'" aria-pressed="'+(m===f)+'" style="min-height:44px'+(m===f?';background:var(--acc,#7c5cff);color:#fff':'')+'">'+{tempo:'Follow tempo',key:'Follow key',both:'Both',fixed:'Fixed'}[f]+'</button>';}).join('')+'</span></div>';}).join('');}
 function secChordBtn(s,c,i,sel){var k=secKey(s),f=secFn(c,k,secMode(s));return '<button class="sc-ch'+(sel?' sel':'')+'" data-sec="ch" data-id="'+s.id+'" data-i="'+i+'" style="--f:'+SECFN[f]+'" aria-label="'+bandChName(c)+', '+secRoman(c,k)+', '+SECFNN[f]+'"><small>'+secRoman(c,k)+'</small><b>'+bandChName(c).replace('#','♯')+'</b></button>';}
 function secRender(){var el=$('#secView');if(!el)return;var U=SEC.ui,Lay=secLayout(),h='';
   h+='<div class="sc-top"><div style="min-width:0"><div class="kicker">Song · Sections</div><div class="sc-title">'+xesc(project.name||'Untitled')+'</div></div><div class="seg sc-vw" role="group" aria-label="Song view"><button aria-pressed="true">Cards</button><button aria-pressed="false" data-sec="time">Time</button></div></div>';
   if(SEC.list.length)h+='<div class="sc-strip" aria-hidden="true">'+SEC.list.map(function(s){return '<i style="flex:'+s.bars+';background:'+secCol(s)+'"></i>';}).join('')+'</div><div style="margin:8px 0"><button class="btn" data-stage="song" style="min-height:44px;width:100%">Stage mode: play it live</button></div>';
   else h+='<div class="card sc-empty"><b>Build your song from sections</b><p class="note">Add Intro, Verse, Chorus… Each card holds its chords, a lyric line and what plays. "Build song" puts it on the Studio timeline with smooth transitions.</p>'+
     '<div class="btns"><button class="btn primary" data-sec="tpl">Intro · Verse · Chorus</button>'+((daw.clips.length||song.some(function(pi){return patterns[pi]&&patHas(patterns[pi]);}))?'<button class="btn" data-sec="infer">Make sections from my song</button>':'')+'</div></div>';
-  if(SEC.warn)h+='<p class="note sc-warn">⚠ '+xesc(SEC.warn)+'</p>';
+  if(SEC.warn)h+='<p class="note sc-warn">⚠ '+xesc(SEC.warn)+'</p>'+secTsRows();
   if(SEC.bpmSug)h+='<div class="sc-undo"><span>'+xesc(SEC.bpmSug.name)+' sounds like '+SEC.bpmSug.bpm+' BPM (song: '+P.bpm.v+')</span><span style="display:flex;gap:6px"><button class="btn" data-sec="usebpm">Use it</button><button class="btn" data-sec="nobpm" aria-label="Dismiss">✕</button></span></div>';
   if(U.del)h+='<div class="sc-undo"><span>Deleted '+xesc(U.del.s.name)+'</span><button class="btn" data-sec="undel">Undo</button></div>';
   Lay.forEach(function(Ly,i){var s=Ly.sec,open=U.open[s.id]!==false,k=secKey(s),col=secCol(s);
@@ -211,6 +216,7 @@ function secRender(){var el=$('#secView');if(!el)return;var U=SEC.ui,Lay=secLayo
   h+='<div class="kicker sc-tools">Pattern editor &amp; tools</div>';
   el.innerHTML=h;}
 function secDo(b){var a=b.getAttribute('data-sec'),id=+b.getAttribute('data-id'),v=b.getAttribute('data-v'),s=secById(id),U=SEC.ui;
+  if(a==='tsf'){var tc=clipById(id);if(tc){tsSet(tc,v);dawNeed=true;markDirty();tsKick();toast(v==='fixed'?'Plays unchanged.':'Follows the song '+({tempo:'tempo',key:'key',both:'tempo and key'})[v]+'.',1400);}secRender();return;}
   if(a==='time'){subGo('t-daw');return;}
   if(a==='tpl'){['Intro','Verse','Chorus'].forEach(function(n){SEC.list.push(secNew(n));});U.del=null;secChanged();return;}
   if(a==='infer'){secInfer();return;}
