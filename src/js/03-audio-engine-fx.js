@@ -17,7 +17,8 @@ function buildGraph(noMaster){
   N.delay.connect(N.dmerge,0,0);N.delay2.connect(N.dmerge,0,1);N.dmerge.connect(N.master);
   buildMasterEq();
   if(noMaster){N.mOut.connect(ctx.destination);}else{N.mOut.connect(N.comp);N.comp.connect(N.limMk);N.limMk.connect(N.clip);N.clip.connect(N.an);N.an.connect(ctx.destination);}
-  N.conv.buffer=makeVerb('hall');
+  /* offline JS mixdowns convolve the reverb send themselves: setting a ConvolverNode buffer costs a long main-thread task, so only do it when it is used */
+  if(!offlineRender)N.conv.buffer=makeVerb('hall');
   buildFX();routeFX();
   if(offlineRender)return;
   /* tap for 24-bit WAV recording (ScriptProcessor fallback; AudioWorklet replaces it when available) */
