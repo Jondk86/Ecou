@@ -7,14 +7,14 @@ function serialize(){
   var bufs=[],map=new Map();
   function bid(b){if(!b)return null;if(map.has(b))return map.get(b);var id=bufs.length,chs=[];map.set(b,id);for(var c=0;c<b.numberOfChannels;c++)chs.push(b.getChannelData(c));bufs.push({id:id,sr:b.sampleRate,chs:chs});return id;}
   function sSlot(s){return s?(s.stock?{name:s.name,root:s.root,det:true,buf:null,stock:s.stock}:{name:s.name,root:s.root,det:s.det,buf:bid(s.buf),cap:s.buf&&s.buf._cap?1:0}):null;}
-  function sSound(S){if(!S)return null;var o={slots:{A:sSlot(S.slots.A),B:sSlot(S.slots.B)},engine:S.engine,loop:!!S.loop,morphMode:S.morphMode||'blend',fmP:S.fmP||null};IKEYS.forEach(function(k){o[k]=S[k];});return o;}
+  function sSound(S){if(!S)return null;var o={slots:{A:sSlot(S.slots.A),B:sSlot(S.slots.B)},engine:S.engine,loop:!!S.loop,morphMode:S.morphMode||'blend',morphBuf:S.morphBuf&&S.morphBuf.getChannelData?bid(S.morphBuf):null,fmP:S.fmP||null};IKEYS.forEach(function(k){o[k]=S[k];});return o;}
   var params={};Object.keys(P).forEach(function(k){if(IKEYS.indexOf(k)<0&&k.indexOf('pad')!==0)params[k]=P[k].v;});
   var data={v:1,name:project.name,params:params,fxOn:fxOn,order:FXORDER.slice(),roFast:roFast,dsync:dsync,MX:MX,
     ir:{name:$('#irName').textContent,rt:$('#irRt').textContent,buf:ctx?bid(N.conv.buffer):null},
     tracks:tracks.map(function(t){return {name:t.name,kind:t.kind,vol:t.vol,pan:t.pan,mute:t.mute,solo:t.solo,rev:t.rev,dly:t.dly,fx:t.fx,sp:t.sp,sound:sSound(t.sound),auto:t.auto||{},inCh:t.inCh,arm:!!t.arm,eq:t.eq||null,comp:t.comp||0,duck:t.duck||0,cmo:t.cmo||0,duckR:t.duckR||0.18,width:t.width==null?1:t.width,cgr:t.cgr==null?null:t.cgr,volRef:t.volRef==null?null:t.volRef,compLegacy:!!t.compLegacy,fm1ch:t.fm1ch||0,rig:t.rig||null,own:t.own?1:0,ins:t.ins&&t.ins.length?JSON.parse(JSON.stringify(t.ins)):[],spre:t.spre||null};}),daw:dawSerialize(bid),mq:MQG.slice(),fmBank:fmBank||null,mqf:MQF.slice(),mqq:MQQ.slice(),selTrack:selTrack,spatial:{on:spatialOn},
     amp:{model:ampModel,cab:cabCustom?bid(cabCustom):null,match:FX.match?FX.match.target:null,ref:matchRef},
-    pads:pads.map(function(p){return {name:p.name,cls:p.cls,level:p.level,tune:p.tune,decay:p.decay,pan:p.pan,choke:p.choke,buf:bid(p.buf),cap:p.buf&&(p.buf._cap||p.buf._slc)?1:0};}),
-    patterns:patterns.map(function(pt){return {name:pt.name,len:pt.len,drums:pt.drums.map(function(a){return a.map(function(x){return x?(typeof x==='number'?Math.round(x*100)/100:1):0;});}),notes:pt.notes,locks:pt.locks||{}};}),song:song,curPat:curPat,garage:garSave()};
+    pads:pads.map(function(p){return {name:p.name,cls:p.cls,level:p.level,tune:p.tune,decay:p.decay,pan:p.pan,choke:p.choke,buf:bid(p.buf),vb:p.vb&&p.vb.length?p.vb.map(bid):null,cap:p.buf&&(p.buf._cap||p.buf._slc)?1:0};}),
+    patterns:patterns.map(function(pt){return {name:pt.name,len:pt.len,drums:pt.drums.map(function(a){return a.map(function(x){return x?(typeof x==='number'?x:1):0;});}),notes:pt.notes,locks:pt.locks||{}};}),song:song,curPat:curPat,garage:garSave()};
   data.mix={rAm:!!MIX.rAm,rBm:!!MIX.rBm,tgt:MIX.tgt,custom:MIX.custom,match:!!MIX.match};data.sections=secSave();data.shelf=shelfSave(bid);data.vmLib=VM.lib.slice();try{data.course=lnLoad();}catch(e){}
   return {data:data,bufs:bufs};
 }
@@ -32,10 +32,10 @@ function loadProjectData(data,bufs){
   setRotary(!!data.roFast);setSync(data.dsync||'1/8D');
   if(data.MX)data.MX.forEach(function(r,i){if(MX[i])r.forEach(function(v,j){MX[i][j]=v;});});$$('#mx button').forEach(paintCell);
   if(data.ir&&data.ir.buf!=null&&gb(data.ir.buf)){N.conv.buffer=fitRate(gb(data.ir.buf));$('#irName').textContent=data.ir.name;$('#irRt').textContent=data.ir.rt;}
-  (data.pads||[]).forEach(function(d,i){var p=pads[i];if(!p)return;['name','cls','level','tune','decay','pan','choke'].forEach(function(k){p[k]=d[k];});p.buf=gb(d.buf);if(p.buf&&d.cap)p.buf._cap=1;});
+  (data.pads||[]).forEach(function(d,i){var p=pads[i];if(!p)return;['name','cls','level','tune','decay','pan','choke'].forEach(function(k){p[k]=d[k];});p.buf=gb(d.buf);if(p.buf&&d.cap)p.buf._cap=1;var vb=Array.isArray(d.vb)?d.vb.map(gb):null;p.vb=vb&&vb.length&&vb.every(Boolean)?vb:null;});
   dropAudioTracks();(data.tracks||[]).forEach(function(d,i){if(i>=4&&tracks.length===i){if(d.kind==='audio')addAudioTrack(d.name,true);else if(d.kind==='keys')addInstTrack(d.name,true);}});
   (data.tracks||[]).forEach(function(d,i){var t=tracks[i];if(!t)return;['name','vol','pan','mute','solo','rev','dly','fx'].forEach(function(k){t[k]=d[k];});if(d.sp)t.sp=d.sp;t.auto=d.auto&&typeof d.auto==='object'?d.auto:{};t.eq=d.eq||null;t.comp=+d.comp||0;t.duck=+d.duck||0;t.cmo=+d.cmo||0;t.fm1ch=+d.fm1ch||0;t.volRef=d.volRef==null?null:+d.volRef;t.duckR=+d.duckR||0.18;t.width=d.width==null?1:+d.width;t.cgr=d.cgr==null?null:+d.cgr;t.compLegacy=!!d.compLegacy||(+d.comp>0&&!('cgr' in d));t.ins=insNorm(d.ins);t.spre=d.spre&&typeof d.spre==='object'?{a:!!d.spre.a,b:!!d.spre.b}:null;applyStrip(t);if(t.comp&&t.cgr==null&&!t.compLegacy){(function(ti){setTimeout(function(){calibrateComp(ti);},2500+ti*400);})(i);}if(t.kind==='audio'){t.inCh=d.inCh||'L';t.arm=!!d.arm;}t.rig=d.rig&&d.rig.amp&&d.rig.ped?d.rig:null;rigRebuild(i);var dst=d.sound&&d.sound.slots&&d.sound.slots.A&&d.sound.slots.A.stock;t.own=('own' in d)?(d.own?1:0):(dst&&dst!==({1:'rhodes',3:'dub'})[i]?1:0);
-    if(d.sound){var S={slots:{A:dSlot(d.sound.slots.A),B:dSlot(d.sound.slots.B)},engine:d.sound.engine,loop:d.sound.loop,morphMode:d.sound.morphMode,morphBuf:null,morphRoot:0,fmP:Array.isArray(d.sound.fmP)?FMC.clamp(d.sound.fmP.slice()):null};IKEYS.forEach(function(k){S[k]=d.sound[k];});S.morphRoot=S.slots.A.root;
+    if(d.sound){var S={slots:{A:dSlot(d.sound.slots.A),B:dSlot(d.sound.slots.B)},engine:d.sound.engine,loop:d.sound.loop,morphMode:d.sound.morphMode,morphBuf:d.sound.morphBuf!=null?(gb(d.sound.morphBuf)||null):null,morphRoot:0,fmP:Array.isArray(d.sound.fmP)?FMC.clamp(d.sound.fmP.slice()):null};IKEYS.forEach(function(k){S[k]=d.sound[k];});S.morphRoot=S.slots.A.root;
       if(S.morphMode!=='blend'&&S.slots.A.buf&&S.slots.B.buf)S.morphBuf=renderMorphCore(S.slots.A,S.slots.B,S.morph,S.morphMode);t.sound=S;}
     trackRoute(i);if(t.kind==='keys'&&t.sound&&t.n){t.n.f.frequency.value=normToHz(t.sound.cutoff);t.n.f.Q.value=t.sound.reso;}});
   $('#padFx').checked=tracks[0].fx;
@@ -150,13 +150,29 @@ function exportProject(){
   if(window.claude&&typeof window.claude.use==='function'){window.claude.use('downloads').then(function(dl){if(!dl){toast('File export isn’t available in this view.');return;}return dl.save({filename:name,data:blob}).then(function(){toast('Project file exported.');}).catch(function(e){toast(e&&e.code==='declined'?'Export cancelled.':'Couldn’t export ('+((e&&e.code)||'error')+').');});});return;}
   var url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(function(){URL.revokeObjectURL(url);},4000);toast('Project file exported.');
 }
+/* lazy zip index: reads only the central directory and the entries asked for (DAW packages can be hundreds of MB) */
+function zipIndex(file){
+  var tl=Math.min(file.size,65557);
+  return file.slice(file.size-tl).arrayBuffer().then(function(tb){var dv=new DataView(tb),eo=-1;for(var i=tb.byteLength-22;i>=0;i--){if(dv.getUint32(i,true)===0x06054b50){eo=i;break;}}
+    if(eo<0)return file.arrayBuffer().then(unzipAsync).then(function(o){return {get:function(nm){return Promise.resolve(o[nm]||null);}};});
+    var n=dv.getUint16(eo+10,true),cs=dv.getUint32(eo+12,true),co=dv.getUint32(eo+16,true);
+    return file.slice(co,co+cs).arrayBuffer().then(function(cb){var d=new DataView(cb),p=0,ix={};
+      for(var k=0;k<n&&p+46<=cb.byteLength;k++){if(d.getUint32(p,true)!==0x02014b50)break;var nl=d.getUint16(p+28,true),el=d.getUint16(p+30,true),cl=d.getUint16(p+32,true);ix[new TextDecoder().decode(new Uint8Array(cb,p+46,nl))]={m:d.getUint16(p+10,true),c:d.getUint32(p+20,true),lo:d.getUint32(p+42,true)};p+=46+nl+el+cl;}
+      return {get:function(nm){var e=ix[nm];if(!e)return Promise.resolve(null);return file.slice(e.lo,e.lo+30).arrayBuffer().then(function(h){var hv=new DataView(h),ds=e.lo+30+hv.getUint16(26,true)+hv.getUint16(28,true),bl=file.slice(ds,ds+e.c);
+        if(e.m===0)return bl.arrayBuffer();if(e.m===8&&typeof DecompressionStream!=='undefined')return new Response(bl.stream().pipeThrough(new DecompressionStream('deflate-raw'))).arrayBuffer();return null;});}};});});
+}
+/* restores an Ecou backup (.ecou.zip), a DAW package (.zip with ecou-project.json + ecou-audio/) or a bare ecou-project.json */
 function importProject(file){
-  if(!file||!ensureAudio())return;
-  file.arrayBuffer().then(unzipAsync).then(function(z){if(!z['project.json'])throw new Error('no project');var data=JSON.parse(new TextDecoder().decode(new Uint8Array(z['project.json'])));
+  if(!file||!ensureAudio())return;var json=/\.json$/i.test(file.name||'')||/json/.test(file.type||''),miss=0;
+  var Z=json?file.text().then(function(t){return {data:JSON.parse(t),get:function(){return Promise.resolve(null);}};})
+    :zipIndex(file).then(function(z){return z.get('project.json').then(function(b){return b||z.get('ecou-project.json');}).then(function(b){if(!b)throw new Error('no project');return {data:JSON.parse(new TextDecoder().decode(new Uint8Array(b))),get:z.get};});});
+  Z.then(function(z){var data=z.data;
     if(!data||!Array.isArray(data.patterns)||!Array.isArray(data.tracks)||!Array.isArray(data.pads)||!data.params)throw new Error('structure');
-    var bufs=(data.bufs||[]).map(function(m){var raw=z['b'+m.id+'.f32'];if(!raw||raw.byteLength!==m.nch*m.len*4)throw new Error('buffer');var f=new Float32Array(raw),chs=[];for(var c=0;c<m.nch;c++)chs.push(f.subarray(c*m.len,(c+1)*m.len));return {id:m.id,sr:m.sr,chs:chs};});
+    return Promise.all((data.bufs||[]).map(function(m){return z.get('b'+m.id+'.f32').then(function(r){return r||z.get('ecou-audio/b'+m.id+'.f32');}).then(function(raw){
+      if(!raw&&json){miss++;raw=new ArrayBuffer(m.nch*m.len*4);}if(!raw||raw.byteLength!==m.nch*m.len*4)throw new Error('buffer');var f=new Float32Array(raw),chs=[];for(var c=0;c<m.nch;c++)chs.push(f.subarray(c*m.len,(c+1)*m.len));return {id:m.id,sr:m.sr,chs:chs};});}))
+    .then(function(bufs){
     var backup=serialize();backup.data=JSON.parse(JSON.stringify(backup.data));var keepId=project.id,keepName=project.name;
     try{project.id=null;loadProjectData(data,bufs);}catch(err){project.id=keepId;project.name=keepName;loadProjectData(backup.data,backup.bufs);throw err;}
-    dirty=true;saveProject(true);toast('Imported “'+project.name+'”.');
+    dirty=true;saveProject(true);toast(miss?'Imported “'+project.name+'”. The .json holds no audio, so '+miss+' recorded/imported sound'+(miss>1?'s are':' is')+' silent: open the .zip to bring '+(miss>1?'them':'it')+' back.':'Imported “'+project.name+'”.',miss?5000:undefined);});
   }).catch(function(){toast('That isn’t a valid Ecou project file — nothing was changed.');});
 }

@@ -10,14 +10,14 @@ function collectSong(){
   if(stemSrc()==='arrange'&&pc.length){var T0={},D0=[],ks=KEYSI(),z=Math.floor(Math.min.apply(null,pc.map(function(c){return c.s;}))/16)*16,end=0;ks.forEach(function(k){T0[k]=[];});
     pc.forEach(function(c){var pt=patterns[c.p],L=pt.len,o=c.o||0,ce=c.s+c.l;end=Math.max(end,ce);
       for(var r=Math.floor(o/L)*L-o;c.s+r<ce;r+=L){var b=c.s+r;
-        if(c.ti===0){pt.drums.forEach(function(a,pad){for(var s=0;s<L;s++){var g=b+s;if(a[s]&&g>=c.s&&g<ce)D0.push({s:g-z,pad:pad});}});}
+        if(c.ti===0){pt.drums.forEach(function(a,pad){for(var s=0;s<L;s++){var g=b+s;if(a[s]&&g>=c.s&&g<ce)D0.push({s:g-z,pad:pad,v:typeof a[s]==='number'?a[s]:1});}});}
         else if(T0[c.ti])(pt.notes[c.ti]||[]).forEach(function(n){var s=Math.round(n.s);if(s>=L)return;var g=b+s;if(g<c.s||g>=ce)return;T0[c.ti].push({s:g-z,l:Math.min(Math.max(1,Math.round(n.l)),ce-g),m:n.m,v:n.v});});}});
     ks.forEach(function(k){T0[k].sort(function(a,b){return a.s-b.s;});});D0.sort(function(a,b){return a.s-b.s;});
     SECZ=z;return {total:Math.max(16,Math.ceil((end-z)/16)*16),keys:T0,drums:D0};}
   SECZ=null;var order=song.length?song:[curPat],off=0,T={},D=[];KEYSI().forEach(function(k){T[k]=[];});
   order.forEach(function(pi){var pt=patterns[pi];
     KEYSI().forEach(function(ti){(pt.notes[ti]||[]).forEach(function(n){var s=Math.round(n.s);if(s>=pt.len)return;var l=Math.min(Math.max(1,Math.round(n.l)),pt.len-s);T[ti].push({s:off+s,l:l,m:n.m,v:n.v});});});
-    pt.drums.forEach(function(a,pad){for(var s=0;s<pt.len;s++)if(a[s])D.push({s:off+s,pad:pad});});
+    pt.drums.forEach(function(a,pad){for(var s=0;s<pt.len;s++)if(a[s])D.push({s:off+s,pad:pad,v:typeof a[s]==='number'?a[s]:1});});
     off+=pt.len;});
   return {total:off,keys:T,drums:D};
 }

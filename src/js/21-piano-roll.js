@@ -145,7 +145,9 @@ function loadKit(id,quiet){
 /* reverb impulse responses: early reflections + 3-band late tail with high-frequency damping, decorrelated L/R */
 var VERBS={room:{name:'Room',rt:0.7,pre:0.004,er:0.9,damp:0.5,size:0.35},chamber:{name:'Chamber',rt:1.3,pre:0.01,er:0.7,damp:0.55,size:0.6},hall:{name:'Hall',rt:2.4,pre:0.022,er:0.55,damp:0.45,size:1},
   plate:{name:'Plate',rt:1.8,pre:0.002,er:0,damp:0.8,size:0.5},spring:{name:'Spring',rt:1.6,pre:0.006,er:0,damp:0.4,size:0.4,spring:true},cathedral:{name:'Cathedral',rt:4.5,pre:0.04,er:0.4,damp:0.38,size:1.6}};
-function makeVerb(id){
+/* offline renders rebuild the graph each time: reuse the (seeded, deterministic) IR instead of recomputing it on the main thread */
+function makeVerb(id){if(!offlineRender)return makeVerbRaw(id);var c=makeVerb.c||(makeVerb.c={}),k=id+'|'+(P.rvSize?P.rvSize.v:1)+'|'+ctx.sampleRate;if(!c[k])c[k]=makeVerbRaw(id);return c[k];}
+function makeVerbRaw(id){
   var V0=VERBS[id],sz=(P.rvSize?P.rvSize.v:1),V=Object.assign({},V0,{rt:V0.rt*sz,size:V0.size*Math.sqrt(sz)}),sr=ctx.sampleRate,n=Math.floor((V.pre+V.rt*1.15)*sr),b=ctx.createBuffer(2,n,sr),p0=Math.floor(V.pre*sr);
   for(var ch=0;ch<2;ch++){var x=dkNoise(n,101+ch*977),lo=biq(x,'lp',350,0.7,sr),hi=biq(x,'hp',3500,0.7,sr),mid=biq(biq(x,'hp',350,0.7,sr),'lp',3500,0.7,sr),d=b.getChannelData(ch);
     var rl=V.rt*1.15,rm=V.rt,rh=V.rt*V.damp,build=V.er?0.012+0.03*V.size:0.004;

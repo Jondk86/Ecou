@@ -1,7 +1,7 @@
 function wetGain(w){return (MIX&&MIX.rAm?0:1)*w*1.3*2.8*dbg(P.rvRet?P.rvRet.v:0);}
 var curVerb='hall';
 function verbIdByName(){var nm=$('#irName')?$('#irName').textContent:'';for(var k in VERBS)if(VERBS[k].name===nm)return k;return null;}
-function verbResize(){clearTimeout(verbResize.t);verbResize.t=setTimeout(function(){if(!ctx||!N.conv)return;var id=verbIdByName();if(!id){return;}N.conv.buffer=makeVerb(id);if(PF&&PF.vConv){try{PF.vConv.buffer=N.conv.buffer;}catch(e){}}$('#irRt').textContent='RT60 ≈ '+dec(VERBS[id].rt*(P.rvSize?P.rvSize.v:1),1)+' s';},160);}
+function verbResize(){if(offlineRender)return;clearTimeout(verbResize.t);verbResize.t=setTimeout(function(){if(!ctx||!N.conv)return;var id=verbIdByName();if(!id){return;}N.conv.buffer=makeVerb(id);if(PF&&PF.vConv){try{PF.vConv.buffer=N.conv.buffer;}catch(e){}}$('#irRt').textContent='RT60 ≈ '+dec(VERBS[id].rt*(P.rvSize?P.rvSize.v:1),1)+' s';},160);}
 function setVerb(id){if(!ensureAudio())return;var V=VERBS[id];curVerb=id;N.conv.buffer=makeVerb(id);if(PF&&PF.vConv){try{PF.vConv.buffer=N.conv.buffer;}catch(e){var nc=ctx.createConvolver();nc.buffer=N.conv.buffer;}}
   $('#irName').textContent=V.name;$('#irRt').textContent='RT60 ≈ '+dec(V.rt*(P.rvSize?P.rvSize.v:1),1)+' s';$$('[data-verb]').forEach(function(x){x.setAttribute('aria-pressed',x.getAttribute('data-verb')===id?'true':'false');});markDirty();toast(V.name+' reverb.',1000);}
 function initDrums2(){

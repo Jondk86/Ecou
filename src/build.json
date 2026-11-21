@@ -60,6 +60,7 @@
     "js/36a-audio-stretch.js",
     "js/37-band-ui.js",
     "js/38-share-reel.js",
+    "js/38a-daw-package.js",
     "js/39-garage-view-tempo.js",
     "js/40-lcd-shelf-echo.js",
     "js/41-idea.js",

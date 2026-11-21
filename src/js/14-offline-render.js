@@ -42,7 +42,7 @@ function renderOffline(opts){
     if(opts.mode==='stem'||opts.mode==='returns')spatialOn=false;
     tracks.forEach(function(t){if(t.sp)t.sp.orbit=0;});
     buildGraph(opts.mode==='stem'||opts.mode==='returns');
-    N.conv.buffer=M.N.conv.buffer;
+    if(!js||useFx)N.conv.buffer=M.N.conv.buffer;
     var ovT=opts.ov?tracks[opts.ov.ti]:null,ovK=ovT?{comp:ovT.comp,cgr:ovT.cgr,duck:ovT.duck}:null;if(ovT)Object.assign(ovT,opts.ov.v);
     try{buildTracks();}finally{if(ovT)Object.assign(ovT,ovK);}
     Object.keys(P).forEach(function(k){if(P[k].on){try{P[k].on(P[k].v);}catch(e){}}});
@@ -53,13 +53,15 @@ function renderOffline(opts){
     function setNow(param,v){param.cancelScheduledValues(0);param.setValueAtTime(v,0);}
     tracks.forEach(function(t,i){if(t.kind==='keys'&&t.n){var S=soundOf(i);setNow(t.n.f.frequency,normToHz(S.cutoff));t.n.f.Q.value=S.reso;}});
     setNow(N.master.gain,P.vol.v);var wet=P.space.v;setNow(N.wet.gain,wetGain(wet));setNow(N.dry.gain,1);
-    if(ms){tracks.forEach(function(t,i){if(i!==opts.track){setNow(t.n.vol.gain,0);setNow(t.n.sr.gain,0);setNow(t.n.sd.gain,0);}});}
+    if(ms&&!opts.ret){tracks.forEach(function(t,i){if(i!==opts.track){setNow(t.n.vol.gain,0);setNow(t.n.sr.gain,0);setNow(t.n.sd.gain,0);}});if(opts.dry){var tdr=tracks[opts.track];if(tdr&&tdr.n){setNow(tdr.n.sr.gain,0);setNow(tdr.n.sd.gain,0);}}}
+    /* DAW package: FX returns only (every track plays into its sends, nothing reaches the bus dry) */
+    if(ms&&opts.ret){tracks.forEach(function(t){try{t.n.out.disconnect(t.n.dest);}catch(e){}});}
     if(opts.mode==='stem'){tracks.forEach(function(t,i){if(i!==opts.track)setNow(t.n.vol.gain,0);else{if(opts.stereo)setNow(t.n.vol.gain,1);setNow(t.n.sr.gain,0);setNow(t.n.sd.gain,0);if(t.n.pan.pan&&!opts.stereo)setNow(t.n.pan.pan,0);}});}
     if(opts.mode==='returns'){tracks.forEach(function(t){try{t.n.out.disconnect(t.n.dest);}catch(e){}});}
     try{N.revIn.disconnect(N.rvPreD);}catch(e){}
     PF=null;pfHeld={};pfFader=0;if(useFx){perfInsert(true);}
     if(js){var srcOut=PF?PF.out:N.mOut;try{srcOut.disconnect();}catch(e){}var mg=ctx.createChannelMerger(4),s1=ctx.createChannelSplitter(2),s2=ctx.createChannelSplitter(2);srcOut.connect(s1);s1.connect(mg,0,0);s1.connect(mg,1,1);N.revIn.connect(s2);s2.connect(mg,0,2);s2.connect(mg,1,3);mg.connect(ctx.destination);}
-    renderOnly=(opts.mode==='stem'||ms)?opts.track:null;RKEY=renderOnly!=null?mxKeysOf(renderOnly):null;offQueue=[];
+    renderOnly=(opts.mode==='stem'||(ms&&!opts.ret))?opts.track:null;RKEY=renderOnly!=null?mxKeysOf(renderOnly):null;offQueue=[];
     end=src==='arrange'?scheduleArrange(0,opts.range):scheduleSong(0);
     var Q=offQueue;offQueue=null;
     var OS={pf:PF,pfh:pfHeld,ctx:off,N:N,FX:FX,nodes:tracks.map(function(t){return t.n;}),pv:padVoices,sv:svoices,ro:renderOnly,on:offNodes};
@@ -80,6 +82,11 @@ function renderOffline(opts){
   else runQ(1e9);
   return off.startRendering().then(function(buf){RKEY=null;
     if(!js)return {buf:buf,end:end};
+    /* DAW package: copy the channels out in slices (no long task on phones) and hand bus + reverb send to a Worker (convolution, EQ, match, encode) */
+    if(opts.split){var nS=buf.length,irS=irBuf&&wetG>0?(irBuf.sampleRate!==sr?fitRate(irBuf):irBuf):null,cp=function(ch){var o=new Float32Array(nS),at=0;return new Promise(function(res){(function step(){var e=Math.min(nS,at+131072);buf.copyFromChannel(o.subarray(at,e),ch,at);at=e;if(at<nS)setTimeout(step,0);else res(o);})();});};
+      var outS={m:[],snd:null,h:null,preS:preS,rvLo:P.rvLo.v,rvHi:P.rvHi.v,k:0,eq:opts.mode!=='returns',sr:sr,end:end};
+      return cp(0).then(function(a){outS.m.push(a);return cp(1);}).then(function(a){outS.m.push(a);if(!irS)return outS;return cp(2).then(function(a){return cp(3).then(function(b){var any=false;for(var i=0;i<nS&&!any;i+=64)if(a[i]||b[i])any=true;
+        if(any){outS.snd=[a,b];outS.h=[0,1].map(function(c){return new Float32Array(irS.getChannelData(Math.min(c,irS.numberOfChannels-1)));});outS.k=wetG*volG*irScale(irS);}return outS;});});});}
     var n=buf.length,m=[new Float32Array(buf.getChannelData(0)),new Float32Array(buf.getChannelData(1))],snd=[buf.getChannelData(2),buf.getChannelData(3)];
     if(irBuf&&wetG>0){var any=false;for(var i=0;i<n;i+=64){if(snd[0][i]||snd[1][i]){any=true;break;}}
       if(any)for(var c=0;c<2;c++){var h=irBuf.getChannelData(Math.min(c,irBuf.numberOfChannels-1));if(irBuf.sampleRate!==sr){h=fitRate(irBuf).getChannelData(Math.min(c,irBuf.numberOfChannels-1));}var w=fftConvolve(snd[c],h);if(preS>0){var ws=new Float32Array(w.length);ws.set(w.subarray(0,w.length-preS),preS);w=ws;}w=biq(biq(w,'hp',P.rvLo.v,0.7,sr),'lp',P.rvHi.v,0.7,sr);if(opts.mode!=='returns')eqJS(w,sr);var k=wetG*volG*irScale(irBuf.sampleRate!==sr?fitRate(irBuf):irBuf);for(var j=0;j<n;j++)m[c][j]+=w[j]*k;}}
