@@ -1554,7 +1554,7 @@ html.splash #splash{display:flex}
       <pre id="diagOut" hidden style="white-space:pre-wrap;font-size:12px;line-height:1.45;background:var(--s2);border-radius:12px;padding:10px;margin:0;color:var(--tx)"></pre>
       <p class="note">Projects auto-save on this device. Back up to file saves a portable copy with all samples, patterns and settings; Restore from file opens one.</p>
     </div>
-    <input type="file" id="f-PROJ" accept=".zip,.ecou,application/zip" class="vh">
+    <input type="file" id="f-PROJ" accept=".zip,.ecou,.json,application/zip,application/json" class="vh">
   </section>
 
   <!-- STUDIO -->
@@ -1994,7 +1994,8 @@ function buildGraph(noMaster){
   N.delay.connect(N.dmerge,0,0);N.delay2.connect(N.dmerge,0,1);N.dmerge.connect(N.master);
   buildMasterEq();
   if(noMaster){N.mOut.connect(ctx.destination);}else{N.mOut.connect(N.comp);N.comp.connect(N.limMk);N.limMk.connect(N.clip);N.clip.connect(N.an);N.an.connect(ctx.destination);}
-  N.conv.buffer=makeVerb('hall');
+  /* offline JS mixdowns convolve the reverb send themselves: setting a ConvolverNode buffer costs a long main-thread task, so only do it when it is used */
+  if(!offlineRender)N.conv.buffer=makeVerb('hall');
   buildFX();routeFX();
   if(offlineRender)return;
   /* tap for 24-bit WAV recording (ScriptProcessor fallback; AudioWorklet replaces it when available) */
@@ -3545,14 +3546,14 @@ function serialize(){
   var bufs=[],map=new Map();
   function bid(b){if(!b)return null;if(map.has(b))return map.get(b);var id=bufs.length,chs=[];map.set(b,id);for(var c=0;c<b.numberOfChannels;c++)chs.push(b.getChannelData(c));bufs.push({id:id,sr:b.sampleRate,chs:chs});return id;}
   function sSlot(s){return s?(s.stock?{name:s.name,root:s.root,det:true,buf:null,stock:s.stock}:{name:s.name,root:s.root,det:s.det,buf:bid(s.buf),cap:s.buf&&s.buf._cap?1:0}):null;}
-  function sSound(S){if(!S)return null;var o={slots:{A:sSlot(S.slots.A),B:sSlot(S.slots.B)},engine:S.engine,loop:!!S.loop,morphMode:S.morphMode||'blend',fmP:S.fmP||null};IKEYS.forEach(function(k){o[k]=S[k];});return o;}
+  function sSound(S){if(!S)return null;var o={slots:{A:sSlot(S.slots.A),B:sSlot(S.slots.B)},engine:S.engine,loop:!!S.loop,morphMode:S.morphMode||'blend',morphBuf:S.morphBuf&&S.morphBuf.getChannelData?bid(S.morphBuf):null,fmP:S.fmP||null};IKEYS.forEach(function(k){o[k]=S[k];});return o;}
   var params={};Object.keys(P).forEach(function(k){if(IKEYS.indexOf(k)<0&&k.indexOf('pad')!==0)params[k]=P[k].v;});
   var data={v:1,name:project.name,params:params,fxOn:fxOn,order:FXORDER.slice(),roFast:roFast,dsync:dsync,MX:MX,
     ir:{name:$('#irName').textContent,rt:$('#irRt').textContent,buf:ctx?bid(N.conv.buffer):null},
     tracks:tracks.map(function(t){return {name:t.name,kind:t.kind,vol:t.vol,pan:t.pan,mute:t.mute,solo:t.solo,rev:t.rev,dly:t.dly,fx:t.fx,sp:t.sp,sound:sSound(t.sound),auto:t.auto||{},inCh:t.inCh,arm:!!t.arm,eq:t.eq||null,comp:t.comp||0,duck:t.duck||0,cmo:t.cmo||0,duckR:t.duckR||0.18,width:t.width==null?1:t.width,cgr:t.cgr==null?null:t.cgr,volRef:t.volRef==null?null:t.volRef,compLegacy:!!t.compLegacy,fm1ch:t.fm1ch||0,rig:t.rig||null,own:t.own?1:0,ins:t.ins&&t.ins.length?JSON.parse(JSON.stringify(t.ins)):[],spre:t.spre||null};}),daw:dawSerialize(bid),mq:MQG.slice(),fmBank:fmBank||null,mqf:MQF.slice(),mqq:MQQ.slice(),selTrack:selTrack,spatial:{on:spatialOn},
     amp:{model:ampModel,cab:cabCustom?bid(cabCustom):null,match:FX.match?FX.match.target:null,ref:matchRef},
-    pads:pads.map(function(p){return {name:p.name,cls:p.cls,level:p.level,tune:p.tune,decay:p.decay,pan:p.pan,choke:p.choke,buf:bid(p.buf),cap:p.buf&&(p.buf._cap||p.buf._slc)?1:0};}),
-    patterns:patterns.map(function(pt){return {name:pt.name,len:pt.len,drums:pt.drums.map(function(a){return a.map(function(x){return x?(typeof x==='number'?Math.round(x*100)/100:1):0;});}),notes:pt.notes,locks:pt.locks||{}};}),song:song,curPat:curPat,garage:garSave()};
+    pads:pads.map(function(p){return {name:p.name,cls:p.cls,level:p.level,tune:p.tune,decay:p.decay,pan:p.pan,choke:p.choke,buf:bid(p.buf),vb:p.vb&&p.vb.length?p.vb.map(bid):null,cap:p.buf&&(p.buf._cap||p.buf._slc)?1:0};}),
+    patterns:patterns.map(function(pt){return {name:pt.name,len:pt.len,drums:pt.drums.map(function(a){return a.map(function(x){return x?(typeof x==='number'?x:1):0;});}),notes:pt.notes,locks:pt.locks||{}};}),song:song,curPat:curPat,garage:garSave()};
   data.mix={rAm:!!MIX.rAm,rBm:!!MIX.rBm,tgt:MIX.tgt,custom:MIX.custom,match:!!MIX.match};data.sections=secSave();data.shelf=shelfSave(bid);data.vmLib=VM.lib.slice();try{data.course=lnLoad();}catch(e){}
   return {data:data,bufs:bufs};
 }
@@ -3570,10 +3571,10 @@ function loadProjectData(data,bufs){
   setRotary(!!data.roFast);setSync(data.dsync||'1/8D');
   if(data.MX)data.MX.forEach(function(r,i){if(MX[i])r.forEach(function(v,j){MX[i][j]=v;});});$$('#mx button').forEach(paintCell);
   if(data.ir&&data.ir.buf!=null&&gb(data.ir.buf)){N.conv.buffer=fitRate(gb(data.ir.buf));$('#irName').textContent=data.ir.name;$('#irRt').textContent=data.ir.rt;}
-  (data.pads||[]).forEach(function(d,i){var p=pads[i];if(!p)return;['name','cls','level','tune','decay','pan','choke'].forEach(function(k){p[k]=d[k];});p.buf=gb(d.buf);if(p.buf&&d.cap)p.buf._cap=1;});
+  (data.pads||[]).forEach(function(d,i){var p=pads[i];if(!p)return;['name','cls','level','tune','decay','pan','choke'].forEach(function(k){p[k]=d[k];});p.buf=gb(d.buf);if(p.buf&&d.cap)p.buf._cap=1;var vb=Array.isArray(d.vb)?d.vb.map(gb):null;p.vb=vb&&vb.length&&vb.every(Boolean)?vb:null;});
   dropAudioTracks();(data.tracks||[]).forEach(function(d,i){if(i>=4&&tracks.length===i){if(d.kind==='audio')addAudioTrack(d.name,true);else if(d.kind==='keys')addInstTrack(d.name,true);}});
   (data.tracks||[]).forEach(function(d,i){var t=tracks[i];if(!t)return;['name','vol','pan','mute','solo','rev','dly','fx'].forEach(function(k){t[k]=d[k];});if(d.sp)t.sp=d.sp;t.auto=d.auto&&typeof d.auto==='object'?d.auto:{};t.eq=d.eq||null;t.comp=+d.comp||0;t.duck=+d.duck||0;t.cmo=+d.cmo||0;t.fm1ch=+d.fm1ch||0;t.volRef=d.volRef==null?null:+d.volRef;t.duckR=+d.duckR||0.18;t.width=d.width==null?1:+d.width;t.cgr=d.cgr==null?null:+d.cgr;t.compLegacy=!!d.compLegacy||(+d.comp>0&&!('cgr' in d));t.ins=insNorm(d.ins);t.spre=d.spre&&typeof d.spre==='object'?{a:!!d.spre.a,b:!!d.spre.b}:null;applyStrip(t);if(t.comp&&t.cgr==null&&!t.compLegacy){(function(ti){setTimeout(function(){calibrateComp(ti);},2500+ti*400);})(i);}if(t.kind==='audio'){t.inCh=d.inCh||'L';t.arm=!!d.arm;}t.rig=d.rig&&d.rig.amp&&d.rig.ped?d.rig:null;rigRebuild(i);var dst=d.sound&&d.sound.slots&&d.sound.slots.A&&d.sound.slots.A.stock;t.own=('own' in d)?(d.own?1:0):(dst&&dst!==({1:'rhodes',3:'dub'})[i]?1:0);
-    if(d.sound){var S={slots:{A:dSlot(d.sound.slots.A),B:dSlot(d.sound.slots.B)},engine:d.sound.engine,loop:d.sound.loop,morphMode:d.sound.morphMode,morphBuf:null,morphRoot:0,fmP:Array.isArray(d.sound.fmP)?FMC.clamp(d.sound.fmP.slice()):null};IKEYS.forEach(function(k){S[k]=d.sound[k];});S.morphRoot=S.slots.A.root;
+    if(d.sound){var S={slots:{A:dSlot(d.sound.slots.A),B:dSlot(d.sound.slots.B)},engine:d.sound.engine,loop:d.sound.loop,morphMode:d.sound.morphMode,morphBuf:d.sound.morphBuf!=null?(gb(d.sound.morphBuf)||null):null,morphRoot:0,fmP:Array.isArray(d.sound.fmP)?FMC.clamp(d.sound.fmP.slice()):null};IKEYS.forEach(function(k){S[k]=d.sound[k];});S.morphRoot=S.slots.A.root;
       if(S.morphMode!=='blend'&&S.slots.A.buf&&S.slots.B.buf)S.morphBuf=renderMorphCore(S.slots.A,S.slots.B,S.morph,S.morphMode);t.sound=S;}
     trackRoute(i);if(t.kind==='keys'&&t.sound&&t.n){t.n.f.frequency.value=normToHz(t.sound.cutoff);t.n.f.Q.value=t.sound.reso;}});
   $('#padFx').checked=tracks[0].fx;
@@ -3688,14 +3689,30 @@ function exportProject(){
   if(window.claude&&typeof window.claude.use==='function'){window.claude.use('downloads').then(function(dl){if(!dl){toast('File export isn’t available in this view.');return;}return dl.save({filename:name,data:blob}).then(function(){toast('Project file exported.');}).catch(function(e){toast(e&&e.code==='declined'?'Export cancelled.':'Couldn’t export ('+((e&&e.code)||'error')+').');});});return;}
   var url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(function(){URL.revokeObjectURL(url);},4000);toast('Project file exported.');
 }
+/* lazy zip index: reads only the central directory and the entries asked for (DAW packages can be hundreds of MB) */
+function zipIndex(file){
+  var tl=Math.min(file.size,65557);
+  return file.slice(file.size-tl).arrayBuffer().then(function(tb){var dv=new DataView(tb),eo=-1;for(var i=tb.byteLength-22;i>=0;i--){if(dv.getUint32(i,true)===0x06054b50){eo=i;break;}}
+    if(eo<0)return file.arrayBuffer().then(unzipAsync).then(function(o){return {get:function(nm){return Promise.resolve(o[nm]||null);}};});
+    var n=dv.getUint16(eo+10,true),cs=dv.getUint32(eo+12,true),co=dv.getUint32(eo+16,true);
+    return file.slice(co,co+cs).arrayBuffer().then(function(cb){var d=new DataView(cb),p=0,ix={};
+      for(var k=0;k<n&&p+46<=cb.byteLength;k++){if(d.getUint32(p,true)!==0x02014b50)break;var nl=d.getUint16(p+28,true),el=d.getUint16(p+30,true),cl=d.getUint16(p+32,true);ix[new TextDecoder().decode(new Uint8Array(cb,p+46,nl))]={m:d.getUint16(p+10,true),c:d.getUint32(p+20,true),lo:d.getUint32(p+42,true)};p+=46+nl+el+cl;}
+      return {get:function(nm){var e=ix[nm];if(!e)return Promise.resolve(null);return file.slice(e.lo,e.lo+30).arrayBuffer().then(function(h){var hv=new DataView(h),ds=e.lo+30+hv.getUint16(26,true)+hv.getUint16(28,true),bl=file.slice(ds,ds+e.c);
+        if(e.m===0)return bl.arrayBuffer();if(e.m===8&&typeof DecompressionStream!=='undefined')return new Response(bl.stream().pipeThrough(new DecompressionStream('deflate-raw'))).arrayBuffer();return null;});}};});});
+}
+/* restores an Ecou backup (.ecou.zip), a DAW package (.zip with ecou-project.json + ecou-audio/) or a bare ecou-project.json */
 function importProject(file){
-  if(!file||!ensureAudio())return;
-  file.arrayBuffer().then(unzipAsync).then(function(z){if(!z['project.json'])throw new Error('no project');var data=JSON.parse(new TextDecoder().decode(new Uint8Array(z['project.json'])));
+  if(!file||!ensureAudio())return;var json=/\.json$/i.test(file.name||'')||/json/.test(file.type||''),miss=0;
+  var Z=json?file.text().then(function(t){return {data:JSON.parse(t),get:function(){return Promise.resolve(null);}};})
+    :zipIndex(file).then(function(z){return z.get('project.json').then(function(b){return b||z.get('ecou-project.json');}).then(function(b){if(!b)throw new Error('no project');return {data:JSON.parse(new TextDecoder().decode(new Uint8Array(b))),get:z.get};});});
+  Z.then(function(z){var data=z.data;
     if(!data||!Array.isArray(data.patterns)||!Array.isArray(data.tracks)||!Array.isArray(data.pads)||!data.params)throw new Error('structure');
-    var bufs=(data.bufs||[]).map(function(m){var raw=z['b'+m.id+'.f32'];if(!raw||raw.byteLength!==m.nch*m.len*4)throw new Error('buffer');var f=new Float32Array(raw),chs=[];for(var c=0;c<m.nch;c++)chs.push(f.subarray(c*m.len,(c+1)*m.len));return {id:m.id,sr:m.sr,chs:chs};});
+    return Promise.all((data.bufs||[]).map(function(m){return z.get('b'+m.id+'.f32').then(function(r){return r||z.get('ecou-audio/b'+m.id+'.f32');}).then(function(raw){
+      if(!raw&&json){miss++;raw=new ArrayBuffer(m.nch*m.len*4);}if(!raw||raw.byteLength!==m.nch*m.len*4)throw new Error('buffer');var f=new Float32Array(raw),chs=[];for(var c=0;c<m.nch;c++)chs.push(f.subarray(c*m.len,(c+1)*m.len));return {id:m.id,sr:m.sr,chs:chs};});}))
+    .then(function(bufs){
     var backup=serialize();backup.data=JSON.parse(JSON.stringify(backup.data));var keepId=project.id,keepName=project.name;
     try{project.id=null;loadProjectData(data,bufs);}catch(err){project.id=keepId;project.name=keepName;loadProjectData(backup.data,backup.bufs);throw err;}
-    dirty=true;saveProject(true);toast('Imported “'+project.name+'”.');
+    dirty=true;saveProject(true);toast(miss?'Imported “'+project.name+'”. The .json holds no audio, so '+miss+' recorded/imported sound'+(miss>1?'s are':' is')+' silent: open the .zip to bring '+(miss>1?'them':'it')+' back.':'Imported “'+project.name+'”.',miss?5000:undefined);});
   }).catch(function(){toast('That isn’t a valid Ecou project file — nothing was changed.');});
 }
 function setKbCollapsed(c){$('#kbwrap').classList.toggle('collapsed',c);if(!c)requestAnimationFrame(layoutBlacks);$('#kbToggle').textContent=c?'Show keys':'Hide keys';$('#kbToggle').setAttribute('aria-expanded',!c);}
@@ -3957,14 +3974,14 @@ function collectSong(){
   if(stemSrc()==='arrange'&&pc.length){var T0={},D0=[],ks=KEYSI(),z=Math.floor(Math.min.apply(null,pc.map(function(c){return c.s;}))/16)*16,end=0;ks.forEach(function(k){T0[k]=[];});
     pc.forEach(function(c){var pt=patterns[c.p],L=pt.len,o=c.o||0,ce=c.s+c.l;end=Math.max(end,ce);
       for(var r=Math.floor(o/L)*L-o;c.s+r<ce;r+=L){var b=c.s+r;
-        if(c.ti===0){pt.drums.forEach(function(a,pad){for(var s=0;s<L;s++){var g=b+s;if(a[s]&&g>=c.s&&g<ce)D0.push({s:g-z,pad:pad});}});}
+        if(c.ti===0){pt.drums.forEach(function(a,pad){for(var s=0;s<L;s++){var g=b+s;if(a[s]&&g>=c.s&&g<ce)D0.push({s:g-z,pad:pad,v:typeof a[s]==='number'?a[s]:1});}});}
         else if(T0[c.ti])(pt.notes[c.ti]||[]).forEach(function(n){var s=Math.round(n.s);if(s>=L)return;var g=b+s;if(g<c.s||g>=ce)return;T0[c.ti].push({s:g-z,l:Math.min(Math.max(1,Math.round(n.l)),ce-g),m:n.m,v:n.v});});}});
     ks.forEach(function(k){T0[k].sort(function(a,b){return a.s-b.s;});});D0.sort(function(a,b){return a.s-b.s;});
     SECZ=z;return {total:Math.max(16,Math.ceil((end-z)/16)*16),keys:T0,drums:D0};}
   SECZ=null;var order=song.length?song:[curPat],off=0,T={},D=[];KEYSI().forEach(function(k){T[k]=[];});
   order.forEach(function(pi){var pt=patterns[pi];
     KEYSI().forEach(function(ti){(pt.notes[ti]||[]).forEach(function(n){var s=Math.round(n.s);if(s>=pt.len)return;var l=Math.min(Math.max(1,Math.round(n.l)),pt.len-s);T[ti].push({s:off+s,l:l,m:n.m,v:n.v});});});
-    pt.drums.forEach(function(a,pad){for(var s=0;s<pt.len;s++)if(a[s])D.push({s:off+s,pad:pad});});
+    pt.drums.forEach(function(a,pad){for(var s=0;s<pt.len;s++)if(a[s])D.push({s:off+s,pad:pad,v:typeof a[s]==='number'?a[s]:1});});
     off+=pt.len;});
   return {total:off,keys:T,drums:D};
 }
@@ -4212,7 +4229,7 @@ function renderOffline(opts){
     if(opts.mode==='stem'||opts.mode==='returns')spatialOn=false;
     tracks.forEach(function(t){if(t.sp)t.sp.orbit=0;});
     buildGraph(opts.mode==='stem'||opts.mode==='returns');
-    N.conv.buffer=M.N.conv.buffer;
+    if(!js||useFx)N.conv.buffer=M.N.conv.buffer;
     var ovT=opts.ov?tracks[opts.ov.ti]:null,ovK=ovT?{comp:ovT.comp,cgr:ovT.cgr,duck:ovT.duck}:null;if(ovT)Object.assign(ovT,opts.ov.v);
     try{buildTracks();}finally{if(ovT)Object.assign(ovT,ovK);}
     Object.keys(P).forEach(function(k){if(P[k].on){try{P[k].on(P[k].v);}catch(e){}}});
@@ -4223,13 +4240,15 @@ function renderOffline(opts){
     function setNow(param,v){param.cancelScheduledValues(0);param.setValueAtTime(v,0);}
     tracks.forEach(function(t,i){if(t.kind==='keys'&&t.n){var S=soundOf(i);setNow(t.n.f.frequency,normToHz(S.cutoff));t.n.f.Q.value=S.reso;}});
     setNow(N.master.gain,P.vol.v);var wet=P.space.v;setNow(N.wet.gain,wetGain(wet));setNow(N.dry.gain,1);
-    if(ms){tracks.forEach(function(t,i){if(i!==opts.track){setNow(t.n.vol.gain,0);setNow(t.n.sr.gain,0);setNow(t.n.sd.gain,0);}});}
+    if(ms&&!opts.ret){tracks.forEach(function(t,i){if(i!==opts.track){setNow(t.n.vol.gain,0);setNow(t.n.sr.gain,0);setNow(t.n.sd.gain,0);}});if(opts.dry){var tdr=tracks[opts.track];if(tdr&&tdr.n){setNow(tdr.n.sr.gain,0);setNow(tdr.n.sd.gain,0);}}}
+    /* DAW package: FX returns only (every track plays into its sends, nothing reaches the bus dry) */
+    if(ms&&opts.ret){tracks.forEach(function(t){try{t.n.out.disconnect(t.n.dest);}catch(e){}});}
     if(opts.mode==='stem'){tracks.forEach(function(t,i){if(i!==opts.track)setNow(t.n.vol.gain,0);else{if(opts.stereo)setNow(t.n.vol.gain,1);setNow(t.n.sr.gain,0);setNow(t.n.sd.gain,0);if(t.n.pan.pan&&!opts.stereo)setNow(t.n.pan.pan,0);}});}
     if(opts.mode==='returns'){tracks.forEach(function(t){try{t.n.out.disconnect(t.n.dest);}catch(e){}});}
     try{N.revIn.disconnect(N.rvPreD);}catch(e){}
     PF=null;pfHeld={};pfFader=0;if(useFx){perfInsert(true);}
     if(js){var srcOut=PF?PF.out:N.mOut;try{srcOut.disconnect();}catch(e){}var mg=ctx.createChannelMerger(4),s1=ctx.createChannelSplitter(2),s2=ctx.createChannelSplitter(2);srcOut.connect(s1);s1.connect(mg,0,0);s1.connect(mg,1,1);N.revIn.connect(s2);s2.connect(mg,0,2);s2.connect(mg,1,3);mg.connect(ctx.destination);}
-    renderOnly=(opts.mode==='stem'||ms)?opts.track:null;RKEY=renderOnly!=null?mxKeysOf(renderOnly):null;offQueue=[];
+    renderOnly=(opts.mode==='stem'||(ms&&!opts.ret))?opts.track:null;RKEY=renderOnly!=null?mxKeysOf(renderOnly):null;offQueue=[];
     end=src==='arrange'?scheduleArrange(0,opts.range):scheduleSong(0);
     var Q=offQueue;offQueue=null;
     var OS={pf:PF,pfh:pfHeld,ctx:off,N:N,FX:FX,nodes:tracks.map(function(t){return t.n;}),pv:padVoices,sv:svoices,ro:renderOnly,on:offNodes};
@@ -4250,6 +4269,11 @@ function renderOffline(opts){
   else runQ(1e9);
   return off.startRendering().then(function(buf){RKEY=null;
     if(!js)return {buf:buf,end:end};
+    /* DAW package: copy the channels out in slices (no long task on phones) and hand bus + reverb send to a Worker (convolution, EQ, match, encode) */
+    if(opts.split){var nS=buf.length,irS=irBuf&&wetG>0?(irBuf.sampleRate!==sr?fitRate(irBuf):irBuf):null,cp=function(ch){var o=new Float32Array(nS),at=0;return new Promise(function(res){(function step(){var e=Math.min(nS,at+131072);buf.copyFromChannel(o.subarray(at,e),ch,at);at=e;if(at<nS)setTimeout(step,0);else res(o);})();});};
+      var outS={m:[],snd:null,h:null,preS:preS,rvLo:P.rvLo.v,rvHi:P.rvHi.v,k:0,eq:opts.mode!=='returns',sr:sr,end:end};
+      return cp(0).then(function(a){outS.m.push(a);return cp(1);}).then(function(a){outS.m.push(a);if(!irS)return outS;return cp(2).then(function(a){return cp(3).then(function(b){var any=false;for(var i=0;i<nS&&!any;i+=64)if(a[i]||b[i])any=true;
+        if(any){outS.snd=[a,b];outS.h=[0,1].map(function(c){return new Float32Array(irS.getChannelData(Math.min(c,irS.numberOfChannels-1)));});outS.k=wetG*volG*irScale(irS);}return outS;});});});}
     var n=buf.length,m=[new Float32Array(buf.getChannelData(0)),new Float32Array(buf.getChannelData(1))],snd=[buf.getChannelData(2),buf.getChannelData(3)];
     if(irBuf&&wetG>0){var any=false;for(var i=0;i<n;i+=64){if(snd[0][i]||snd[1][i]){any=true;break;}}
       if(any)for(var c=0;c<2;c++){var h=irBuf.getChannelData(Math.min(c,irBuf.numberOfChannels-1));if(irBuf.sampleRate!==sr){h=fitRate(irBuf).getChannelData(Math.min(c,irBuf.numberOfChannels-1));}var w=fftConvolve(snd[c],h);if(preS>0){var ws=new Float32Array(w.length);ws.set(w.subarray(0,w.length-preS),preS);w=ws;}w=biq(biq(w,'hp',P.rvLo.v,0.7,sr),'lp',P.rvHi.v,0.7,sr);if(opts.mode!=='returns')eqJS(w,sr);var k=wetG*volG*irScale(irBuf.sampleRate!==sr?fitRate(irBuf):irBuf);for(var j=0;j<n;j++)m[c][j]+=w[j]*k;}}
@@ -5283,7 +5307,9 @@ function loadKit(id,quiet){
 /* reverb impulse responses: early reflections + 3-band late tail with high-frequency damping, decorrelated L/R */
 var VERBS={room:{name:'Room',rt:0.7,pre:0.004,er:0.9,damp:0.5,size:0.35},chamber:{name:'Chamber',rt:1.3,pre:0.01,er:0.7,damp:0.55,size:0.6},hall:{name:'Hall',rt:2.4,pre:0.022,er:0.55,damp:0.45,size:1},
   plate:{name:'Plate',rt:1.8,pre:0.002,er:0,damp:0.8,size:0.5},spring:{name:'Spring',rt:1.6,pre:0.006,er:0,damp:0.4,size:0.4,spring:true},cathedral:{name:'Cathedral',rt:4.5,pre:0.04,er:0.4,damp:0.38,size:1.6}};
-function makeVerb(id){
+/* offline renders rebuild the graph each time: reuse the (seeded, deterministic) IR instead of recomputing it on the main thread */
+function makeVerb(id){if(!offlineRender)return makeVerbRaw(id);var c=makeVerb.c||(makeVerb.c={}),k=id+'|'+(P.rvSize?P.rvSize.v:1)+'|'+ctx.sampleRate;if(!c[k])c[k]=makeVerbRaw(id);return c[k];}
+function makeVerbRaw(id){
   var V0=VERBS[id],sz=(P.rvSize?P.rvSize.v:1),V=Object.assign({},V0,{rt:V0.rt*sz,size:V0.size*Math.sqrt(sz)}),sr=ctx.sampleRate,n=Math.floor((V.pre+V.rt*1.15)*sr),b=ctx.createBuffer(2,n,sr),p0=Math.floor(V.pre*sr);
   for(var ch=0;ch<2;ch++){var x=dkNoise(n,101+ch*977),lo=biq(x,'lp',350,0.7,sr),hi=biq(x,'hp',3500,0.7,sr),mid=biq(biq(x,'hp',350,0.7,sr),'lp',3500,0.7,sr),d=b.getChannelData(ch);
     var rl=V.rt*1.15,rm=V.rt,rh=V.rt*V.damp,build=V.er?0.012+0.03*V.size:0.004;
@@ -5297,7 +5323,7 @@ function makeVerb(id){
 function wetGain(w){return (MIX&&MIX.rAm?0:1)*w*1.3*2.8*dbg(P.rvRet?P.rvRet.v:0);}
 var curVerb='hall';
 function verbIdByName(){var nm=$('#irName')?$('#irName').textContent:'';for(var k in VERBS)if(VERBS[k].name===nm)return k;return null;}
-function verbResize(){clearTimeout(verbResize.t);verbResize.t=setTimeout(function(){if(!ctx||!N.conv)return;var id=verbIdByName();if(!id){return;}N.conv.buffer=makeVerb(id);if(PF&&PF.vConv){try{PF.vConv.buffer=N.conv.buffer;}catch(e){}}$('#irRt').textContent='RT60 ≈ '+dec(VERBS[id].rt*(P.rvSize?P.rvSize.v:1),1)+' s';},160);}
+function verbResize(){if(offlineRender)return;clearTimeout(verbResize.t);verbResize.t=setTimeout(function(){if(!ctx||!N.conv)return;var id=verbIdByName();if(!id){return;}N.conv.buffer=makeVerb(id);if(PF&&PF.vConv){try{PF.vConv.buffer=N.conv.buffer;}catch(e){}}$('#irRt').textContent='RT60 ≈ '+dec(VERBS[id].rt*(P.rvSize?P.rvSize.v:1),1)+' s';},160);}
 function setVerb(id){if(!ensureAudio())return;var V=VERBS[id];curVerb=id;N.conv.buffer=makeVerb(id);if(PF&&PF.vConv){try{PF.vConv.buffer=N.conv.buffer;}catch(e){var nc=ctx.createConvolver();nc.buffer=N.conv.buffer;}}
   $('#irName').textContent=V.name;$('#irRt').textContent='RT60 ≈ '+dec(V.rt*(P.rvSize?P.rvSize.v:1),1)+' s';$$('[data-verb]').forEach(function(x){x.setAttribute('aria-pressed',x.getAttribute('data-verb')===id?'true':'false');});markDirty();toast(V.name+' reverb.',1000);}
 function initDrums2(){
@@ -8231,8 +8257,8 @@ function llCommitPerf(gEnd){var L=GAR.ll,log=L.perfLog;L.perfLog=null;if(!log||!
   function close(ti,g){var o=open[ti];if(!o)return;if(g>o.g){newClip({type:'pat',ti:ti,s:base+o.g,l:g-o.g,p:o.p,o:0});made++;}delete open[ti];}
   log.forEach(function(e){close(e.ti,e.g);if(e.p>=0)open[e.ti]={p:e.p,g:e.g};});Object.keys(open).forEach(function(k){close(+k,end);});
   if(made){dawNeed=true;markDirty();toast('Performance captured: '+made+' region'+(made>1?'s':'')+' from bar '+(base/16+1)+' in Tracks.',2600);}}
-function garSave(){try{bandPart('A');bandPart('B');bandPart('C');bandGroove();}catch(e){}return {key:GAR.key,minor:GAR.minor,chords:GAR.chords,ap:GAR.ap,drum:GAR.drum,smart:{pieces:GAR.smart.pieces,bars:GAR.smart.bars,pat:GAR.smart.pat},band:JSON.parse(JSON.stringify(Object.assign({},GAR.band,{keyHint:null,half:false,sel:0,open:{harm:true}})))};}
-function garLoad(d){d=d||{};if(typeof bandStop==='function'&&!hist.keepBand)bandStop();if(d.band)bandMigrate(d.band);GAR.key=d.key|0;GAR.minor=!!d.minor;GAR.chords=Array.isArray(d.chords)&&d.chords.length===8?d.chords:null;if(d.ap)Object.assign(GAR.ap,d.ap);if(d.drum)Object.assign(GAR.drum,d.drum);if(d.smart){GAR.smart.pieces=d.smart.pieces||GAR.smart.pieces;GAR.smart.bars=d.smart.bars||2;GAR.smart.pat=d.smart.pat==null?-1:d.smart.pat;}
+function garSave(){try{bandPart('A');bandPart('B');bandPart('C');bandGroove();}catch(e){}return {kit:GAR.kit||null,key:GAR.key,minor:GAR.minor,chords:GAR.chords,ap:GAR.ap,drum:GAR.drum,smart:{pieces:GAR.smart.pieces,bars:GAR.smart.bars,pat:GAR.smart.pat},band:JSON.parse(JSON.stringify(Object.assign({},GAR.band,{keyHint:null,half:false,sel:0,open:{harm:true}})))};}
+function garLoad(d){d=d||{};if(typeof bandStop==='function'&&!hist.keepBand)bandStop();if(d.band)bandMigrate(d.band);GAR.kit=typeof d.kit==='string'?d.kit:null;GAR.key=d.key|0;GAR.minor=!!d.minor;GAR.chords=Array.isArray(d.chords)&&d.chords.length===8?d.chords:null;if(d.ap)Object.assign(GAR.ap,d.ap);if(d.drum)Object.assign(GAR.drum,d.drum);if(d.smart){GAR.smart.pieces=d.smart.pieces||GAR.smart.pieces;GAR.smart.bars=d.smart.bars||2;GAR.smart.pat=d.smart.pat==null?-1:d.smart.pat;}
   GAR.ll.act={};GAR.ll.q={};GAR.ll.rec=null;GAR.ll.sel=null;var ks=$('#garKey');if(ks)ks.value=GAR.key+(GAR.minor?'m':'');if($('#t-gar').classList.contains('active'))garView(GAR.view);}
 function llStopped(){llCommitPerf(seq.step);GAR.ll.act={};GAR.ll.q={};if(GAR.ll.rec){seq.rec=false;GAR.ll.rec=null;}seq.mode='pattern';}
 /* ---------- design tokens shared with the CSS ---------- */
@@ -9851,6 +9877,171 @@ try{shareInit();}catch(e){errLog.push('share: '+e.message);}
 /* warm the service-worker cache with the muxer so Ripple Reel also works offline later */
 setTimeout(function(){try{if(reelWCok()&&navigator.onLine!==false)['vendor/mp4-muxer/mp4-muxer.js','vendor/webm-muxer/webm-muxer.js'].forEach(function(u){fetch(u).catch(function(){});});}catch(e){}},15000);
 
+/* ---------- SEND TO ABLETON / ANY DAW: stems from bar 1 + Type 1 MIDI (tempo map, meters, keys, markers, lyrics) + README + project, one zip ----------
+   Heavy DSP (reverb convolution, master EQ on the wet, match-to-target, WAV encode, CRC) runs in a Worker; each finished file becomes a Blob
+   right away so the browser can page it out; the zip is just a list of Blob parts (stored, no compression). */
+var DAWX={busy:false,cancel:false,bits:32,gain:1,fx:'print',arm:0,w:null,wq:{},wid:0,last:null,info:null};
+var DAWFN=['fftInit','fft','fftConvolve','biq','jsMaster','softClipCurve','loudness','kFilter','kCoefs','mxMatch','truePeak','dbg','clamp'];
+function dawWorkerMain(){
+  var CT=new Uint32Array(256);for(var q=0;q<256;q++){var c0=q;for(var k0=0;k0<8;k0++)c0=c0&1?0xEDB88320^(c0>>>1):c0>>>1;CT[q]=c0>>>0;}
+  function crc(b){var c=0xFFFFFFFF;for(var i=0;i<b.length;i++)c=CT[(c^b[i])&255]^(c>>>8);return (c^0xFFFFFFFF)>>>0;}
+  function wav(chs,sr,bits){var nc=chs.length,n=chs[0].length,fl=bits===32,bps=fl?4:3,data=n*nc*bps,hl=fl?58:44,buf=new ArrayBuffer(hl+data),dv=new DataView(buf),u=new Uint8Array(buf),o=0,i,c;
+    function str(s){for(var j=0;j<s.length;j++)u[o++]=s.charCodeAt(j);}function u32(v){dv.setUint32(o,v,true);o+=4;}function u16(v){dv.setUint16(o,v,true);o+=2;}
+    str('RIFF');u32(hl-8+data);str('WAVE');str('fmt ');u32(fl?18:16);u16(fl?3:1);u16(nc);u32(sr);u32(sr*nc*bps);u16(nc*bps);u16(bits);if(fl){u16(0);str('fact');u32(4);u32(n);}str('data');u32(data);
+    if(fl){var il=new Float32Array(n*nc);for(i=0;i<n;i++)for(c=0;c<nc;c++)il[i*nc+c]=chs[c][i];u.set(new Uint8Array(il.buffer),hl);}
+    else{for(i=0;i<n;i++)for(c=0;c<nc;c++){var s=chs[c][i];s=s>1?1:s<-1?-1:s;var v=Math.round(s*8388607);u[o++]=v&255;u[o++]=(v>>8)&255;u[o++]=(v>>16)&255;}}
+    return u;}
+  function proc(d){var m=d.m,sr=d.sr,n=m[0].length,i;
+    if(d.snd){for(var c=0;c<2;c++){var w=fftConvolve(d.snd[c],d.h[c]);if(d.preS>0){var ws=new Float32Array(w.length);ws.set(w.subarray(0,w.length-d.preS),d.preS);w=ws;}
+      w=biq(biq(w,'hp',d.rvLo,0.7,sr),'lp',d.rvHi,0.7,sr);
+      (d.eq||[]).forEach(function(k){var x1=0,x2=0,y1=0,y2=0;for(var j=0;j<w.length;j++){var v=k[0]*w[j]+k[1]*x1+k[2]*x2-k[3]*y1-k[4]*y2;x2=x1;x1=w[j];y2=y1;y1=v;w[j]=v;}});
+      var K=d.k,mc=m[c];for(i=0;i<n;i++)mc[i]+=w[i]*K;}}
+    if(d.match){P.ceil.v=d.match.ceil;TGT=d.match.tgt;mxMatch(m,sr);}
+    var len=d.len;
+    if(len==null){var th=Math.pow(10,-80/20),last=Math.floor(d.end*sr);for(i=n-1;i>last;i--){if(Math.abs(m[0][i])>th||Math.abs(m[1][i])>th){last=i;break;}}len=Math.min(n,last+Math.floor(sr*0.2));}
+    var off=d.off||0,L=Math.min(len,n-off),f=Math.floor(sr*0.05),pk=0,out=[m[0].slice(off,off+L),m[1].slice(off,off+L)];
+    if(L<len){out=out.map(function(x){var y=new Float32Array(len);y.set(x);return y;});}
+    out.forEach(function(x){for(var j=0;j<f&&j<L;j++)x[L-1-j]*=j/f;for(var q2=0;q2<x.length;q2++){var a=x[q2]<0?-x[q2]:x[q2];if(a>pk)pk=a;}});
+    if(d.hold){HOLD={out:out,sr:sr,bits:d.bits};return {wav:new Uint8Array(0),crc:0,len:len,peak:pk,last:d.match?MIX.last:null};}
+    return enc(out,sr,d.bits,d.gain,len,pk);}
+  var HOLD=null;
+  function enc(out,sr,bits,g,len,pk){if(g!=null&&g!==1)out.forEach(function(x){for(var j=0;j<x.length;j++)x[j]*=g;});var u=wav(out,sr,bits);return {wav:u,crc:crc(u),len:len,peak:pk*(g==null?1:g)};}
+  self.onmessage=function(e){var d=e.data,r;try{if(d.crcOnly){var b=d.crcOnly;self.postMessage({id:d.id,crc:crc(b),wav:b},[b.buffer]);return;}if(d.enc){var H=HOLD;HOLD=null;r=enc(H.out,H.sr,H.bits,d.gain,H.out[0].length,d.peak);}else r=proc(d);}catch(err){self.postMessage({id:d.id,err:String(err&&err.stack||err)});return;}
+    self.postMessage({id:d.id,wav:r.wav,crc:r.crc,len:r.len,peak:r.peak,last:r.last||null},[r.wav.buffer]);};
+}
+function dawW(){if(DAWX.w)return DAWX.w;
+  var F={fftInit:fftInit,fft:fft,fftConvolve:fftConvolve,biq:biq,jsMaster:jsMaster,softClipCurve:softClipCurve,loudness:loudness,kFilter:kFilter,kCoefs:kCoefs,mxMatch:mxMatch,truePeak:truePeak,dbg:dbg,clamp:clamp};
+  var src=DAWFN.map(function(n){return 'var '+n+'='+F[n].toString()+';';}).join('\n')+'\nvar P={ceil:{v:-1}},TGT=-14,MIX={};function mxTgtVal(){return TGT;}function mxLastTxt(){}\n('+dawWorkerMain.toString()+')();';
+  var w=new Worker(URL.createObjectURL(new Blob([src],{type:'application/javascript'})));
+  w.onmessage=function(e){var q=DAWX.wq[e.data.id];delete DAWX.wq[e.data.id];if(!q)return;if(e.data.err)q.rej(new Error(e.data.err));else q.res(e.data);};
+  w.onerror=function(e){Object.keys(DAWX.wq).forEach(function(k){DAWX.wq[k].rej(new Error('worker: '+(e.message||'')));delete DAWX.wq[k];});};
+  DAWX.w=w;return w;}
+function dawCall(d,tr){return new Promise(function(res,rej){var id=++DAWX.wid;d.id=id;DAWX.wq[id]={res:res,rej:rej};dawW().postMessage(d,tr||[]);});}
+function dawEqK(sr){var out=[];MQB.forEach(function(b,i){if(MQG[i])out.push(rbj(b.t,MQF[i],MQQ[i],MQG[i],sr));});return out;}
+/* render one bus (mix / one track / FX returns) and let the worker finish + encode it */
+function dawBus(o,x){return renderOffline(o).then(function(r){
+  var d={m:r.m,snd:r.snd,h:r.h,preS:r.preS,rvLo:r.rvLo,rvHi:r.rvHi,k:r.k,eq:r.eq?dawEqK(r.sr):[],sr:r.sr,end:r.end,len:x.len,off:x.off,bits:DAWX.bits,match:x.match||null,hold:!!x.hold,gain:x.hold?1:DAWX.gain};
+  var tr=[r.m[0].buffer,r.m[1].buffer];if(r.snd)tr.push(r.snd[0].buffer,r.snd[1].buffer);r=null;return dawCall(d,tr);});}
+function dawCrc(u){return dawCall({crcOnly:u},[u.buffer]);}
+/* zip writer over Blob parts (STORE, UTF-8 names) */
+function DZip(){this.parts=[];this.cd=[];this.off=0;this.n=0;}
+DZip.prototype.add=function(name,data,crc){var nm=u8(name),sz=data.size!=null?data.size:data.length;if(crc==null)crc=crc32(data);
+  var lh=new DataView(new ArrayBuffer(30));lh.setUint32(0,0x04034b50,true);lh.setUint16(4,20,true);lh.setUint16(6,0x0800,true);lh.setUint16(10,0x21,true);lh.setUint16(12,0x5B54,true);lh.setUint32(14,crc,true);lh.setUint32(18,sz,true);lh.setUint32(22,sz,true);lh.setUint16(26,nm.length,true);
+  var cd=new DataView(new ArrayBuffer(46));cd.setUint32(0,0x02014b50,true);cd.setUint16(4,20,true);cd.setUint16(6,20,true);cd.setUint16(8,0x0800,true);cd.setUint16(12,0x21,true);cd.setUint16(14,0x5B54,true);cd.setUint32(16,crc,true);cd.setUint32(20,sz,true);cd.setUint32(24,sz,true);cd.setUint16(28,nm.length,true);cd.setUint32(42,this.off,true);
+  this.parts.push(lh.buffer,nm,data instanceof Blob?data:new Blob([data]));this.cd.push(cd.buffer,nm);this.off+=30+nm.length+sz;this.n++;};
+DZip.prototype.blob=function(){var cs=this.cd.reduce(function(a,b){return a+(b.byteLength||b.length);},0),e=new DataView(new ArrayBuffer(22));e.setUint32(0,0x06054b50,true);e.setUint16(8,this.n,true);e.setUint16(10,this.n,true);e.setUint32(12,cs,true);e.setUint32(16,this.off,true);
+  return new Blob(this.parts.concat(this.cd,[e.buffer]),{type:'application/zip'});};
+/* song facts shared by MIDI and README */
+var DAWNOTE=['C','D♭','D','E♭','E','F','F♯','G','A♭','A','B♭','B'],DAWSF=[0,-5,2,-3,4,-1,6,1,-4,3,-2,5];
+function dawMinor(md){return /min|aeol|dor|phr|loc/i.test(md||'');}
+function dawKeySig(pc,md){var off=/aeol|^min|minor/i.test(md||'')?3:/dor/i.test(md||'')?10:/phr/i.test(md||'')?8:/lyd/i.test(md||'')?7:/mix/i.test(md||'')?5:/loc/i.test(md||'')?1:0;return {sf:DAWSF[(pc+off)%12],mi:dawMinor(md)?1:0};}
+function dawKeyName(pc,md){md=md||'major';return DAWNOTE[((pc%12)+12)%12]+' '+(/^(ionian|major)$/i.test(md)?'major':/^(aeolian|minor)$/i.test(md)?'minor':md);}
+function dawSteps(ss){return ss==='arrange'?Math.ceil(arrEnd()):songOrder().reduce(function(a,pi){return a+patterns[pi].len;},0);}
+function dawFacts(){var ss=stemSrc(),steps=dawSteps(ss),secs=[],tm=ss==='arrange'&&daw.tmap&&daw.tmap.length;
+  if(SEC.list.length&&SEC.reg&&SEC.reg.length){var bar=1;secLayout().forEach(function(Ly){var s=Ly.sec;secs.push({name:s.name,s:Ly.s,l:Ly.l,bar:bar,bars:s.bars,meter:secMeter(s),key:secKey(s),mode:secMode(s),bpm:Math.round(secBpm(s)*100)/100,lyric:s.lyric||''});bar+=s.bars;});}
+  var sec0=secs[0],key=sec0?sec0.key:(GAR.key||0),mode=sec0?sec0.mode:(GAR.band&&GAR.band.mode)||'major';
+  var tempo=[],last=null,dur=0;for(var g=0;g<steps;g++){var b=tm?tmBpm(g):P.bpm.v,us=Math.round(60000000/b);if(us!==last){tempo.push({s:g,us:us,bpm:b});last=us;}dur+=tm?tmSd(g):stepDur();}
+  if(!tempo.length)tempo.push({s:0,us:Math.round(60000000/P.bpm.v),bpm:P.bpm.v});
+  var bars=secs.length?secs.reduce(function(a,x){return a+x.bars;},0):Math.ceil(steps/16);
+  return {ss:ss,steps:steps,secs:secs,key:key,mode:mode,tempo:tempo,bpm0:tempo[0].bpm,dur:dur,bars:bars};}
+/* ---- MIDI (SMF type 1, 480 PPQ, one 16th step = 120 ticks) ---- */
+/* names: UTF-8 (Ableton, Logic, Reaper, Bitwig read it) plus an ASCII-folded copy for older DAWs that show Latin-1 */
+function dawFold(s){s=String(s||'');try{s=s.normalize('NFD');}catch(e){}return s.replace(/[\u0300-\u036f]/g,'').replace(/[ßẞ]/g,'ss').replace(/[^\x20-\x7e]/g,'').replace(/\s+/g,' ').trim();}
+function dawNm(s){s=String(s||'');var f=dawFold(s);return f===s?s:s+(f?' ('+f+')':'');}
+function dawUtf(s){return Array.prototype.slice.call(u8(String(s||'')));}
+function dawMeta(t,type,bytes){return {t:t,o:0,b:[0xFF,type].concat(vlq(bytes.length),bytes)};}
+function dawTrk(name,ev){var nb=dawUtf(dawNm(name)),out=[0,0xFF,0x03].concat(vlq(nb.length),nb),last=0;ev.sort(function(a,b){return a.t-b.t||a.o-b.o;});
+  ev.forEach(function(e){out=out.concat(vlq(e.t-last),e.b);last=e.t;});out=out.concat([0,0xFF,0x2F,0]);var L=out.length;return [0x4D,0x54,0x72,0x6B,(L>>>24)&255,(L>>>16)&255,(L>>>8)&255,L&255].concat(out);}
+function dawSmf(trks){var all=[0x4D,0x54,0x68,0x64,0,0,0,6,0,1,0,trks.length,1,0xE0];trks.forEach(function(t){all=all.concat(t);});return new Uint8Array(all);}
+function dawMidi(F){var T=120,cond=[];
+  F.tempo.forEach(function(x){cond.push({t:x.s*T,o:0,b:[0xFF,0x51,3,(x.us>>16)&255,(x.us>>8)&255,x.us&255]});});
+  var ts=function(t,m){var p=String(m||'4/4').split('/'),nn=+p[0]||4,dd=Math.round(Math.log(+p[1]||4)/Math.LN2);cond.push({t:t,o:0,b:[0xFF,0x58,4,nn,dd,24,8]});},ks=function(t,pc,md){var k=dawKeySig(pc,md);cond.push({t:t,o:0,b:[0xFF,0x59,2,k.sf&255,k.mi]});};
+  if(F.secs.length){var pm=null,pk=null;F.secs.forEach(function(x){var t=x.s*T;if(x.meter!==pm){ts(t,x.meter);pm=x.meter;}var kk=x.key+'|'+x.mode;if(kk!==pk){ks(t,x.key,x.mode);pk=kk;}cond.push(dawMeta(t,0x06,dawUtf(dawNm(x.name))));if(x.lyric)cond.push(dawMeta(t,0x05,dawUtf(x.lyric)));});}
+  else{ts(0,'4/4');ks(0,F.key,F.mode);}
+  var S=collectSong(),z=0,pc=daw.clips.filter(function(c){return c.type==='pat'&&!c.mute&&patterns[c.p]&&tracks[c.ti]&&tracks[c.ti].kind!=='audio';});
+  if(F.ss==='arrange'&&pc.length)z=Math.floor(Math.min.apply(null,pc.map(function(c){return c.s;}))/16)*16;
+  var parts=[],ch=0,counts={};
+  KEYSI().forEach(function(ti){var ns=S.keys[ti];if(!ns||!ns.length)return;if(ch===9)ch++;var c=Math.min(ch++,15),ev=[{t:0,o:0,b:[0xC0|c,GMPROG[ti]||0]}];
+    ns.forEach(function(n){var v=Math.max(1,Math.min(127,Math.round(n.v*127))),s=(n.s+z)*T;ev.push({t:s,o:2,b:[0x90|c,n.m&127,v]});ev.push({t:s+Math.max(1,n.l)*T-1,o:1,b:[0x80|c,n.m&127,0]});});
+    counts[ti]=ns.length;parts.push({ti:ti,name:tracks[ti].name,ev:ev});});
+  if(S.drums.length){var ev=[];S.drums.forEach(function(d){var nn=GMDRUM[d.pad]||36,s=(d.s+z)*T,vv=Math.max(1,Math.min(127,Math.round((d.v==null?0.8:d.v)*127)));ev.push({t:s,o:2,b:[0x99,nn,vv]});ev.push({t:s+T-1,o:1,b:[0x89,nn,0]});});counts[0]=S.drums.length;parts.unshift({ti:0,name:tracks[0].name,ev:ev,drum:1});}
+  var title=project.name||'Ecou',condT=function(){return dawTrk(title,cond.map(function(e){return {t:e.t,o:e.o,b:e.b};}));};
+  return {full:dawSmf([condT()].concat(parts.map(function(p){return dawTrk(p.name,p.ev.slice());}))),
+    per:parts.map(function(p){return {name:'MIDI/'+String(p.ti+1).padStart(2,'0')+' '+dawFile(p.name)+'.mid',data:dawSmf([condT(),dawTrk(p.name,p.ev.slice())])};}),counts:counts};}
+function dawFile(s){return String(s||'Track').replace(/[\\\/:*?"<>|\u0000-\u001f]+/g,'-').replace(/\s+/g,' ').trim()||'Track';}
+function dawTime(s){var m=Math.floor(s/60);return m+':'+dec(s-m*60,3).padStart(6,'0');}
+function dawReadme(F,I){var bd=DAWX.bits===32?'32-bit float':'24-bit PCM',t0=dec(F.bpm0,2).replace(/\.?0+$/,''),chg=F.tempo.length>1,
+  L=['Ecou – DAW package (Ableton Live, Logic, FL Studio, Reaper, Bitwig, Cubase…)','','Project:      '+(project.name||'Untitled'),
+    'Tempo:        '+t0+' BPM'+(chg?' at bar 1 (the song changes tempo, see sections; the full tempo map is in Ecou.mid)':''),
+    'Key:          '+dawKeyName(F.key,F.mode),'Time sig.:    '+(function(){var ms=[];F.secs.forEach(function(x){if(ms.indexOf(x.meter)<0)ms.push(x.meter);});return ms.length>1?'changes per section ('+ms.join(', ')+'), see Sections below; Ecou.mid carries every change':(ms[0]||'4/4');})(),
+    'Sample rate:  '+I.sr+' Hz','Bit depth:    '+bd,'Level:        '+(I.gain<1?'all stems and the master are turned down by '+dec(-20*Math.log10(I.gain),1)+' dB (the same for every file) so nothing clips in 24-bit; raise the master in your DAW by that much to get the original level':'as in Ecou (no trim)'),
+    'Song length:  '+dawTime(I.len/I.sr)+' ('+I.len+' samples, '+F.bars+' bars + tail). Every WAV has exactly this length and starts at bar 1.',''];
+  if(F.secs.length){L.push('Sections:');F.secs.forEach(function(x){L.push('  Bar '+String(x.bar).padEnd(4)+' '+x.name+' – '+x.bars+' bar'+(x.bars>1?'s':'')+', '+dec(x.bpm,2).replace(/\.?0+$/,'')+' BPM, '+dawKeyName(x.key,x.mode)+', '+x.meter+(x.lyric?' – “'+x.lyric+'”':''));});L.push('');}
+  L.push('How to import into Ableton Live:','  1. Set the project tempo to '+t0+' BPM.'+(chg?' (Optional, for the grid only: drag Ecou.mid into the Arrangement and let Live import its tempo and time signatures.)':''),
+    '  2. Drag all files from the Stems folder into the Arrangement at bar 1 (1.1.1).','  3. Turn Warp off on the stems (select all audio clips › Clip view › Warp off), so Live plays them exactly as rendered.',
+    '  4. Drag Ecou.mid (all parts) or the files in MIDI/ (one per track) onto MIDI tracks at bar 1. Drums are on channel 10 with General MIDI notes.',
+    'Other DAWs: same idea – tempo '+t0+' BPM, every stem at bar 1, no time-stretching.','',
+    'Files:','  Stems/NN <track>.wav   one stereo stem per track'+(DAWX.fx==='dry'?', dry (no reverb/delay sends)':', with its own reverb and delay printed in'),
+    DAWX.fx==='dry'?'  Stems/'+I.retName+'   the shared reverb + delay returns of all tracks':null,
+    '  '+I.masterName+'   '+(I.matched?'the master, matched to your loudness target (limited) – a reference, do not add it to the stems':'the mix before the master limiter = all stems summed – a reference, do not add it to the stems'),
+    '  Ecou.mid               Type 1 MIDI: tempo map, time and key signatures, section markers, lyrics, one track per part, real step velocities',
+    '                         Text is UTF-8; track and marker names also carry an ASCII copy in brackets (Strofă → Strofa) for DAWs that show Latin-1',
+    '  MIDI/                  the same parts as separate .mid files','  ecou-project.json      the Ecou project (open this zip in Ecou › Restore from file to get it back)','  ecou-audio/            audio the project needs (recordings, imported clips)','',
+    'Stems summed at unity gain rebuild the mix before the limiter'+(DAWX.bits===32?'. Float files cannot clip.':'. 24-bit files clip above 0 dBFS: if a peak below says 0.0, choose 32-bit float.'),'','Stem peaks:');
+  I.peaks.forEach(function(p){L.push('  '+p);});if(I.skipped.length)L.push('','Skipped (silent): '+I.skipped.join(', '));
+  L.push('','No Ableton Live Set (.als) is included: Live reads the stems and MIDI directly, and a hand-made .als can break between Live versions.');
+  return L.filter(function(x){return x!=null;}).join('\r\n')+'\r\n';}
+function dawBufBytes(){try{var s=serialize();return s.bufs.reduce(function(a,b){return a+b.chs.length*b.chs[0].length*4;},0);}catch(e){return 0;}}
+function dawStat(t,f){var s=$('#dawStat');if(s)s.textContent=t;if(f!=null){$('#dawProg').hidden=false;$('#dawBar').style.width=Math.round(f*100)+'%';}}
+function dawEstimate(){var F=dawFacts(),sr=ctx.sampleRate,bps=DAWX.bits===32?4:3,n=tracks.filter(function(t){return !t.mute;}).length+1+(DAWX.fx==='dry'?1:0);return {F:F,bytes:Math.round(n*(F.dur+1.5)*sr*2*bps+dawBufBytes())};}
+function dawGo(){
+  if(DAWX.busy)return;if(!ensureAudio())return;var ss=stemSrc();if(ss==='song'&&!song.length){toast('Add sections or patterns to the song first.');return;}
+  if(seq.bounce||stemsRunning){toast('An export is already running.');return;}
+  var E=dawEstimate(),mb=Math.round(E.bytes/1048576);
+  if(E.bytes>500*1048576&&!(DAWX.arm>Date.now())){DAWX.arm=Date.now()+10000;dawStat('Large package: about '+mb+' MB. On a phone that can fill storage or memory. Tap again within 10 s to continue, or choose 24-bit / fewer tracks.');$('#dawGo').textContent='Continue (~'+mb+' MB)';return;}
+  DAWX.arm=0;transportStop();DAWX.busy=true;DAWX.cancel=false;stemsRunning=true;$('#dawGo').hidden=true;$('#dawCancel').hidden=false;
+  var F=E.F,sr=ctx.sampleRate,lat=Math.round(TRACKLAT*sr),dry=DAWX.fx==='dry',matched=!!MIX.match,Z=new DZip(),len=0,peaks=[],skipped=[],t0=performance.now(),retName='',masterName=matched?'Master (matched).wav':'Master (pre-limiter).wav';
+  var idx=tracks.map(function(t,i){return i;}).filter(function(i){return !tracks[i].mute;}),total=idx.length+(dry?1:0)+2,stage=0;
+  tracks.forEach(function(t){if(t.mute)skipped.push(t.name+' (muted)');});
+  var chk=function(){if(DAWX.cancel)throw new Error('cancel');},prog=function(lbl){return function(f){dawStat(lbl+' '+Math.round(f*100)+'%',(stage+f*0.9)/total);};},clip=0,pk=function(n,p){var db=p>0?20*Math.log10(p):-200;if(DAWX.bits!==32&&p>=0.99999)clip++;peaks.push(n+': '+(db<-200?'silent':dec(db,1)+' dBFS'));return db;};
+  dawStat(calPending()?'Measuring compressors…':'Rendering the mix…',0);
+  waitCal().then(function(){chk();return dawBus({mode:'mix',src:ss,spatial:false,split:true,onProgress:prog('Mix')},{off:lat,hold:true,match:matched?{tgt:mxTgtVal(),ceil:Math.min(P.ceil?P.ceil.v:-1,-1)}:null});})
+  .then(function(r){chk();len=r.len;var p0=r.peak;if(r.last){MIX.last=r.last;DAWX.match=r.last;try{mxLastTxt();}catch(e){}}
+    /* 24-bit cannot go above 0 dBFS: one common trim for master and every stem (same dB), so nothing clips and the stems still sum to the master */
+    DAWX.gain=1;if(DAWX.bits!==32&&p0>0.891){var db=Math.ceil((20*Math.log10(p0)+1)*10)/10;DAWX.gain=Math.pow(10,-db/20);}
+    return dawCall({enc:true,gain:DAWX.gain,peak:p0});})
+  .then(function(r){chk();pk(masterName,r.peak);Z.add(masterName,new Blob([r.wav]),r.crc);stage++;
+    var chain=Promise.resolve();
+    idx.forEach(function(i){chain=chain.then(function(){chk();var t=tracks[i],nm='Stem '+(stage)+'/'+(total-2)+' · '+t.name;dawStat(nm+'…',stage/total);
+      return dawBus({mode:'mstem',track:i,src:ss,spatial:false,split:true,dry:dry,onProgress:prog(nm)},{len:len,off:lat}).then(function(x){chk();stage++;
+        if(x.peak<3.2e-5){skipped.push(t.name);return;}var fn=String(i+1).padStart(2,'0')+' '+dawFile(t.name)+'.wav';pk(fn,x.peak);Z.add('Stems/'+fn,new Blob([x.wav]),x.crc);});});});
+    if(dry)chain=chain.then(function(){chk();dawStat('FX returns…',stage/total);retName=String(tracks.length+1).padStart(2,'0')+' FX Returns.wav';
+      return dawBus({mode:'mstem',ret:true,track:-1,src:ss,spatial:false,split:true,onProgress:prog('FX returns')},{len:len,off:lat}).then(function(x){stage++;pk(retName,x.peak);Z.add('Stems/'+retName,new Blob([x.wav]),x.crc);});});
+    return chain;})
+  .then(function(){chk();dawStat('MIDI, README and project…',stage/total);
+    var M=dawMidi(F);Z.add('Ecou.mid',M.full);M.per.forEach(function(p){Z.add(p.name,p.data);});
+    var s=serialize(),meta=s.bufs.map(function(b){return {id:b.id,sr:b.sr,nch:b.chs.length,len:b.chs[0].length};});s.data.bufs=meta;
+    var pj=JSON.stringify(s.data);
+    DAWX.info={sr:sr,len:len,bits:DAWX.bits,gain:DAWX.gain,fx:DAWX.fx,matched:matched,facts:F,counts:M.counts,masterName:masterName,retName:retName};
+    var c2=Promise.resolve();s.bufs.forEach(function(b){c2=c2.then(function(){chk();var L=b.chs[0].length,all=new Float32Array(L*b.chs.length);b.chs.forEach(function(c,i){all.set(c,i*L);});
+      return dawCrc(new Uint8Array(all.buffer)).then(function(r){Z.add('ecou-audio/b'+b.id+'.f32',new Blob([r.wav]),r.crc);});});});
+    return c2.then(function(){Z.add('ecou-project.json',u8(pj));Z.add('README.txt',u8(dawReadme(F,{sr:sr,len:len,peaks:peaks,skipped:skipped,retName:retName,masterName:masterName,matched:matched,gain:DAWX.gain})));});})
+  .then(function(){var blob=Z.blob();DAWX.last=blob;stage=total;dawStat('Done: '+Math.round(blob.size/1048576)+' MB in '+dec((performance.now()-t0)/1000,1)+' s.'+(clip?' '+clip+' file'+(clip>1?'s':'')+' went above 0 dBFS and clipped in 24-bit: choose 32-bit float for an exact pre-limiter master.':''),1);
+    saveBlob(blob,safeName(project.name)+'-daw.zip','DAW package saved ('+Math.round(blob.size/1048576)+' MB).');})
+  .catch(function(e){if(e&&e.message==='cancel'){dawStat('Cancelled. Nothing was saved.',0);toast('DAW export cancelled.');}else{console.error(e);errLog.push('daw: '+(e&&e.message));dawStat('Export failed: '+((e&&e.message)||'error').split('\n')[0]);toast('DAW export failed in this browser.');}})
+  .then(function(){DAWX.busy=false;stemsRunning=false;$('#dawGo').hidden=false;$('#dawGo').textContent='Make DAW package';$('#dawCancel').hidden=true;});
+}
+function dawInit(){var sh=$('#shareSheet'),bits=$('#shBits');if(!sh||!bits)return;var after=bits.closest('.gx-sec'),d=document.createElement('div');d.className='gx-sec';d.id='dawSec';
+  d.innerHTML='<div class="sh-t"><b>Send to Ableton / any DAW</b><small>One .zip: a stem per track from bar 1, MIDI with tempo map, markers and lyrics, README and the project</small></div>'+
+    '<div class="seg" id="dawBits" role="group" aria-label="Stem bit depth"><button data-db="32" aria-pressed="true">32-bit float</button><button data-db="24" aria-pressed="false">24-bit</button></div>'+
+    '<div class="seg" id="dawFx" role="group" aria-label="Effects on stems"><button data-dx="print" aria-pressed="true">Print FX on stems</button><button data-dx="dry" aria-pressed="false">Dry + FX returns</button></div>'+
+    '<div class="sh-prog" id="dawProg" hidden><i id="dawBar"></i></div><p class="note" id="dawStat" aria-live="polite"></p>'+
+    '<div class="btns"><button class="gx-btn sh-pri" id="dawGo">Make DAW package</button><button class="gx-btn" id="dawCancel" hidden>Cancel</button></div>';
+  after.parentNode.insertBefore(d,after.nextSibling);
+  $$('#dawBits button').forEach(function(b){b.addEventListener('click',function(){if(DAWX.busy)return;DAWX.bits=+b.getAttribute('data-db');$$('#dawBits button').forEach(function(x){x.setAttribute('aria-pressed',String(x===b));});});});
+  $$('#dawFx button').forEach(function(b){b.addEventListener('click',function(){if(DAWX.busy)return;DAWX.fx=b.getAttribute('data-dx');$$('#dawFx button').forEach(function(x){x.setAttribute('aria-pressed',String(x===b));});});});
+  $('#dawGo').addEventListener('click',dawGo);$('#dawCancel').addEventListener('click',function(){DAWX.cancel=true;dawStat('Cancelling after this step…');});}
+try{dawInit();}catch(e){errLog.push('daw: '+e.message);}
 function garRenderPlay(){
   var inst=GAR.inst||'skeys';GAR.inst=inst;var I=GINST[inst],fam=FAM[IFAM[inst]];$('#t-gar').style.setProperty('--fam',fam);
   $('#garInstName').textContent=I.name;garTrackSel();garSoundSel();
@@ -10637,6 +10828,6 @@ $('#midiOn').addEventListener('click',midiConnect);
 $$('[data-exp]').forEach(function(b){b.addEventListener('click',function(){ensureAudio();var k=b.getAttribute('data-exp'),s=slots[k];if(!s.buf)return;saveWav(encodeWav([s.buf.getChannelData(0)],s.buf.sampleRate),'ecou-'+s.name.replace(/[^a-z0-9]+/gi,'-').toLowerCase()+'-'+nname(ftom(s.root)));});});
 })();
 </script>
-<div id="updBar" hidden><span>A new version of Ecou is ready.</span><button id="updGo">Update</button></div><style>#updBar{position:fixed;left:12px;right:12px;bottom:calc(84px + env(safe-area-inset-bottom));z-index:950;display:flex;align-items:center;gap:12px;padding:12px 12px 12px 16px;border-radius:16px;background:#1E1E28;border:1px solid #2B2B37;color:#E9E9F0;font:14px/1.4 system-ui,sans-serif;box-shadow:0 10px 30px rgba(0,0,0,.5)}#updBar[hidden]{display:none}#updBar span{flex:1}#updBar button{border:0;border-radius:999px;background:#D4FF3A;color:#0B0B10;font:700 14px system-ui,sans-serif;padding:9px 16px}</style><script>(function(){var V="8291f9523f",busy=false,last=0;function chk(){if(busy||Date.now()-last<60000)return;busy=true;last=Date.now();fetch("beta/version.txt?"+Date.now(),{cache:"no-store"}).then(function(r){return r.ok?r.text():"";}).then(function(t){t=(t||"").trim();if(t&&t!==V)document.getElementById("updBar").hidden=false;}).catch(function(){}).then(function(){busy=false;});}document.addEventListener("visibilitychange",function(){if(!document.hidden)chk();});setTimeout(chk,8000);document.addEventListener("click",function(e){if(e.target&&e.target.id==="updGo"){try{if(typeof saveProject==="function")saveProject(true);}catch(x){}location.reload();}});})();</script>
+<div id="updBar" hidden><span>A new version of Ecou is ready.</span><button id="updGo">Update</button></div><style>#updBar{position:fixed;left:12px;right:12px;bottom:calc(84px + env(safe-area-inset-bottom));z-index:950;display:flex;align-items:center;gap:12px;padding:12px 12px 12px 16px;border-radius:16px;background:#1E1E28;border:1px solid #2B2B37;color:#E9E9F0;font:14px/1.4 system-ui,sans-serif;box-shadow:0 10px 30px rgba(0,0,0,.5)}#updBar[hidden]{display:none}#updBar span{flex:1}#updBar button{border:0;border-radius:999px;background:#D4FF3A;color:#0B0B10;font:700 14px system-ui,sans-serif;padding:9px 16px}</style><script>(function(){var V="da9583a734",busy=false,last=0;function chk(){if(busy||Date.now()-last<60000)return;busy=true;last=Date.now();fetch("beta/version.txt?"+Date.now(),{cache:"no-store"}).then(function(r){return r.ok?r.text():"";}).then(function(t){t=(t||"").trim();if(t&&t!==V)document.getElementById("updBar").hidden=false;}).catch(function(){}).then(function(){busy=false;});}document.addEventListener("visibilitychange",function(){if(!document.hidden)chk();});setTimeout(chk,8000);document.addEventListener("click",function(e){if(e.target&&e.target.id==="updGo"){try{if(typeof saveProject==="function")saveProject(true);}catch(x){}location.reload();}});})();</script>
 </body>
 </html>
