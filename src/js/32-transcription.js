@@ -83,11 +83,11 @@ function trxOv(show,title){var o=$('#trxOv');if(!o){o=document.createElement('di
   $('#trxOvC').addEventListener('click',trxCancel);}
   o.hidden=!show;if(title)$('#trxOvN').textContent=title;if(show){$('#trxOvSec').hidden=true;$('#trxOvRun').hidden=false;$('#trxOvT').textContent=TRX.mode==='stems'?'Splitting and writing the song':'Writing the notes';}}
 function trxStep(t,f){$('#trxOvS').textContent=t;if(f!=null){$('#trxOvB').style.width=Math.round(f*100)+'%';$('#trxOvPc').textContent=Math.round(f*100)+'%';}}
-function trxCancel(){if(trxWk){if(trxWk._rej)trxWk._rej(new Error('cancel'));trxWk.terminate();trxWk=null;}if(trxDm&&TRX.busy){trxDm.terminate();trxDm=null;}TRX.cancel=true;TRX.busy=false;trxOv(false);if(TRX.prevSrc){try{TRX.prevSrc.stop();}catch(e){}}toast('Stopped.',1000);}
+function trxCancel(){if(trxWk){if(trxWk._rej)trxWk._rej(new Error('cancel'));trxWk.terminate();trxWk=null;}if(trxDm&&TRX.busy){if(trxDm._rej)trxDm._rej(new Error('cancel'));trxDm.terminate();trxDm=null;}TRX.cancel=true;TRX.busy=false;trxOv(false);if(TRX.prevSrc){try{TRX.prevSrc.stop();}catch(e){}}toast('Stopped.',1000);}
 function trxPaint(){return new Promise(function(r){requestAnimationFrame(function(){setTimeout(r,40);});});}
 function trxRes(buf,sr,ch){var len=Math.ceil(buf.duration*sr),oc=new OfflineAudioContext(ch,len,sr),s=oc.createBufferSource();s.buffer=buf;s.connect(oc.destination);s.start();return oc.startRendering();}
 function trxFail(m){trxOv(false);TRX.busy=false;toast(m,4000);}
-function trxMsg(e){var m=(e&&e.message)||'';if(m==='cancel')return;trxFail(m==='long'?'That recording is longer than 7 minutes. Trim it and try again.':m==='none'?'No clear notes were found. A solo instrument or voice works best.':m==='mem'?'This phone ran out of memory. Choose a shorter section and try again.':m.indexOf('worker')===0||m.indexOf('model')===0||m.indexOf('demucs')===0?'The analysis stopped ('+m.replace(/^\w+: /,'')+'). Try a shorter section.':'This file could not be read. Try an MP3 or WAV.');}
+function trxMsg(e){var m=(e&&e.message)||'';if(m==='cancel')return;trxFail(m==='long'?'That recording is longer than 7 minutes. Trim it and try again.':m==='none'?'No clear notes were found. A solo instrument or voice works best.':m==='mem'?'This phone ran out of memory. Choose a shorter section and try again.':/download|manifest|Failed to fetch|NetworkError/i.test(m)?'The stem splitter could not be downloaded. Check the connection and try again; the parts that already arrived are kept.':m.indexOf('worker')===0||m.indexOf('model')===0||m.indexOf('demucs')===0?'The analysis stopped ('+m.replace(/^\w+: /,'')+'). Try a shorter section.':'This file could not be read. Try an MP3 or WAV.');}
 /* ---------- note detection (Basic Pitch) ---------- */
 function trxBP(buf,mode,f0,f1,label,opt){return trxRes(buf,22050,1).then(function(r22){return trxBase().then(function(base){return new Promise(function(res,rej){
   if(TRX.cancel){rej(new Error('cancel'));return;}
@@ -116,19 +116,74 @@ function trxDrums(x,sr){var hop=Math.round(sr/100),n=Math.floor(x.length/hop),E=
   var out=[];cl.forEach(function(c){var p0=pk(0,c.i),p1=pk(1,c.i),p2=pk(2,c.i),t=c.i*hop/sr,kick=c.bs[0]&&p0>=0.3&&p0>=p1*0.8,snare=c.bs[1]&&p1>=0.3&&(p0<0.45||p1>p0*1.25);
     if(kick)out.push({t:t,pad:0,a:p0});if(snare)out.push({t:t,pad:1,a:p1});if(c.bs[2]&&!snare&&p2>=0.2)out.push({t:t,pad:4,a:p2});});
   return out.sort(function(p,q){return p.t-q.t;});}
-/* ---------- the stem splitter (Demucs) ---------- */
-function trxDemucs(){if(trxDm&&trxDm._ready)return Promise.resolve(trxDm);var base=new URL('./',location.href).href+'vendor/demucs/';
-  return fetch(base+'worker.js',{method:'HEAD'}).then(function(r){if(!r.ok)throw new Error('demucs: the stem splitter is only available on the published app');}).then(function(){return new Promise(function(res,rej){
-    try{trxDm=new Worker(base+'worker.js',{type:'module'});}catch(e){rej(new Error('worker'));return;}
-    trxDm.onmessage=function(e){var d=e.data;if(d.t==='dl')trxStep(d.f<1?'Downloading the stem splitter (once, about 175 MB)… ':'Starting the stem splitter…',0.02+d.f*0.13);else if(d.t==='stage')trxStep('Starting the stem splitter…',0.15);
+/* ---------- the stem splitter (Spleeter 4-stems by Deezer, MIT; vendor/stems/, about 79 MB, fetched once) ---------- */
+var STEMS_MB=79,STEMS_PARTS=8,STEMS_CACHE='ecou-stems-v2';
+function stemsCached(){if(typeof caches==='undefined')return Promise.resolve(false);return caches.open(STEMS_CACHE).then(function(c){return c.keys();}).then(function(k){return k.length>=STEMS_PARTS;}).catch(function(){return false;});}
+/* size warning before the first download (the overlay is already open) */
+function stemsAsk(){return stemsCached().then(function(ok){if(ok||TRX.stAgreed)return;return new Promise(function(res,rej){var box=$('#trxOvSec'),title=$('#trxOvT').textContent;$('#trxOvRun').hidden=true;box.hidden=false;$('#trxOvT').textContent='Download the stem splitter?';
+  box.innerHTML='<p class="note" style="margin:0">Splitting needs a one-time download of about '+STEMS_MB+' MB (Spleeter by Deezer, MIT licence). It stays on this phone and works offline afterwards. On mobile data it counts against your plan. If the download stops, it carries on where it left off next time.</p><div class="btns"><button class="btn" id="stAskNo">Not now</button><button class="btn primary" id="stAskGo">Download '+STEMS_MB+' MB</button></div>';
+  $('#stAskNo').addEventListener('click',function(){box.hidden=true;rej(new Error('cancel'));trxCancel();});
+  $('#stAskGo').addEventListener('click',function(){box.hidden=true;TRX.stAgreed=true;$('#trxOvT').textContent=title;$('#trxOvRun').hidden=false;res();});});});}
+function trxDemucs(){if(trxDm&&trxDm._ready)return Promise.resolve(trxDm);var root=new URL('./',location.href).href,base=root+'vendor/stems/';
+  return fetch(base+'manifest.json').then(function(r){if(!r.ok)throw new Error('demucs: the stem splitter is only available on the published app');}).then(stemsAsk).then(function(){return new Promise(function(res,rej){
+    try{trxDm=new Worker(base+'worker.js');}catch(e){rej(new Error('worker'));return;}trxDm._rej=rej;
+    trxDm.onmessage=function(e){var d=e.data;if(d.t==='dl')trxStep(d.f<1?'Downloading the stem splitter (once) · '+Math.round(d.got/1e6)+' of '+Math.round(d.total/1e6)+' MB'+(d.resumed?' (resumed)':'')+'…':'Starting the stem splitter…',0.02+d.f*0.13);else if(d.t==='stage')trxStep('Starting the stem splitter…',0.15);
       else if(d.t==='ready'){trxDm._ready=true;trxDm._ep=d.ep;res(trxDm);}else if(d.t==='err')rej(new Error('demucs: '+d.m));};
     trxDm.onerror=function(e){rej(new Error('demucs: '+(e.message||'could not start')));};
-    trxDm.postMessage({t:'init',base:base,parts:[base+'htdemucs.onnx.part0',base+'htdemucs.onnx.part1'],size:174263526});});});}
-function trxSplit(buf){return trxRes(buf,44100,2).then(function(b){return trxDemucs().then(function(w){return new Promise(function(res,rej){var t0=performance.now();
-  trxStep(w._ep==='webgpu'?'Splitting into vocals, bass, other and drums…':'Splitting into vocals, bass, other and drums (no GPU here, so this takes a while)…',0.16);
+    trxDm.postMessage({t:'init',base:base,ort:root+'vendor/ort/'});});});}
+/* returns {vocals, drums, bass, other} as stereo 44.1 kHz AudioBuffers of the same length (aligned) */
+function trxSplit(buf){return trxRes(buf,44100,2).then(function(b){return trxDemucs().then(function(w){return new Promise(function(res,rej){var t0=performance.now();w._rej=rej;
+  trxStep(w._ep==='webgpu'?'Splitting into vocals, drums, bass and other…':'Splitting into vocals, drums, bass and other (no GPU here, so this takes a while)…',0.16);
   w.onmessage=function(e){var d=e.data;if(d.t==='p'){var el=(performance.now()-t0)/1000;trxStep('Splitting the stems'+(d.f>0.04?' · about '+trxDur(el/d.f*(1-d.f))+' left':'…'),0.16+d.f*0.49);}
-    else if(d.t==='done'){var st={};d.names.forEach(function(nm,i){var ab=ctx.createBuffer(1,d.stems[i].length,44100);ab.getChannelData(0).set(d.stems[i]);st[nm]=ab;});try{w.terminate();}catch(x){}trxDm=null;res(st);}else if(d.t==='err')rej(new Error(/memory|alloc|Out of/i.test(d.m)?'mem':'demucs: '+d.m));};
-  var L=b.getChannelData(0).slice(),R=b.getChannelData(1).slice();w.postMessage({t:'run',L:L,R:R,chunk:20,overlap:0.1},[L.buffer,R.buffer]);});});});}
+    else if(d.t==='done'){var st={};d.names.forEach(function(nm,i){var s=d.stems[i],ab=ctx.createBuffer(2,s[0].length,44100);ab.getChannelData(0).set(s[0]);ab.getChannelData(1).set(s[1]);st[nm]=ab;});try{w.terminate();}catch(x){}trxDm=null;res(st);}else if(d.t==='err')rej(new Error(/memory|alloc|Out of/i.test(d.m)?'mem':'demucs: '+d.m));};
+  var L=b.getChannelData(0).slice(),R=b.getChannelData(1).slice();w.postMessage({t:'run',L:L,R:R,overlap:1},[L.buffer,R.buffer]);});});});}
+/* trxSplit, with a Retry box (overlay stays open) when the model download fails */
+function stemsSplit(part){return trxSplit(part).catch(function(e){var m=(e&&e.message)||'';if(!/download|manifest|Failed to fetch|NetworkError/i.test(m))throw e;
+  if(trxDm){try{trxDm.terminate();}catch(x){}trxDm=null;}if(TRX.cancel)throw new Error('cancel');
+  return new Promise(function(res,rej){var box=$('#trxOvSec'),title=$('#trxOvT').textContent;$('#trxOvRun').hidden=true;box.hidden=false;$('#trxOvT').textContent='Download stopped';
+    box.innerHTML='<p class="note" style="margin:0">The stem splitter could not be downloaded ('+m.replace(/^demucs: /,'').replace(/[<>&"]/g,'')+'). Check the connection and try again. The parts that already arrived are kept, so it carries on from there.</p><div class="btns"><button class="btn" id="stRetNo">Cancel</button><button class="btn primary" id="stRet">Retry</button></div>';
+    $('#stRetNo').addEventListener('click',function(){box.hidden=true;rej(new Error('cancel'));trxCancel();});
+    $('#stRet').addEventListener('click',function(){box.hidden=true;$('#trxOvT').textContent=title;$('#trxOvRun').hidden=false;res(stemsSplit(part));});});});}
+var STEM_ORDER=[['vocals','Vocals'],['drums','Drums'],['bass','Bass'],['other','Other']];
+/* keeps the current project (saved, listed in Open…) and starts an empty one */
+function stemsNewProject(){return Promise.resolve(saveProject(true)).catch(function(){}).then(function(){resetProject();clearPatternsAll();setTimeout(histReset,0);});}
+/* stems -> new audio tracks, all at the same step so they stay aligned; one track per frame so the page stays responsive.
+   Never throws the result away: without enough free tracks they go into a new project. */
+function stemsToTracks(st,name){var order=STEM_ORDER.filter(function(o){return st[o[0]];});
+  var pre=MAXAUD-audioCount()<order.length?stemsNewProject().then(function(){TRX.stNewDone=true;}):Promise.resolve();
+  return pre.then(function(){var s=dawSnap(daw.play),made=0;
+    return order.reduce(function(p,o){return p.then(function(){return new Promise(function(r){setTimeout(function(){var b=st[o[0]],ti=addAudioTrack(o[1],true);if(ti>=0){newClip({type:'aud',ti:ti,s:s,off:0,dur:b.duration,buf:abufAdd(b),name:(name||'Song').slice(0,28)+' · '+o[1]});made++;}r();},0);});});},Promise.resolve())
+    .then(function(){seq.src='arrange';updTransportUI();renderMixer();renderSpUI();renderDawHeads();renderInsp();dawNeed=true;markDirty();return made;});});}
+/* before a split: room for 4 tracks? if not, the user chooses a new project up front (or cancels) */
+function stemsRoom(){var need=STEM_ORDER.length,free=MAXAUD-audioCount();TRX.stNewDone=false;if(free>=need)return Promise.resolve();
+  return new Promise(function(res,rej){var box=$('#trxOvSec');$('#trxOvRun').hidden=true;box.hidden=false;$('#trxOvT').textContent='No room for 4 stems here';
+    box.innerHTML='<p class="note" style="margin:0">This project uses '+audioCount()+' of '+MAXAUD+' audio tracks and the stems need '+need+'. Ecou can put them in a new project; this one is saved and stays in Open….</p><div class="btns"><button class="btn" id="stRmNo">Cancel</button><button class="btn primary" id="stRmNew">Put stems in a new project</button></div>';
+    $('#stRmNo').addEventListener('click',function(){box.hidden=true;rej(new Error('cancel'));trxCancel();});
+    $('#stRmNew').addEventListener('click',function(){box.hidden=true;$('#trxOvRun').hidden=false;res();});});}
+function stemsFile(file){if(TRX.busy||!file)return;if(!ensureAudio())return;TRX.busy=true;TRX.cancel=false;var nm=(file.name||'Song').replace(/\.[^.]+$/,'');
+  trxOv(true,nm);trxStep('Reading the file…',0.02);
+  stemsRoom().then(function(){return file.arrayBuffer();}).then(function(ab){trxStep('Decoding the audio…',0.04);return smpDecode(ab);}).then(function(b){if(TRX.cancel)throw new Error('cancel');if(b.duration>420)throw new Error('long');
+    return trxPickSection(b).then(function(sec){$('#trxOvT').textContent='Splitting into stems';return stemsSplit(trxCut(b,sec.start,sec.len));});})
+  .then(function(st){if(TRX.cancel)throw new Error('cancel');trxStep('Placing the stems…',0.99);return stemsToTracks(st,nm);}).then(function(n){TRX.busy=false;trxOv(false);
+    if(n)toast('Vocals, drums, bass and other are on '+n+' aligned audio tracks'+(TRX.stNewDone?' in a new project (the previous one is in Open…)':'')+'. Tap a clip, then Send to… to make an instrument, transcribe it, open it in Vocal Studio or slice it.',6000);})
+  .catch(function(e){TRX.busy=false;trxMsg(e);});}
+/* ---------- any sound travels: a Studio clip -> instrument, sheet music, Vocal Studio, slicer ---------- */
+function clipRegion(c,maxS,mono){var b=abuf[c.buf];if(!b)return null;var sr=b.sampleRate,a=Math.min(b.length-1,Math.max(0,Math.floor((c.off||0)*sr))),n=Math.max(1,Math.min(b.length-a,Math.floor(Math.min(c.dur,maxS||1e9)*sr)));
+  var nc=mono?1:b.numberOfChannels,o=ctx.createBuffer(nc,n,sr);
+  if(mono){var d=o.getChannelData(0);for(var ch=0;ch<b.numberOfChannels;ch++){var s=b.getChannelData(ch);for(var i=0;i<n;i++)d[i]+=s[a+i]/b.numberOfChannels;}}
+  else for(var k=0;k<nc;k++)o.getChannelData(k).set(b.getChannelData(k).subarray(a,a+n));return o;}
+function clipSend(c,to){if(!ensureAudio()||!c||c.type!=='aud')return;var nm=(c.name||'Clip').slice(0,40);
+  if(to==='vs'){vtOpenClip(c);return;}
+  if(to==='inst'){var r=clipRegion(c,6,true);if(!r)return;showTab('t-cap');handleAudio(r.getChannelData(0),r.sampleRate,'A',nm.slice(0,24));return;}
+  if(to==='sl'){var q=clipRegion(c,30,true);if(!q)return;setSlot('B',q,nm.slice(0,24),261.63,false);showTab('t-cap');slOpen('B');return;}
+  if(to==='trx'){var t=clipRegion(c,420,false);if(!t)return;var chs=[];for(var k=0;k<t.numberOfChannels;k++)chs.push(t.getChannelData(k));
+    /* queued, not started: the Sheet music card opens with the clip loaded, the mode set, and one tap to start */
+    var md=/drum/i.test(nm)?'song':/bass|vocal|voice|lead/i.test(nm)?'melody':'poly',bt=$('#trxMode [data-tm="'+md+'"]');if(bt&&!TRX.busy)bt.click();
+    TRX.clipFile=new File([encodeWav(chs,t.sampleRate)],nm.replace(/[^\w\- ]+/g,' ').trim()+'.wav',{type:'audio/wav'});
+    $('#trxClipN').textContent='Ready: “'+nm+'” ('+dec(t.duration,1)+' s from the Studio). Pick what to write above, then start.';$('#trxClipQ').hidden=false;
+    showTab('t-song');setTimeout(function(){var q=$('#trxClipQ');if(q&&q.scrollIntoView)q.scrollIntoView({block:'center'});},60);}}
+function clipSendRow(c){return '<div class="row"><span class="mu">Send to…</span></div><div class="btn3" style="grid-template-columns:repeat(2,1fr)"><button class="btn" id="ciToInst">Make instrument</button><button class="btn" id="ciToTrx">Transcribe</button><button class="btn" id="ciToVs">Vocal Studio</button><button class="btn" id="ciToSl">Slicer</button></div>';}
+function clipSendBind(c){[['ciToInst','inst'],['ciToTrx','trx'],['ciToVs','vs'],['ciToSl','sl']].forEach(function(x){var e=$('#'+x[0]);if(e)e.addEventListener('click',function(){clipSend(c,x[1]);});});}
 function trxDur(s){s=Math.round(s);return s<90?s+' s':Math.round(s/60)+' min';}
 function trxRms(b){var d=b.getChannelData(0),s=0;for(var i=0;i<d.length;i+=4)s+=d[i]*d[i];return Math.sqrt(s/(d.length/4));}
 function trxCut(b,start,len){var sr=b.sampleRate,a=Math.floor(start*sr),n=Math.min(b.length-a,Math.floor(len*sr)),o=ctx.createBuffer(b.numberOfChannels,Math.max(1,n),sr);for(var c=0;c<b.numberOfChannels;c++)o.getChannelData(c).set(b.getChannelData(c).subarray(a,a+n));return o;}
@@ -153,7 +208,7 @@ function trxFile(file){
         if(md==='song'){var parts=[];[['lead','Lead melody','mel','treble',o.lead],['other','Chords & other','poly',null,o.other],['bass','Bass','mel','bass',o.bass]].forEach(function(x){var ev=trxEv(x[4]);if(ev.length>2)parts.push({id:x[0],name:x[1],k:x[2],clef:x[3],ev:ev,buf:b,show:true,aud:true});});if(!parts.length)throw new Error('none');TRX.parts=parts;return;}
         var ev=trxEv(o);if(!ev.length)throw new Error('none');TRX.parts=[{id:'main',name:md==='poly'?'Piano':'Melody',k:md==='poly'?'poly':'mel',ev:ev,buf:b,show:true,aud:true}];});}
     return trxPickSection(b).then(function(sec){if(TRX.cancel)throw new Error('cancel');var part=trxCut(b,sec.start,sec.len);TRX.orig=part;TRX.dur=part.duration;TRX.bpm=Math.round(detectBpm(part)||detectBpm(b)||120);
-      return trxSplit(part).then(function(st){if(TRX.cancel)throw new Error('cancel');var parts=[],ref=trxRms(part)||1;
+      return stemsSplit(part).then(function(st){if(TRX.cancel)throw new Error('cancel');var parts=[],ref=trxRms(part)||1;
         var jobs=[['vocals',0.65,0.76,{}],['bass',0.76,0.84,{maxF:500}],['other',0.84,0.96,{}]].reduce(function(p,j){return p.then(function(){var S=TRXSTEM[j[0]],buf=st[j[0]];if(!buf||trxRms(buf)<ref*0.04)return;
           return trxBP(buf,S.k==='poly'?'poly':j[0]==='bass'?'bassline':'melody',j[1],j[2],'Writing '+S.n.toLowerCase()+'…',j[3]).then(function(ns){var ev=trxEv(ns);if(ev.length>2)parts.push({id:j[0],name:S.n,k:S.k,clef:S.clef,ev:ev,buf:buf,show:true,aud:true});});});},Promise.resolve());
         return jobs.then(function(){var db=st.drums;if(db&&trxRms(db)>ref*0.04){trxStep('Writing drums…',0.97);var ev=trxDrums(db.getChannelData(0),db.sampleRate);if(ev.length>3)parts.push({id:'drums',name:'Drums',k:'drum',clef:'perc',ev:ev,buf:db,show:true,aud:true});}
@@ -208,11 +263,14 @@ function trxListen(){if(!TRX.parts||!ensureAudio())return;var b=$('#trxPlay');if
   setTimeout(function(){if(trxSrcs.length){trxSrcs=[];b.textContent='Listen';}},(end*sd+1.5)*1000);}
 function initTrx(){
   $('#f-TRX').addEventListener('change',function(){if(this.files&&this.files[0])trxFile(this.files[0]);});
-  $$('#trxMode [data-tm]').forEach(function(b){b.addEventListener('click',function(){TRX.mode=b.getAttribute('data-tm');$$('#trxMode [data-tm]').forEach(function(x){x.setAttribute('aria-pressed',x===b);});$('#trxPick').textContent=TRX.mode==='stems'?'Choose a song':'Choose a recording';$('#trxStemNote').hidden=TRX.mode!=='stems';});});
+  $$('#trxMode [data-tm]').forEach(function(b){b.addEventListener('click',function(){TRX.mode=b.getAttribute('data-tm');$$('#trxMode [data-tm]').forEach(function(x){x.setAttribute('aria-pressed',x===b);});$('#trxPick').textContent=TRX.mode==='stems'?'Choose a song':'Choose a recording';$('#trxStemNote').hidden=TRX.mode!=='stems';$('#stemPick').hidden=TRX.mode!=='stems';});});
   $('#trxBpmDn').addEventListener('click',function(){TRX.bpm=Math.max(40,TRX.bpm-1);trxShowRes();});$('#trxBpmUp').addEventListener('click',function(){TRX.bpm=Math.min(240,TRX.bpm+1);trxShowRes();});
   $('#trxHalf').addEventListener('click',function(){TRX.bpm=Math.max(40,Math.round(TRX.bpm/2));trxShowRes();});$('#trxDbl').addEventListener('click',function(){TRX.bpm=Math.min(240,TRX.bpm*2);trxShowRes();});
   $('#trxView').addEventListener('click',function(){trxUse(openScore);});$('#trxPdf').addEventListener('click',function(){trxUse(exportPDF);});$('#trxXml').addEventListener('click',function(){trxUse(exportNotation);});
   $('#trxPlay').addEventListener('click',trxListen);
+  $('#trxClipGo').addEventListener('click',function(){var f=TRX.clipFile;if(!f||TRX.busy)return;TRX.clipFile=null;$('#trxClipQ').hidden=true;if(TRX.mode==='stems')stemsFile(f);else trxFile(f);});
+  $('#trxClipX').addEventListener('click',function(){TRX.clipFile=null;$('#trxClipQ').hidden=true;});
+  $('#f-STEM').addEventListener('change',function(){var f=this.files[0];this.value='';stemsFile(f);});
   $('#trxProj').addEventListener('click',function(){SCOREX=null;openScore();});var ds=$('#dawScore');if(ds)ds.addEventListener('click',function(){SCOREX=null;openScore();});trxProjUI();
   if(window.IntersectionObserver)new IntersectionObserver(function(es){if(es[0].isIntersecting)trxProjUI();}).observe($('#trxCard'));
   /* lets the stem splitter use every CPU core on later visits (cross-origin isolation through a service worker) */

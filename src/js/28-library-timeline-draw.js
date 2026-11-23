@@ -217,7 +217,7 @@ function renderInsp(){
         '<label class="ctl"><span class="row"><span>Fade in</span><output id="ciFio">'+dec(c.fi,2)+' s</output></span><input type="range" id="ciFi" min="0" max="'+maxF+'" step="0.005" value="'+Math.min(c.fi,maxF)+'"></label>'+
         '<label class="ctl"><span class="row"><span>Fade out</span><output id="ciFoo">'+dec(c.fo,2)+' s</output></span><input type="range" id="ciFo" min="0" max="'+maxF+'" step="0.005" value="'+Math.min(c.fo,maxF)+'"></label></div>';
       if(c.takes&&c.takes.length>1)h+='<div class="row"><span class="mu">Takes</span><div class="row" style="gap:6px"><button class="mv" id="ciTp" aria-label="Previous take">◀</button><strong>'+(c.takes.indexOf(c.buf)+1)+' / '+c.takes.length+'</strong><button class="mv" id="ciTn" aria-label="Next take">▶</button><button class="btn" id="ciTk" style="min-height:36px;font-size:13px">Keep only this</button></div></div>';
-      h+='<div class="btn3"><button class="btn" id="ciNorm">Normalize</button><button class="btn" id="ciRev">Reverse</button><button class="btn" id="ciLoopSel">Loop this</button></div>'+vtInspRow(c)+tsInspRow(c)+(b?'<p class="note">Source '+dec(b.duration,2)+' s · '+(b.numberOfChannels>1?'stereo':'mono')+' · '+Math.round(b.sampleRate/100)/10+' kHz</p>':'');}
+      h+='<div class="btn3"><button class="btn" id="ciNorm">Normalize</button><button class="btn" id="ciRev">Reverse</button><button class="btn" id="ciLoopSel">Loop this</button></div>'+clipSendRow(c)+vtInspRow(c)+tsInspRow(c)+(b?'<p class="note">Source '+dec(b.duration,2)+' s · '+(b.numberOfChannels>1?'stereo':'mono')+' · '+Math.round(b.sampleRate/100)/10+' kHz</p>':'');}
     el.innerHTML=h;bindInsp(c);return;
   }
   var t=tracks[daw.lane]||tracks[0],ti=tracks.indexOf(t),k=daw.auto;
@@ -280,6 +280,7 @@ function bindInsp(c){
     $('#ciFo').addEventListener('input',function(e){c.fo=+e.target.value;$('#ciFoo').textContent=dec(c.fo,2)+' s';dawNeed=true;markDirty();});
     if($('#ciTp')){var sw=function(d){var i=c.takes.indexOf(c.buf);c.buf=c.takes[(i+d+c.takes.length)%c.takes.length];done();};$('#ciTp').addEventListener('click',function(){sw(-1);});$('#ciTn').addEventListener('click',function(){sw(1);});
       $('#ciTk').addEventListener('click',function(){c.takes=[c.buf];done();toast('Other takes removed (Undo brings them back).',1600);});}
+    clipSendBind(c);
     $('#ciNorm').addEventListener('click',function(){var b=abuf[c.buf];if(!b)return;var pk=0;for(var ch=0;ch<b.numberOfChannels;ch++){var d=b.getChannelData(ch);for(var i=0;i<d.length;i++){var a=Math.abs(d[i]);if(a>pk)pk=a;}}if(pk>0){c.gain=Math.round((20*Math.log10(0.891/pk))*10)/10;done();toast('Clip gain set to '+dec(c.gain,1)+' dB (peak −1 dBFS).',1600);}});
     $('#ciRev').addEventListener('click',function(){var b=abuf[c.buf];if(!b)return;var nb=ctx.createBuffer(b.numberOfChannels,b.length,b.sampleRate);for(var ch=0;ch<b.numberOfChannels;ch++){var s=b.getChannelData(ch),d=nb.getChannelData(ch),n=s.length;for(var i=0;i<n;i++)d[i]=s[n-1-i];}var id=abufAdd(nb),k=c.takes.indexOf(c.buf);c.buf=id;if(k>=0)c.takes[k]=id;if(!c.loop)c.off=Math.max(0,b.duration-c.off-c.dur);done();});
     vtBindInsp(c);
