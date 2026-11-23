@@ -1,0 +1,50 @@
+{
+ "name": "spleeter-4stems-fp16",
+ "stems": [
+  "vocals",
+  "drums",
+  "bass",
+  "other"
+ ],
+ "sampleRate": 44100,
+ "models": [
+  {
+   "name": "spleeter4",
+   "parts": [
+    {
+     "file": "spleeter4.fp16.onnx.part0",
+     "size": 10000000
+    },
+    {
+     "file": "spleeter4.fp16.onnx.part1",
+     "size": 10000000
+    },
+    {
+     "file": "spleeter4.fp16.onnx.part2",
+     "size": 10000000
+    },
+    {
+     "file": "spleeter4.fp16.onnx.part3",
+     "size": 10000000
+    },
+    {
+     "file": "spleeter4.fp16.onnx.part4",
+     "size": 10000000
+    },
+    {
+     "file": "spleeter4.fp16.onnx.part5",
+     "size": 10000000
+    },
+    {
+     "file": "spleeter4.fp16.onnx.part6",
+     "size": 10000000
+    },
+    {
+     "file": "spleeter4.fp16.onnx.part7",
+     "size": 8741754
+    }
+   ]
+  }
+ ],
+ "totalBytes": 78741754
+}
