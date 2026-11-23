@@ -1,7 +1,7 @@
 var TRX={parts:null,orig:null,name:'',bpm:120,mode:'melody',busy:false,dur:0,cancel:false,t0:0,sec:{start:0,len:60}};
 var SCOREX=null;
 var TRXSTEM={vocals:{n:'Vocals',k:'mel',clef:'treble'},bass:{n:'Bass',k:'mel',clef:'bass'},other:{n:'Other instruments',k:'poly',clef:'treble'},drums:{n:'Drums',k:'drum',clef:'perc'}};
-function trxBase(){return new Promise(function(res){var u=new URL('vendor/basic-pitch/basicpitch.js',location.href).href;fetch(u,{method:'HEAD'}).then(function(r){res(r.ok?new URL('./',location.href).href:SMPALT);},function(){res(SMPALT);});});}
+function trxBase(){return new Promise(function(res){var u=new URL('vendor/basic-pitch/basicpitch.js',document.baseURI).href;fetch(u,{method:'HEAD'}).then(function(r){res(r.ok?new URL('./',location.href).href:SMPALT);},function(){res(SMPALT);});});}
 /* Note-detection worker. Runs Basic Pitch (Spotify, Apache-2.0) on ONNX Runtime Web (WASM SIMD) window by window with real progress,
    then turns the frame/onset maps into notes here, off the main thread, in linear time. The tfjs build is only a fallback.
    Modes: melody = one top voice (Viterbi path through the pitch map), bassline = lowest voice, poly = every note with
@@ -124,7 +124,7 @@ function stemsAsk(){return stemsCached().then(function(ok){if(ok||TRX.stAgreed)r
   box.innerHTML='<p class="note" style="margin:0">Splitting needs a one-time download of about '+STEMS_MB+' MB (Spleeter by Deezer, MIT licence). It stays on this phone and works offline afterwards. On mobile data it counts against your plan. If the download stops, it carries on where it left off next time.</p><div class="btns"><button class="btn" id="stAskNo">Not now</button><button class="btn primary" id="stAskGo">Download '+STEMS_MB+' MB</button></div>';
   $('#stAskNo').addEventListener('click',function(){box.hidden=true;rej(new Error('cancel'));trxCancel();});
   $('#stAskGo').addEventListener('click',function(){box.hidden=true;TRX.stAgreed=true;$('#trxOvT').textContent=title;$('#trxOvRun').hidden=false;res();});});});}
-function trxDemucs(){if(trxDm&&trxDm._ready)return Promise.resolve(trxDm);var root=new URL('./',location.href).href,base=root+'vendor/stems/';
+function trxDemucs(){if(trxDm&&trxDm._ready)return Promise.resolve(trxDm);var root=new URL('./',document.baseURI).href,base=root+'vendor/stems/';
   return fetch(base+'manifest.json').then(function(r){if(!r.ok)throw new Error('demucs: the stem splitter is only available on the published app');}).then(stemsAsk).then(function(){return new Promise(function(res,rej){
     try{trxDm=new Worker(base+'worker.js');}catch(e){rej(new Error('worker'));return;}trxDm._rej=rej;
     trxDm.onmessage=function(e){var d=e.data;if(d.t==='dl')trxStep(d.f<1?'Downloading the stem splitter (once) · '+Math.round(d.got/1e6)+' of '+Math.round(d.total/1e6)+' MB'+(d.resumed?' (resumed)':'')+'…':'Starting the stem splitter…',0.02+d.f*0.13);else if(d.t==='stage')trxStep('Starting the stem splitter…',0.15);
