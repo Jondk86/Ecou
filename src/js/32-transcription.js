@@ -1,7 +1,7 @@
 var TRX={parts:null,orig:null,name:'',bpm:120,mode:'melody',busy:false,dur:0,cancel:false,t0:0,sec:{start:0,len:60}};
 var SCOREX=null;
 var TRXSTEM={vocals:{n:'Vocals',k:'mel',clef:'treble'},bass:{n:'Bass',k:'mel',clef:'bass'},other:{n:'Other instruments',k:'poly',clef:'treble'},drums:{n:'Drums',k:'drum',clef:'perc'}};
-function trxBase(){return new Promise(function(res){var u=new URL('vendor/basic-pitch/basicpitch.js',document.baseURI).href;fetch(u,{method:'HEAD'}).then(function(r){res(r.ok?new URL('./',location.href).href:SMPALT);},function(){res(SMPALT);});});}
+function trxBase(){return new Promise(function(res){var u=new URL('vendor/basic-pitch/basicpitch.js',document.baseURI).href;fetch(u,{method:'HEAD'}).then(function(r){res(r.ok?new URL('./',document.baseURI).href:SMPALT);},function(){res(SMPALT);});});}
 /* Note-detection worker. Runs Basic Pitch (Spotify, Apache-2.0) on ONNX Runtime Web (WASM SIMD) window by window with real progress,
    then turns the frame/onset maps into notes here, off the main thread, in linear time. The tfjs build is only a fallback.
    Modes: melody = one top voice (Viterbi path through the pitch map), bassline = lowest voice, poly = every note with
