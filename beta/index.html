@@ -44,7 +44,7 @@ h2{margin:0;font-size:22px;letter-spacing:-.01em}
 .row{display:flex;align-items:center;justify-content:space-between;gap:10px}
 .mu{color:var(--mu);font-size:13px}
 .btns{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.vh{position:absolute;width:1px;height:1px;opacity:0;overflow:hidden;clip:rect(0 0 0 0);pointer-events:none}
+.vh{position:fixed;left:0;top:0;width:1px;height:1px;opacity:0;overflow:hidden;clip:rect(0 0 0 0);pointer-events:none}
 label.btn{display:flex;align-items:center;justify-content:center;text-align:center;user-select:none;-webkit-user-select:none}
 .btn{min-height:48px;border-radius:14px;border:1px solid #3A3A48;background:var(--s2);color:var(--tx);font-size:15px;font-weight:600;padding:0 12px}
 .btn.primary{background:var(--ac);color:var(--bg);border-color:var(--ac);font-weight:700}
@@ -4721,6 +4721,8 @@ document.addEventListener('keydown',function(e){var t=e.target;if(t&&t.tagName==
 function fixLabels(){$$('label.btn[for]').forEach(function(l){l.tabIndex=0;l.setAttribute('role','button');});}
 fixLabels();new MutationObserver(fixLabels).observe($('#fxChain'),{childList:true,subtree:true});
 /* ---------- SOUND LIBRARY: multisampled instruments synthesized on the device ---------- */
+/* the app shell never scrolls (main does). A focused hidden input or a scrollIntoView could still scroll the window and leave a black screen with the tab bar off-screen: undo that at once. */
+window.addEventListener('scroll',function(){if(window.scrollY||window.scrollX)window.scrollTo(0,0);},{passive:true});
 var STOCK={
   gpiano:{name:'Grand Piano',smp:'piano',src:'piano',zones:[36,48,60,72,84],dur:3.2,loop:false,p:{attack:0.002,release:0.7,cutoff:1,reso:0.7,fenv:0,fdec:0.3,glide:0,mono:0}},
   epiano:{name:'Stage Electric Piano',smp:'rhodes',src:'rhodes',zones:[36,48,60,72,84],dur:3,loop:false,p:{attack:0.002,release:0.5,cutoff:1,reso:0.7,fenv:0,fdec:0.3,glide:0,mono:0}},
@@ -7790,6 +7792,11 @@ function stemsToTracks(st,name){var order=STEM_ORDER.filter(function(o){return s
   return pre.then(function(){var s=dawSnap(daw.play),made=0;
     return order.reduce(function(p,o){return p.then(function(){return new Promise(function(r){setTimeout(function(){var b=st[o[0]],ti=addAudioTrack(o[1],true);if(ti>=0){newClip({type:'aud',ti:ti,s:s,off:0,dur:b.duration,buf:abufAdd(b),name:(name||'Song').slice(0,28)+' · '+o[1]});made++;}r();},0);});});},Promise.resolve())
     .then(function(){seq.src='arrange';updTransportUI();renderMixer();renderSpUI();renderDawHeads();renderInsp();dawNeed=true;markDirty();return made;});});}
+/* after placing: open Song › Studio on the new stem tracks with the first stem clip selected */
+function stemsShow(nm){var cs=daw.clips.filter(function(c){return c.type==='aud'&&c.name&&c.name.indexOf((nm||'Song').slice(0,28)+' · ')===0;});if(!cs.length)return;var c=cs[cs.length-STEM_ORDER.length]||cs[0];
+  try{if(document.activeElement&&document.activeElement.blur)document.activeElement.blur();}catch(e){}window.scrollTo(0,0);
+  showTab('t-daw');daw.sel=c.id;daw.lane=c.ti;daw.sx=Math.max(0,c.s-4);renderDawHeads();renderInsp();dawNeed=true;
+  setTimeout(function(){var cv=$('#dawCv');if(cv&&cv.scrollIntoView)cv.scrollIntoView({block:'start'});window.scrollTo(0,0);},80);}
 /* before a split: room for 4 tracks? if not, the user chooses a new project up front (or cancels) */
 function stemsRoom(){var need=STEM_ORDER.length,free=MAXAUD-audioCount();TRX.stNewDone=false;if(free>=need)return Promise.resolve();
   return new Promise(function(res,rej){var box=$('#trxOvSec');$('#trxOvRun').hidden=true;box.hidden=false;$('#trxOvT').textContent='No room for 4 stems here';
@@ -7801,6 +7808,7 @@ function stemsFile(file){if(TRX.busy||!file)return;if(!ensureAudio())return;TRX.
   stemsRoom().then(function(){return file.arrayBuffer();}).then(function(ab){trxStep('Decoding the audio…',0.04);return smpDecode(ab);}).then(function(b){if(TRX.cancel)throw new Error('cancel');if(b.duration>420)throw new Error('long');
     return trxPickSection(b).then(function(sec){$('#trxOvT').textContent='Splitting into stems';return stemsSplit(trxCut(b,sec.start,sec.len));});})
   .then(function(st){if(TRX.cancel)throw new Error('cancel');trxStep('Placing the stems…',0.99);return stemsToTracks(st,nm);}).then(function(n){TRX.busy=false;trxOv(false);
+    if(n)stemsShow(nm);
     if(n)toast('Vocals, drums, bass and other are on '+n+' aligned audio tracks'+(TRX.stNewDone?' in a new project (the previous one is in Open…)':'')+'. Tap a clip, then Send to… to make an instrument, transcribe it, open it in Vocal Studio or slice it.',6000);})
   .catch(function(e){TRX.busy=false;trxMsg(e);});}
 /* ---------- any sound travels: a Studio clip -> instrument, sheet music, Vocal Studio, slicer ---------- */
@@ -10889,6 +10897,6 @@ $('#midiOn').addEventListener('click',midiConnect);
 $$('[data-exp]').forEach(function(b){b.addEventListener('click',function(){ensureAudio();var k=b.getAttribute('data-exp'),s=slots[k];if(!s.buf)return;saveWav(encodeWav([s.buf.getChannelData(0)],s.buf.sampleRate),'ecou-'+s.name.replace(/[^a-z0-9]+/gi,'-').toLowerCase()+'-'+nname(ftom(s.root)));});});
 })();
 </script>
-<div id="updBar" hidden><span>A new version of Ecou is ready.</span><button id="updGo">Update</button></div><style>#updBar{position:fixed;left:12px;right:12px;bottom:calc(84px + env(safe-area-inset-bottom));z-index:950;display:flex;align-items:center;gap:12px;padding:12px 12px 12px 16px;border-radius:16px;background:#1E1E28;border:1px solid #2B2B37;color:#E9E9F0;font:14px/1.4 system-ui,sans-serif;box-shadow:0 10px 30px rgba(0,0,0,.5)}#updBar[hidden]{display:none}#updBar span{flex:1}#updBar button{border:0;border-radius:999px;background:#D4FF3A;color:#0B0B10;font:700 14px system-ui,sans-serif;padding:9px 16px}</style><script>(function(){var V="677a78ded5",busy=false,last=0;function chk(){if(busy||Date.now()-last<60000)return;busy=true;last=Date.now();fetch("beta/version.txt?"+Date.now(),{cache:"no-store"}).then(function(r){return r.ok?r.text():"";}).then(function(t){t=(t||"").trim();if(t&&t!==V)document.getElementById("updBar").hidden=false;}).catch(function(){}).then(function(){busy=false;});}document.addEventListener("visibilitychange",function(){if(!document.hidden)chk();});setTimeout(chk,8000);document.addEventListener("click",function(e){if(e.target&&e.target.id==="updGo"){try{if(typeof saveProject==="function")saveProject(true);}catch(x){}location.reload();}});})();</script>
+<div id="updBar" hidden><span>A new version of Ecou is ready.</span><button id="updGo">Update</button></div><style>#updBar{position:fixed;left:12px;right:12px;bottom:calc(84px + env(safe-area-inset-bottom));z-index:950;display:flex;align-items:center;gap:12px;padding:12px 12px 12px 16px;border-radius:16px;background:#1E1E28;border:1px solid #2B2B37;color:#E9E9F0;font:14px/1.4 system-ui,sans-serif;box-shadow:0 10px 30px rgba(0,0,0,.5)}#updBar[hidden]{display:none}#updBar span{flex:1}#updBar button{border:0;border-radius:999px;background:#D4FF3A;color:#0B0B10;font:700 14px system-ui,sans-serif;padding:9px 16px}</style><script>(function(){var V="0de009979d",busy=false,last=0;function chk(){if(busy||Date.now()-last<60000)return;busy=true;last=Date.now();fetch("beta/version.txt?"+Date.now(),{cache:"no-store"}).then(function(r){return r.ok?r.text():"";}).then(function(t){t=(t||"").trim();if(t&&t!==V)document.getElementById("updBar").hidden=false;}).catch(function(){}).then(function(){busy=false;});}document.addEventListener("visibilitychange",function(){if(!document.hidden)chk();});setTimeout(chk,8000);document.addEventListener("click",function(e){if(e.target&&e.target.id==="updGo"){try{if(typeof saveProject==="function")saveProject(true);}catch(x){}location.reload();}});})();</script>
 </body>
 </html>
