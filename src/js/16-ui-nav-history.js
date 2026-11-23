@@ -129,3 +129,5 @@ document.addEventListener('keydown',function(e){var t=e.target;if(t&&t.tagName==
 function fixLabels(){$$('label.btn[for]').forEach(function(l){l.tabIndex=0;l.setAttribute('role','button');});}
 fixLabels();new MutationObserver(fixLabels).observe($('#fxChain'),{childList:true,subtree:true});
 /* ---------- SOUND LIBRARY: multisampled instruments synthesized on the device ---------- */
+/* the app shell never scrolls (main does). A focused hidden input or a scrollIntoView could still scroll the window and leave a black screen with the tab bar off-screen: undo that at once. */
+window.addEventListener('scroll',function(){if(window.scrollY||window.scrollX)window.scrollTo(0,0);},{passive:true});

@@ -154,6 +154,11 @@ function stemsToTracks(st,name){var order=STEM_ORDER.filter(function(o){return s
   return pre.then(function(){var s=dawSnap(daw.play),made=0;
     return order.reduce(function(p,o){return p.then(function(){return new Promise(function(r){setTimeout(function(){var b=st[o[0]],ti=addAudioTrack(o[1],true);if(ti>=0){newClip({type:'aud',ti:ti,s:s,off:0,dur:b.duration,buf:abufAdd(b),name:(name||'Song').slice(0,28)+' · '+o[1]});made++;}r();},0);});});},Promise.resolve())
     .then(function(){seq.src='arrange';updTransportUI();renderMixer();renderSpUI();renderDawHeads();renderInsp();dawNeed=true;markDirty();return made;});});}
+/* after placing: open Song › Studio on the new stem tracks with the first stem clip selected */
+function stemsShow(nm){var cs=daw.clips.filter(function(c){return c.type==='aud'&&c.name&&c.name.indexOf((nm||'Song').slice(0,28)+' · ')===0;});if(!cs.length)return;var c=cs[cs.length-STEM_ORDER.length]||cs[0];
+  try{if(document.activeElement&&document.activeElement.blur)document.activeElement.blur();}catch(e){}window.scrollTo(0,0);
+  showTab('t-daw');daw.sel=c.id;daw.lane=c.ti;daw.sx=Math.max(0,c.s-4);renderDawHeads();renderInsp();dawNeed=true;
+  setTimeout(function(){var cv=$('#dawCv');if(cv&&cv.scrollIntoView)cv.scrollIntoView({block:'start'});window.scrollTo(0,0);},80);}
 /* before a split: room for 4 tracks? if not, the user chooses a new project up front (or cancels) */
 function stemsRoom(){var need=STEM_ORDER.length,free=MAXAUD-audioCount();TRX.stNewDone=false;if(free>=need)return Promise.resolve();
   return new Promise(function(res,rej){var box=$('#trxOvSec');$('#trxOvRun').hidden=true;box.hidden=false;$('#trxOvT').textContent='No room for 4 stems here';
@@ -165,6 +170,7 @@ function stemsFile(file){if(TRX.busy||!file)return;if(!ensureAudio())return;TRX.
   stemsRoom().then(function(){return file.arrayBuffer();}).then(function(ab){trxStep('Decoding the audio…',0.04);return smpDecode(ab);}).then(function(b){if(TRX.cancel)throw new Error('cancel');if(b.duration>420)throw new Error('long');
     return trxPickSection(b).then(function(sec){$('#trxOvT').textContent='Splitting into stems';return stemsSplit(trxCut(b,sec.start,sec.len));});})
   .then(function(st){if(TRX.cancel)throw new Error('cancel');trxStep('Placing the stems…',0.99);return stemsToTracks(st,nm);}).then(function(n){TRX.busy=false;trxOv(false);
+    if(n)stemsShow(nm);
     if(n)toast('Vocals, drums, bass and other are on '+n+' aligned audio tracks'+(TRX.stNewDone?' in a new project (the previous one is in Open…)':'')+'. Tap a clip, then Send to… to make an instrument, transcribe it, open it in Vocal Studio or slice it.',6000);})
   .catch(function(e){TRX.busy=false;trxMsg(e);});}
 /* ---------- any sound travels: a Studio clip -> instrument, sheet music, Vocal Studio, slicer ---------- */
