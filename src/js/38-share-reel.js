@@ -277,7 +277,7 @@ function reelWCok(){return typeof VideoEncoder!=='undefined'&&typeof AudioEncode
 /* vendored MIT muxers (Vanilagy mp4-muxer / webm-muxer), lazy-loaded; cached by sw.js for offline use */
 function reelLoad(path,g){if(window[g])return Promise.resolve(window[g]);
   function one(base){return new Promise(function(res,rej){var s=document.createElement('script');s.src=new URL(path,base).href;s.onload=function(){window[g]?res(window[g]):rej('noload');};s.onerror=function(){s.remove();rej('noload');};document.head.appendChild(s);});}
-  return one(location.href).catch(function(){return one(SMPALT);});}
+  return one(document.baseURI).catch(function(){return one(SMPALT);});}
 function reelFirst(L,f){return L.reduce(function(p,c){return p.then(function(r){return r||Promise.resolve().then(function(){return f(c);}).then(function(x){return x&&x.supported?c:null;},function(){return null;});});},Promise.resolve(null));}
 function reelPickA(){return reelFirst([{codec:'mp4a.40.2',sampleRate:48000,numberOfChannels:2,bitrate:160000},{codec:'opus',sampleRate:48000,numberOfChannels:2,bitrate:160000}],function(c){return AudioEncoder.isConfigSupported(c);});}
 function reelPickV(boxes,maxW){var C=[];boxes.forEach(function(bx){[[1080,1920,8e6,'28','40'],[720,1280,5e6,'1f','31']].forEach(function(z){if(z[0]>(maxW||1080))return;

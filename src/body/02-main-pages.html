@@ -386,10 +386,12 @@
     <div class="card" id="trxCard">
       <div class="row"><span class="kicker">Audio to sheet music</span><span class="mu" id="trxInfo"></span></div>
       <p class="note">Choose an MP3 or WAV and Ecou writes out the notes, right on your phone. It works best with one instrument or a voice, recorded clearly.</p>
-      <div class="seg" role="group" aria-label="What to transcribe" id="trxMode" style="display:grid;grid-template-columns:repeat(3,1fr)"><button data-tm="melody" aria-pressed="true">Lead melody</button><button data-tm="song" aria-pressed="false">Full song</button><button data-tm="poly" aria-pressed="false">Every note</button></div>
+      <div class="seg" role="group" aria-label="What to transcribe" id="trxMode" style="display:grid;grid-template-columns:repeat(4,1fr)"><button data-tm="melody" aria-pressed="true">Lead melody</button><button data-tm="song" aria-pressed="false">Full song</button><button data-tm="poly" aria-pressed="false">Every note</button><button data-tm="stems" aria-pressed="false">Split song</button></div>
       <p class="note" id="trxModeNote">Lead melody: the tune you would sing (top voice). Full song: lead, chords and bass on separate staves. Every note: one instrument such as a piano.</p>
-      <p class="note" id="trxStemNote" hidden>For a full song: Ecou splits it into vocals, bass, other instruments and drums, and writes a staff for each. The first time, it downloads the stem splitter (about 175 MB, kept on the phone). Splitting is slow on phones without GPU support, so you pick a section first.</p>
+      <p class="note" id="trxStemNote" hidden>Split song: Ecou separates vocals, drums, bass and other instruments, right on the phone, and writes a staff for each. Or choose <b>Split into 4 stems</b> to get them as four aligned audio tracks. The first time, it downloads the stem splitter (about 79 MB, kept on the phone, works offline after that). You pick a section first.</p>
+      <div id="trxClipQ" hidden><p class="note" id="trxClipN"></p><div class="btns"><button class="btn" id="trxClipX">Clear</button><button class="btn primary" id="trxClipGo">Transcribe this clip</button></div></div>
       <label class="btn primary" for="f-TRX" id="trxPick">Choose a recording</label>
+      <label class="btn" for="f-STEM" id="stemPick" hidden>Split into 4 stems</label><input type="file" id="f-STEM" accept="audio/*,.mp3,.wav,.m4a" class="vh">
       <button class="btn" id="trxProj" hidden>Score from my project (exact notes)</button>
       <input type="file" id="f-TRX" accept="audio/*,.mp3,.wav,.m4a" class="vh">
       <div id="trxRes" hidden style="display:flex;flex-direction:column;gap:10px">
